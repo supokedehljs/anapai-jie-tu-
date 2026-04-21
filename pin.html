@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>贴图</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        font-family: "Microsoft YaHei", sans-serif;
+        background: transparent;
+        color: #f7f9fc;
+      }
+      body {
+        overflow: hidden;
+      }
+      #stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        -webkit-app-region: no-drag;
+      }
+      #dragHandle {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        height: 18px;
+        z-index: 2;
+        -webkit-app-region: drag;
+      }
+      #img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        user-select: none;
+        pointer-events: none;
+        display: block;
+        transform-origin: center center;
+        will-change: transform;
+      }
+      #toolbar {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: flex;
+        gap: 6px;
+        padding: 6px;
+        border-radius: 8px;
+        background: rgba(20, 24, 30, 0.62);
+        backdrop-filter: blur(8px);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition: opacity 0.16s ease, transform 0.16s ease;
+        -webkit-app-region: no-drag;
+      }
+      #stage:hover #toolbar,
+      body.toolbar-force #toolbar {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      #stateTag {
+        position: absolute;
+        left: 8px;
+        bottom: 8px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: rgba(20, 24, 30, 0.62);
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.16s ease;
+        pointer-events: none;
+      }
+      body.click-through #stateTag {
+        opacity: 1;
+      }
+      button {
+        border: none;
+        border-radius: 6px;
+        padding: 5px 8px;
+        font-size: 12px;
+        background: #2f7fff;
+        color: #fff;
+        cursor: pointer;
+      }
+      button:hover {
+        filter: brightness(1.08);
+      }
+      #clickThroughBtn {
+        background: #6a7a8f;
+      }
+      #closeBtn {
+        background: #cc4758;
+      }
+      #hint {
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        display: flex;
+        gap: 4px;
+        padding: 2px 6px;
+        border-radius: 6px;
+        background: rgba(20, 24, 30, 0.5);
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.16s ease;
+        pointer-events: none;
+      }
+      #stage:hover #hint {
+        opacity: 1;
+      }
+      #runningStatus {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        background: rgba(20, 24, 30, 0.72);
+        font-size: 12px;
+        line-height: 1.3;
+        opacity: 0;
+        transition: opacity 0.16s ease;
+        pointer-events: none;
+        white-space: pre-wrap;
+      }
+      body.show-running-status #runningStatus {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="dragHandle"></div>
+      <img id="img" alt="截图结果" />
+      <div id="toolbar">
+        <button id="saveBtn">保存</button>
+        <button id="recaptureBtn">重新截图</button>
+        <button id="clickThroughBtn">鼠标穿透</button>
+        <button id="closeBtn">X</button>
+      </div>
+      <div id="hint">滚轮缩放，双击关闭</div>
+      <div id="stateTag">已开启鼠标穿透</div>
+      <div id="runningStatus"></div>
+    </div>
+    <script src="./pin.js"></script>
+  </body>
+</html>

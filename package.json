@@ -1,0 +1,16 @@
+{
+  "name": "snapai-jie-tu",
+  "version": "1.0.0",
+  "description": "极简托盘截图工具（区域截图 + 置顶钉图）",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "electron": "^41.2.1"
+  }
+}

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>区域截图</title>
+    <style>
+      html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Microsoft YaHei", sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        cursor: crosshair;
+      }
+      #bg {
+        position: absolute;
+        inset: 0;
+        background-size: 100% 100%;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+      }
+      #mask {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.38);
+      }
+      #selection {
+        position: absolute;
+        border: 2px solid #4ea1ff;
+        box-sizing: border-box;
+        display: none;
+        will-change: left, top, width, height;
+      }
+      #toolbar {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 99;
+        display: flex;
+        gap: 8px;
+      }
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background: #2f7fff;
+        color: #fff;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #5e6574;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="bg"></div>
+      <div id="mask"></div>
+      <div id="selection"></div>
+      <div id="toolbar">
+        <button id="confirm">完成截图</button>
+        <button id="cancel" class="secondary">取消</button>
+      </div>
+    </div>
+    <script src="./capture.js"></script>
+  </body>
+</html>
