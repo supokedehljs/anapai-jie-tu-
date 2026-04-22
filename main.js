@@ -15,10 +15,13 @@ const fs = require("fs");
 let tray = null;
 let captureWindow = null;
 let pinWindow = null;
+let workflowWindow = null;
+let pinDragState = null;
 const logFilePath = path.join(__dirname, "snapai-debug.log");
 const runningHubConfigPath = path.join(__dirname, "runninghub.config.json");
 const runningHubWorkflowDir = path.join(__dirname, "runninghub-workflows");
 let runningHubUploading = false;
+let currentPinnedImageDataUrl = "";
 
 function logDebug(message, extra = "") {
   const line = `[${new Date().toISOString()}] ${message}${
@@ -131,6 +134,42 @@ function getWorkflowFiles() {
     .readdirSync(runningHubWorkflowDir)
     .filter((name) => name.toLowerCase().endsWith(".json"))
     .sort((a, b) => a.localeCompare(b, "zh-CN"));
+}
+
+function fileToDataUrl(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeMap = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+  };
+  const mimeType = mimeMap[ext] || "application/octet-stream";
+  const buffer = fs.readFileSync(filePath);
+  return `data:${mimeType};base64,${buffer.toString("base64")}`;
+}
+
+function getWorkflowThumbnailPath(fileName) {
+  const baseName = path.basename(fileName, path.extname(fileName));
+  const candidates = [".png", ".jpg", ".jpeg", ".webp", ".gif"]
+    .map((ext) => path.join(runningHubWorkflowDir, `${baseName}${ext}`));
+  return candidates.find((candidate) => fs.existsSync(candidate)) || "";
+}
+
+function getWorkflowSummaries() {
+  const config = getRunningHubConfig();
+  return getWorkflowFiles().map((fileName) => {
+    const workflow = readWorkflow(fileName);
+    const thumbnailPath = getWorkflowThumbnailPath(fileName);
+    return {
+      fileName,
+      name: workflow.name,
+      workflowId: workflow.workflowId,
+      selected: config.selectedWorkflowFile === fileName,
+      thumbnailDataUrl: thumbnailPath ? fileToDataUrl(thumbnailPath) : "",
+    };
+  });
 }
 
 function readWorkflow(fileName) {
@@ -689,10 +728,66 @@ function sendPinStatus(message) {
   }
 }
 
+function sendWorkflowSelectionData() {
+  if (workflowWindow && !workflowWindow.isDestroyed()) {
+    workflowWindow.webContents.send("workflow-selection-data", getWorkflowSummaries());
+  }
+}
+
 function setSelectedWorkflow(fileName) {
   const config = getRunningHubConfig();
   config.selectedWorkflowFile = fileName;
   fs.writeFileSync(runningHubConfigPath, JSON.stringify(config, null, 2), "utf8");
+  sendWorkflowSelectionData();
+}
+
+function showWorkflowWindow() {
+  if (!pinWindow || pinWindow.isDestroyed()) {
+    return;
+  }
+
+  if (workflowWindow && !workflowWindow.isDestroyed()) {
+    workflowWindow.show();
+    workflowWindow.focus();
+    sendWorkflowSelectionData();
+    return;
+  }
+
+  workflowWindow = new BrowserWindow({
+    width: 1080,
+    height: 720,
+    minWidth: 720,
+    minHeight: 480,
+    frame: false,
+    transparent: true,
+    hasShadow: true,
+    backgroundColor: "#00000000",
+    alwaysOnTop: true,
+    resizable: true,
+    skipTaskbar: true,
+    autoHideMenuBar: true,
+    parent: pinWindow,
+    modal: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  workflowWindow.setAlwaysOnTop(true, "screen-saver");
+  workflowWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  workflowWindow.setMenuBarVisibility(false);
+  workflowWindow.loadFile(path.join(__dirname, "workflow-selector.html"));
+  workflowWindow.webContents.on("console-message", (_e, _level, msg) => {
+    logDebug("workflow selector console", msg);
+  });
+  workflowWindow.webContents.once("did-finish-load", () => {
+    sendWorkflowSelectionData();
+  });
+  workflowWindow.on("closed", () => {
+    workflowWindow = null;
+  });
 }
 
 function buildPinContextMenu(dataUrl) {
@@ -718,6 +813,7 @@ function buildPinContextMenu(dataUrl) {
           const result = await runRunningHubGeneration(dataUrl, (msg) =>
             sendPinStatus(`RunningHub: ${msg}`)
           );
+          currentPinnedImageDataUrl = result.resultImageDataUrl;
           if (pinWindow && !pinWindow.isDestroyed()) {
             pinWindow.webContents.send("set-image", result.resultImageDataUrl);
           }
@@ -728,6 +824,11 @@ function buildPinContextMenu(dataUrl) {
           runningHubUploading = false;
         }
       },
+    },
+    {
+      label: "打开工作流选择器",
+      enabled: !runningHubUploading,
+      click: () => showWorkflowWindow(),
     },
     {
       label: "选择工作流",
@@ -780,6 +881,7 @@ function startCapture() {
 
 function openPinnedImage(dataUrl, selectionRect) {
   logDebug("openPinnedImage called", `dataUrlLength=${dataUrl ? dataUrl.length : 0}`);
+  currentPinnedImageDataUrl = typeof dataUrl === "string" ? dataUrl : "";
   const hasSelectionRect =
     selectionRect &&
     Number.isFinite(selectionRect.left) &&
@@ -844,6 +946,11 @@ function openPinnedImage(dataUrl, selectionRect) {
   });
   pinWindow.on("closed", () => {
     logDebug("pinWindow closed");
+    pinDragState = null;
+    currentPinnedImageDataUrl = "";
+    if (workflowWindow && !workflowWindow.isDestroyed()) {
+      workflowWindow.close();
+    }
     pinWindow = null;
   });
 }
@@ -917,7 +1024,51 @@ ipcMain.handle("get-screen-image-data-url", async (_event, payload = {}) => {
 
 ipcMain.on("pin-recapture", () => startCapture());
 ipcMain.on("pin-close", () => {
+  if (workflowWindow && !workflowWindow.isDestroyed()) {
+    workflowWindow.close();
+  }
   if (pinWindow && !pinWindow.isDestroyed()) pinWindow.close();
+});
+ipcMain.on("pin-open-workflow-selector", () => {
+  showWorkflowWindow();
+});
+ipcMain.handle("get-workflow-summaries", () => {
+  return getWorkflowSummaries();
+});
+ipcMain.handle("select-workflow", (_event, fileName) => {
+  if (!fileName || typeof fileName !== "string") {
+    return { ok: false, error: "无效的工作流文件名" };
+  }
+  setSelectedWorkflow(fileName);
+  return { ok: true };
+});
+ipcMain.handle("run-selected-workflow", async () => {
+  if (runningHubUploading) {
+    return { ok: false, error: "RunningHub 正在处理，请稍后再试" };
+  }
+  if (!currentPinnedImageDataUrl) {
+    return { ok: false, error: "当前没有可用截图" };
+  }
+
+  runningHubUploading = true;
+  sendPinStatus("RunningHub: 准备开始...");
+  try {
+    const result = await runRunningHubGeneration(currentPinnedImageDataUrl, (msg) =>
+      sendPinStatus(`RunningHub: ${msg}`)
+    );
+    currentPinnedImageDataUrl = result.resultImageDataUrl;
+    if (pinWindow && !pinWindow.isDestroyed()) {
+      pinWindow.webContents.send("set-image", result.resultImageDataUrl);
+    }
+    sendPinStatus(`RunningHub 生图完成（${result.workflowName}）`);
+    return { ok: true, workflowName: result.workflowName };
+  } catch (error) {
+    const message = error && error.message ? error.message : String(error);
+    sendPinStatus(`RunningHub 失败: ${message}`);
+    return { ok: false, error: message };
+  } finally {
+    runningHubUploading = false;
+  }
 });
 ipcMain.handle("pin-set-click-through", (_event, enable) => {
   if (!pinWindow || pinWindow.isDestroyed()) return false;
@@ -934,6 +1085,29 @@ ipcMain.handle("pin-set-size", (_event, payload = {}) => {
   pinWindow.setContentSize(width, height);
   return true;
 });
+ipcMain.on("pin-start-drag", (_event, payload = {}) => {
+  if (!pinWindow || pinWindow.isDestroyed()) return;
+  pinDragState = {
+    startBounds: pinWindow.getBounds(),
+    startX: Number(payload.screenX) || 0,
+    startY: Number(payload.screenY) || 0,
+  };
+});
+ipcMain.on("pin-drag", (_event, payload = {}) => {
+  if (!pinWindow || pinWindow.isDestroyed() || !pinDragState) return;
+  const currentX = Number(payload.screenX) || 0;
+  const currentY = Number(payload.screenY) || 0;
+  const deltaX = currentX - pinDragState.startX;
+  const deltaY = currentY - pinDragState.startY;
+  pinWindow.setBounds({
+    ...pinDragState.startBounds,
+    x: Math.round(pinDragState.startBounds.x + deltaX),
+    y: Math.round(pinDragState.startBounds.y + deltaY),
+  });
+});
+ipcMain.on("pin-end-drag", () => {
+  pinDragState = null;
+});
 ipcMain.on("renderer-error", (_event, payload) => {
   const source = payload && payload.source ? payload.source : "unknown";
   const message = payload && payload.message ? payload.message : "empty message";
@@ -943,6 +1117,11 @@ ipcMain.on("pin-show-context-menu", (_event, dataUrl) => {
   if (!pinWindow || pinWindow.isDestroyed()) return;
   const menu = buildPinContextMenu(dataUrl);
   menu.popup({ window: pinWindow });
+});
+ipcMain.on("workflow-selector-close", () => {
+  if (workflowWindow && !workflowWindow.isDestroyed()) {
+    workflowWindow.close();
+  }
 });
 
 app.whenReady().then(() => {

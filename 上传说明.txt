@@ -1,0 +1,51 @@
+项目上传说明
+
+GitHub 仓库地址：
+https://github.com/supokedehljs/anapai-jie-tu-.git
+
+本地项目目录：
+D:\OneDrive\cursor_workspace\SnapAI-jie-tu
+
+以后这个软件要上传到哪里：
+- 远程仓库名：origin
+- 远程地址：https://github.com/supokedehljs/anapai-jie-tu-.git
+- 分支：main
+
+首次已经完成的内容：
+- 已初始化 git
+- 已连接远程仓库 origin
+- 已推送到 main 分支
+
+以后更新代码后，上传步骤：
+1. 打开终端，进入项目目录
+2. 执行以下命令：
+
+git add .
+git commit -m "写一句这次修改的说明"
+git push origin main
+
+常用查看命令：
+查看当前远程仓库地址：
+git remote -v
+
+查看当前状态：
+git status
+
+如果提交时报用户名/邮箱未配置，可执行：
+git config user.name "supokedehljs"
+git config user.email "supokedehljs@gmail.com"
+
+当前仓库使用的信息：
+- 用户名：supokedehljs
+- 邮箱：supokedehljs@gmail.com
+
+注意这些文件不要上传：
+- node_modules/
+- runninghub.config.json
+- snapai-debug.log
+- 各种 .log 文件
+
+原因：
+- node_modules 太大
+- runninghub.config.json 里可能有 apiKey
+- 日志文件没有必要上传

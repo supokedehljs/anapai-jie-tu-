@@ -24,6 +24,10 @@
         border-radius: 10px;
         overflow: hidden;
         -webkit-app-region: no-drag;
+        cursor: grab;
+      }
+      #stage:active {
+        cursor: grabbing;
       }
       #dragHandle {
         position: absolute;
@@ -41,8 +45,6 @@
         user-select: none;
         pointer-events: none;
         display: block;
-        transform-origin: center center;
-        will-change: transform;
       }
       #toolbar {
         position: absolute;

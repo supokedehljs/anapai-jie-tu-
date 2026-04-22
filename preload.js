@@ -25,11 +25,40 @@ contextBridge.exposeInMainWorld("api", {
   closePin() {
     ipcRenderer.send("pin-close");
   },
+  openWorkflowSelector() {
+    ipcRenderer.send("pin-open-workflow-selector");
+  },
+  getWorkflowSummaries() {
+    return ipcRenderer.invoke("get-workflow-summaries");
+  },
+  selectWorkflow(fileName) {
+    return ipcRenderer.invoke("select-workflow", fileName);
+  },
+  runSelectedWorkflow() {
+    return ipcRenderer.invoke("run-selected-workflow");
+  },
+  closeWorkflowSelector() {
+    ipcRenderer.send("workflow-selector-close");
+  },
+  onWorkflowSelectionData(callback) {
+    ipcRenderer.on("workflow-selection-data", (_event, workflows) =>
+      callback(Array.isArray(workflows) ? workflows : [])
+    );
+  },
   setPinClickThrough(enable) {
     return ipcRenderer.invoke("pin-set-click-through", enable);
   },
   setPinSize(width, height) {
     return ipcRenderer.invoke("pin-set-size", { width, height });
+  },
+  startPinDrag(position) {
+    ipcRenderer.send("pin-start-drag", position);
+  },
+  dragPin(position) {
+    ipcRenderer.send("pin-drag", position);
+  },
+  endPinDrag() {
+    ipcRenderer.send("pin-end-drag");
   },
   onPinClickThroughState(callback) {
     ipcRenderer.on("pin-click-through-state", (_event, enabled) =>
