@@ -1,23 +1,13 @@
 const img = document.getElementById("img");
 const stage = document.getElementById("stage");
 const saveBtn = document.getElementById("saveBtn");
-const recaptureBtn = document.getElementById("recaptureBtn");
-const clickThroughBtn = document.getElementById("clickThroughBtn");
-const closeBtn = document.getElementById("closeBtn");
 const runningStatus = document.getElementById("runningStatus");
 
 let currentDataUrl = "";
-let clickThrough = false;
 let zoom = 1;
 let baseImageWidth = 0;
 let baseImageHeight = 0;
 let dragState = null;
-
-function updateClickThroughUI() {
-  document.body.classList.toggle("click-through", clickThrough);
-  document.body.classList.toggle("toolbar-force", !clickThrough);
-  clickThroughBtn.textContent = clickThrough ? "取消穿透" : "鼠标穿透";
-}
 
 function getScaledSize(nextZoom = zoom) {
   const width = Math.max(120, Math.round(baseImageWidth * nextZoom));
@@ -37,11 +27,7 @@ async function setZoom(nextZoom) {
 }
 
 function shouldStartDrag(event) {
-  return (
-    event.button === 0 &&
-    !clickThrough &&
-    !event.target.closest("button")
-  );
+  return event.button === 0 && !event.target.closest("button");
 }
 
 function startDrag(event) {
@@ -70,15 +56,6 @@ function endDrag(event) {
   window.api.endPinDrag();
 }
 
-async function toggleClickThrough() {
-  try {
-    clickThrough = await window.api.setPinClickThrough(!clickThrough);
-    updateClickThroughUI();
-  } catch (error) {
-    window.api.reportError("pin:toggleClickThrough", error.message || String(error));
-  }
-}
-
 window.api.onSetImage((dataUrl) => {
   if (!dataUrl || typeof dataUrl !== "string") {
     window.api.reportError("pin:onSetImage", "invalid dataUrl");
@@ -90,31 +67,23 @@ window.api.onSetImage((dataUrl) => {
   baseImageHeight = 0;
   img.src = dataUrl;
 });
-window.api.onPinClickThroughState((enabled) => {
-  clickThrough = Boolean(enabled);
-  updateClickThroughUI();
-});
 
 saveBtn.addEventListener("click", async () => {
   if (!currentDataUrl) return;
   try {
-    await window.api.saveImage(currentDataUrl);
+    const result = await window.api.saveImage(currentDataUrl);
+    if (!result || result.ok !== true) {
+      throw new Error((result && result.error) || "保存失败");
+    }
+    runningStatus.textContent = `已保存到：${result.filePath || "默认位置"}`;
+    document.body.classList.add("show-running-status");
+    setTimeout(() => {
+      document.body.classList.remove("show-running-status");
+    }, 3000);
   } catch (error) {
     window.api.reportError("pin:save", error.message || String(error));
     alert(`保存失败：${error.message || error}`);
   }
-});
-
-recaptureBtn.addEventListener("click", () => {
-  window.api.recapture();
-});
-
-clickThroughBtn.addEventListener("click", () => {
-  toggleClickThrough();
-});
-
-closeBtn.addEventListener("click", () => {
-  window.api.closePin();
 });
 
 stage.addEventListener("dblclick", () => {
@@ -161,10 +130,6 @@ window.api.onRunningHubStatus((message) => {
 });
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    window.api.closePin();
-    return;
-  }
   if (event.key === " " || event.code === "Space") {
     event.preventDefault();
     window.api.openWorkflowSelector();

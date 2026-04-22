@@ -61,43 +61,9 @@
         transition: opacity 0.16s ease, transform 0.16s ease;
         -webkit-app-region: no-drag;
       }
-      #stage:hover #toolbar,
-      body.toolbar-force #toolbar {
+      #stage:hover #toolbar {
         opacity: 1;
         transform: translateY(0);
-      }
-      #stateTag {
-        position: absolute;
-        left: 8px;
-        bottom: 8px;
-        padding: 2px 8px;
-        border-radius: 999px;
-        background: rgba(20, 24, 30, 0.62);
-        font-size: 12px;
-        opacity: 0;
-        transition: opacity 0.16s ease;
-        pointer-events: none;
-      }
-      body.click-through #stateTag {
-        opacity: 1;
-      }
-      button {
-        border: none;
-        border-radius: 6px;
-        padding: 5px 8px;
-        font-size: 12px;
-        background: #2f7fff;
-        color: #fff;
-        cursor: pointer;
-      }
-      button:hover {
-        filter: brightness(1.08);
-      }
-      #clickThroughBtn {
-        background: #6a7a8f;
-      }
-      #closeBtn {
-        background: #cc4758;
       }
       #hint {
         position: absolute;
@@ -142,12 +108,8 @@
       <img id="img" alt="截图结果" />
       <div id="toolbar">
         <button id="saveBtn">保存</button>
-        <button id="recaptureBtn">重新截图</button>
-        <button id="clickThroughBtn">鼠标穿透</button>
-        <button id="closeBtn">X</button>
       </div>
-      <div id="hint">滚轮缩放，双击关闭</div>
-      <div id="stateTag">已开启鼠标穿透</div>
+      <div id="hint">滚轮缩放，空格打开工作流选择器</div>
       <div id="runningStatus"></div>
     </div>
     <script src="./pin.js"></script>

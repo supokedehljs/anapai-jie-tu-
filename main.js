@@ -8,6 +8,8 @@ const {
   ipcMain,
   dialog,
   desktopCapturer,
+  globalShortcut,
+  clipboard,
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -16,12 +18,39 @@ let tray = null;
 let captureWindow = null;
 let pinWindow = null;
 let workflowWindow = null;
+let settingsWindow = null;
 let pinDragState = null;
-const logFilePath = path.join(__dirname, "snapai-debug.log");
-const runningHubConfigPath = path.join(__dirname, "runninghub.config.json");
-const runningHubWorkflowDir = path.join(__dirname, "runninghub-workflows");
+let pinnedWindowsHidden = false;
+const isPackagedApp = app.isPackaged;
+const bundledConfigPath = path.join(__dirname, "runninghub.config.json");
+const bundledWorkflowDir = path.join(__dirname, "runninghub-workflows");
+const appDataRoot = isPackagedApp
+  ? path.join(app.getPath("userData"), "runninghub-data")
+  : __dirname;
+const logFilePath = path.join(appDataRoot, "snapai-debug.log");
+const runningHubConfigPath = path.join(appDataRoot, "runninghub.config.json");
+const runningHubWorkflowDir = isPackagedApp
+  ? path.join(appDataRoot, "runninghub-workflows")
+  : bundledWorkflowDir;
 let runningHubUploading = false;
 let currentPinnedImageDataUrl = "";
+
+function getDefaultAppSettings() {
+  return {
+    apiKey: "",
+    uploadUrl: "https://www.runninghub.cn/task/openapi/upload",
+    createTaskUrl: "https://www.runninghub.cn/task/openapi/create",
+    taskStatusUrl: "https://www.runninghub.cn/task/openapi/status",
+    webhookDetailUrl: "https://www.runninghub.cn/task/openapi/getWebhookDetail",
+    selectedWorkflowFile: "",
+    captureShortcut: "CommandOrControl+Shift+A",
+    togglePinnedShortcut: "CommandOrControl+Shift+H",
+    defaultClickThrough: false,
+    autoCopyToClipboard: true,
+    launchAtStartup: false,
+    defaultSaveDirectory: app.getPath("pictures"),
+  };
+}
 
 function logDebug(message, extra = "") {
   const line = `[${new Date().toISOString()}] ${message}${
@@ -54,15 +83,12 @@ function createTray() {
       click: () => startCapture(),
     },
     {
+      label: pinnedWindowsHidden ? "显示置顶贴图" : "隐藏置顶贴图",
+      click: () => togglePinnedImagesVisibility(),
+    },
+    {
       label: "设置",
-      click: () => {
-        dialog.showMessageBox({
-          type: "info",
-          title: "设置",
-          message: "当前是极简版本",
-          detail: "暂时只保留核心功能：区域截图 + 截图后置顶。",
-        });
-      },
+      click: () => showSettingsWindow(),
     },
     { type: "separator" },
     {
@@ -74,22 +100,61 @@ function createTray() {
   tray.setContextMenu(contextMenu);
 }
 
+function refreshTrayMenu() {
+  if (!tray) return;
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "区域截图",
+      click: () => startCapture(),
+    },
+    {
+      label: pinnedWindowsHidden ? "显示置顶贴图" : "隐藏置顶贴图",
+      click: () => togglePinnedImagesVisibility(),
+    },
+    {
+      label: "设置",
+      click: () => showSettingsWindow(),
+    },
+    { type: "separator" },
+    {
+      label: "退出",
+      click: () => app.quit(),
+    },
+  ]);
+  tray.setContextMenu(contextMenu);
+}
+
+function copyBundledWorkflowsToUserDir() {
+  if (!isPackagedApp || !fs.existsSync(bundledWorkflowDir)) {
+    return;
+  }
+
+  const bundledFiles = fs.readdirSync(bundledWorkflowDir);
+  bundledFiles.forEach((fileName) => {
+    const sourcePath = path.join(bundledWorkflowDir, fileName);
+    const targetPath = path.join(runningHubWorkflowDir, fileName);
+    if (!fs.statSync(sourcePath).isFile() || fs.existsSync(targetPath)) {
+      return;
+    }
+    fs.copyFileSync(sourcePath, targetPath);
+  });
+}
+
 function ensureRunningHubFiles() {
+  if (!fs.existsSync(appDataRoot)) {
+    fs.mkdirSync(appDataRoot, { recursive: true });
+  }
   if (!fs.existsSync(runningHubWorkflowDir)) {
     fs.mkdirSync(runningHubWorkflowDir, { recursive: true });
   }
+  copyBundledWorkflowsToUserDir();
   if (!fs.existsSync(runningHubConfigPath)) {
-    const defaultConfig = {
-      apiKey: "",
-      uploadUrl: "https://www.runninghub.cn/task/openapi/upload",
-      createTaskUrl: "https://www.runninghub.cn/task/openapi/create",
-      taskStatusUrl: "https://www.runninghub.cn/task/openapi/status",
-      webhookDetailUrl: "https://www.runninghub.cn/task/openapi/getWebhookDetail",
-      selectedWorkflowFile: "",
-    };
+    const initialConfig = fs.existsSync(bundledConfigPath) && !isPackagedApp
+      ? JSON.parse(fs.readFileSync(bundledConfigPath, "utf8"))
+      : getDefaultAppSettings();
     fs.writeFileSync(
       runningHubConfigPath,
-      JSON.stringify(defaultConfig, null, 2),
+      JSON.stringify({ ...getDefaultAppSettings(), ...initialConfig }, null, 2),
       "utf8"
     );
   }
@@ -97,35 +162,44 @@ function ensureRunningHubFiles() {
 
 function getRunningHubConfig() {
   ensureRunningHubFiles();
+  const defaults = getDefaultAppSettings();
   try {
     const parsed = JSON.parse(fs.readFileSync(runningHubConfigPath, "utf8"));
     return {
-      apiKey: String(parsed.apiKey || ""),
-      uploadUrl: String(
-        parsed.uploadUrl || "https://www.runninghub.cn/task/openapi/upload"
+      ...defaults,
+      ...parsed,
+      apiKey: String(parsed.apiKey || defaults.apiKey),
+      uploadUrl: String(parsed.uploadUrl || defaults.uploadUrl),
+      createTaskUrl: String(parsed.createTaskUrl || defaults.createTaskUrl),
+      taskStatusUrl: String(parsed.taskStatusUrl || defaults.taskStatusUrl),
+      webhookDetailUrl: String(parsed.webhookDetailUrl || defaults.webhookDetailUrl),
+      selectedWorkflowFile: String(parsed.selectedWorkflowFile || defaults.selectedWorkflowFile),
+      captureShortcut: String(parsed.captureShortcut || defaults.captureShortcut),
+      togglePinnedShortcut: String(
+        parsed.togglePinnedShortcut || defaults.togglePinnedShortcut
       ),
-      createTaskUrl: String(
-        parsed.createTaskUrl || "https://www.runninghub.cn/task/openapi/create"
+      defaultClickThrough: Boolean(parsed.defaultClickThrough),
+      autoCopyToClipboard:
+        typeof parsed.autoCopyToClipboard === "boolean"
+          ? parsed.autoCopyToClipboard
+          : defaults.autoCopyToClipboard,
+      launchAtStartup: Boolean(parsed.launchAtStartup),
+      defaultSaveDirectory: String(
+        parsed.defaultSaveDirectory || defaults.defaultSaveDirectory
       ),
-      taskStatusUrl: String(
-        parsed.taskStatusUrl || "https://www.runninghub.cn/task/openapi/status"
-      ),
-      webhookDetailUrl: String(
-        parsed.webhookDetailUrl ||
-          "https://www.runninghub.cn/task/openapi/getWebhookDetail"
-      ),
-      selectedWorkflowFile: String(parsed.selectedWorkflowFile || ""),
     };
   } catch (_error) {
-    return {
-      apiKey: "",
-      uploadUrl: "https://www.runninghub.cn/task/openapi/upload",
-      createTaskUrl: "https://www.runninghub.cn/task/openapi/create",
-      taskStatusUrl: "https://www.runninghub.cn/task/openapi/status",
-      webhookDetailUrl: "https://www.runninghub.cn/task/openapi/getWebhookDetail",
-      selectedWorkflowFile: "",
-    };
+    return defaults;
   }
+}
+
+function saveRunningHubConfig(nextValues = {}) {
+  const merged = {
+    ...getRunningHubConfig(),
+    ...nextValues,
+  };
+  fs.writeFileSync(runningHubConfigPath, JSON.stringify(merged, null, 2), "utf8");
+  return merged;
 }
 
 function getWorkflowFiles() {
@@ -735,10 +809,9 @@ function sendWorkflowSelectionData() {
 }
 
 function setSelectedWorkflow(fileName) {
-  const config = getRunningHubConfig();
-  config.selectedWorkflowFile = fileName;
-  fs.writeFileSync(runningHubConfigPath, JSON.stringify(config, null, 2), "utf8");
+  saveRunningHubConfig({ selectedWorkflowFile: fileName });
   sendWorkflowSelectionData();
+  sendSettingsData();
 }
 
 function showWorkflowWindow() {
@@ -790,18 +863,112 @@ function showWorkflowWindow() {
   });
 }
 
-function buildPinContextMenu(dataUrl) {
-  const config = getRunningHubConfig();
-  const workflowFiles = getWorkflowFiles();
-  const workflowSubmenu = workflowFiles.length
-    ? workflowFiles.map((fileName) => ({
-        label: fileName,
-        type: "radio",
-        checked: config.selectedWorkflowFile === fileName,
-        click: () => setSelectedWorkflow(fileName),
-      }))
-    : [{ label: "未找到工作流 json", enabled: false }];
+function sendSettingsData() {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.webContents.send("settings-data", getRunningHubConfig());
+  }
+}
 
+function normalizeShortcut(value, fallback) {
+  const input = String(value || "").trim();
+  return input || fallback;
+}
+
+function registerGlobalShortcuts() {
+  globalShortcut.unregisterAll();
+  const config = getRunningHubConfig();
+  const captureShortcut = normalizeShortcut(
+    config.captureShortcut,
+    getDefaultAppSettings().captureShortcut
+  );
+  const togglePinnedShortcut = normalizeShortcut(
+    config.togglePinnedShortcut,
+    getDefaultAppSettings().togglePinnedShortcut
+  );
+
+  const captureRegistered = globalShortcut.register(captureShortcut, () => {
+    startCapture();
+  });
+  const toggleRegistered = globalShortcut.register(togglePinnedShortcut, () => {
+    togglePinnedImagesVisibility();
+  });
+
+  logDebug(
+    "global shortcuts registered",
+    JSON.stringify({
+      captureShortcut,
+      captureRegistered,
+      togglePinnedShortcut,
+      toggleRegistered,
+    })
+  );
+
+  return {
+    captureShortcut,
+    captureRegistered,
+    togglePinnedShortcut,
+    toggleRegistered,
+  };
+}
+
+function togglePinnedImagesVisibility(forceVisible) {
+  if (!pinWindow || pinWindow.isDestroyed()) {
+    return false;
+  }
+  const nextHidden =
+    typeof forceVisible === "boolean" ? !forceVisible : !pinnedWindowsHidden;
+  pinnedWindowsHidden = nextHidden;
+  if (pinnedWindowsHidden) {
+    pinWindow.hide();
+    if (workflowWindow && !workflowWindow.isDestroyed()) {
+      workflowWindow.hide();
+    }
+  } else {
+    pinWindow.show();
+    if (workflowWindow && !workflowWindow.isDestroyed()) {
+      workflowWindow.show();
+    }
+  }
+  refreshTrayMenu();
+  return true;
+}
+
+function showSettingsWindow() {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.show();
+    settingsWindow.focus();
+    sendSettingsData();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 1120,
+    height: 780,
+    minWidth: 980,
+    minHeight: 680,
+    title: "SnapAI 设置",
+    backgroundColor: "#0b1016",
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  settingsWindow.setMenuBarVisibility(false);
+  settingsWindow.loadFile(path.join(__dirname, "settings.html"));
+  settingsWindow.webContents.on("console-message", (_e, _level, msg) => {
+    logDebug("settings console", msg);
+  });
+  settingsWindow.webContents.once("did-finish-load", () => {
+    sendSettingsData();
+  });
+  settingsWindow.on("closed", () => {
+    settingsWindow = null;
+  });
+}
+function buildPinContextMenu(dataUrl) {
   return Menu.buildFromTemplate([
     {
       label: runningHubUploading ? "RunningHub 正在处理..." : "上传到 RunningHub 生图",
@@ -830,14 +997,10 @@ function buildPinContextMenu(dataUrl) {
       enabled: !runningHubUploading,
       click: () => showWorkflowWindow(),
     },
-    {
-      label: "选择工作流",
-      submenu: workflowSubmenu,
-    },
     { type: "separator" },
     {
-      label: "打开 RunningHub 配置",
-      click: () => shell.openPath(runningHubConfigPath),
+      label: "打开设置",
+      click: () => showSettingsWindow(),
     },
     {
       label: "打开工作流目录",
@@ -882,6 +1045,18 @@ function startCapture() {
 function openPinnedImage(dataUrl, selectionRect) {
   logDebug("openPinnedImage called", `dataUrlLength=${dataUrl ? dataUrl.length : 0}`);
   currentPinnedImageDataUrl = typeof dataUrl === "string" ? dataUrl : "";
+  pinnedWindowsHidden = false;
+  const config = getRunningHubConfig();
+  if (config.autoCopyToClipboard && currentPinnedImageDataUrl) {
+    try {
+      clipboard.writeImage(nativeImage.createFromDataURL(currentPinnedImageDataUrl));
+    } catch (error) {
+      logDebug(
+        "clipboard write failed",
+        error && error.message ? error.message : String(error)
+      );
+    }
+  }
   const hasSelectionRect =
     selectionRect &&
     Number.isFinite(selectionRect.left) &&
@@ -890,7 +1065,8 @@ function openPinnedImage(dataUrl, selectionRect) {
     Number.isFinite(selectionRect.height);
 
   if (pinWindow && !pinWindow.isDestroyed()) {
-    pinWindow.webContents.send("pin-click-through-state", false);
+    pinWindow.webContents.send("pin-click-through-state", config.defaultClickThrough);
+    pinWindow.setIgnoreMouseEvents(Boolean(config.defaultClickThrough), { forward: true });
     if (hasSelectionRect) {
       pinWindow.setBounds({
         x: Math.round(selectionRect.left),
@@ -902,6 +1078,7 @@ function openPinnedImage(dataUrl, selectionRect) {
     pinWindow.webContents.send("set-image", dataUrl);
     pinWindow.show();
     pinWindow.focus();
+    refreshTrayMenu();
     return;
   }
 
@@ -928,6 +1105,9 @@ function openPinnedImage(dataUrl, selectionRect) {
   pinWindow.setAlwaysOnTop(true, "screen-saver");
   pinWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   pinWindow.setMenuBarVisibility(false);
+  pinWindow.setIgnoreMouseEvents(Boolean(config.defaultClickThrough), {
+    forward: true,
+  });
   pinWindow.loadFile(path.join(__dirname, "pin.html"));
   pinWindow.webContents.on("console-message", (_e, _level, msg) => {
     logDebug("pin console", msg);
@@ -943,14 +1123,17 @@ function openPinnedImage(dataUrl, selectionRect) {
       });
     }
     pinWindow.webContents.send("set-image", dataUrl);
+    pinWindow.webContents.send("pin-click-through-state", config.defaultClickThrough);
   });
   pinWindow.on("closed", () => {
     logDebug("pinWindow closed");
     pinDragState = null;
+    pinnedWindowsHidden = false;
     currentPinnedImageDataUrl = "";
     if (workflowWindow && !workflowWindow.isDestroyed()) {
       workflowWindow.close();
     }
+    refreshTrayMenu();
     pinWindow = null;
   });
 }
@@ -984,17 +1167,33 @@ ipcMain.on("capture-complete", (_event, payload) => {
 });
 
 ipcMain.handle("save-image", async (_event, dataUrl) => {
-  const { canceled, filePath } = await dialog.showSaveDialog({
-    title: "保存截图",
-    defaultPath: `SnapAI-${Date.now()}.png`,
-    filters: [{ name: "PNG 图片", extensions: ["png"] }],
-  });
+  const config = getRunningHubConfig();
+  const defaultDirectory = String(config.defaultSaveDirectory || app.getPath("pictures"));
+  const fileName = `SnapAI-${Date.now()}.png`;
+  const targetPath = path.join(defaultDirectory, fileName);
 
-  if (canceled || !filePath) return { ok: false };
+  if (!fs.existsSync(defaultDirectory)) {
+    fs.mkdirSync(defaultDirectory, { recursive: true });
+  }
 
   const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
-  fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
-  return { ok: true, filePath };
+  fs.writeFileSync(targetPath, Buffer.from(base64Data, "base64"));
+  return { ok: true, filePath: targetPath };
+});
+
+ipcMain.handle("choose-directory", async () => {
+  const config = getRunningHubConfig();
+  const result = await dialog.showOpenDialog({
+    title: "选择默认保存位置",
+    defaultPath: String(config.defaultSaveDirectory || app.getPath("pictures")),
+    properties: ["openDirectory", "createDirectory"],
+  });
+
+  if (result.canceled || !Array.isArray(result.filePaths) || !result.filePaths[0]) {
+    return { ok: false };
+  }
+
+  return { ok: true, directoryPath: result.filePaths[0] };
 });
 
 ipcMain.handle("get-screen-image-data-url", async (_event, payload = {}) => {
@@ -1124,12 +1323,103 @@ ipcMain.on("workflow-selector-close", () => {
   }
 });
 
+ipcMain.handle("get-settings", () => {
+  return getRunningHubConfig();
+});
+ipcMain.handle("save-settings", async (_event, payload = {}) => {
+  try {
+    const current = getRunningHubConfig();
+    const nextSettings = {
+      apiKey: String(payload.apiKey || "").trim(),
+      uploadUrl: String(payload.uploadUrl || "").trim() || getDefaultAppSettings().uploadUrl,
+      createTaskUrl:
+        String(payload.createTaskUrl || "").trim() || getDefaultAppSettings().createTaskUrl,
+      taskStatusUrl:
+        String(payload.taskStatusUrl || "").trim() || getDefaultAppSettings().taskStatusUrl,
+      webhookDetailUrl:
+        String(payload.webhookDetailUrl || "").trim() ||
+        getDefaultAppSettings().webhookDetailUrl,
+      captureShortcut: normalizeShortcut(
+        payload.captureShortcut,
+        getDefaultAppSettings().captureShortcut
+      ),
+      togglePinnedShortcut: normalizeShortcut(
+        payload.togglePinnedShortcut,
+        getDefaultAppSettings().togglePinnedShortcut
+      ),
+      defaultClickThrough: Boolean(payload.defaultClickThrough),
+      autoCopyToClipboard:
+        typeof payload.autoCopyToClipboard === "boolean"
+          ? payload.autoCopyToClipboard
+          : true,
+      launchAtStartup: Boolean(payload.launchAtStartup),
+      defaultSaveDirectory:
+        String(payload.defaultSaveDirectory || "").trim() ||
+        current.defaultSaveDirectory ||
+        getDefaultAppSettings().defaultSaveDirectory,
+      selectedWorkflowFile: current.selectedWorkflowFile,
+    };
+
+    const saved = saveRunningHubConfig(nextSettings);
+    app.setLoginItemSettings({
+      openAtLogin: Boolean(saved.launchAtStartup),
+    });
+    const shortcutState = registerGlobalShortcuts();
+    sendSettingsData();
+    sendWorkflowSelectionData();
+    refreshTrayMenu();
+
+    if (!shortcutState.captureRegistered || !shortcutState.toggleRegistered) {
+      return {
+        ok: false,
+        error: "部分快捷键注册失败，可能与其他软件冲突。请换一个组合键后重试。",
+        settings: saved,
+        shortcutState,
+      };
+    }
+
+    return { ok: true, settings: saved, shortcutState };
+  } catch (error) {
+    const message = error && error.message ? error.message : String(error);
+    logDebug("save-settings failed", message);
+    return { ok: false, error: message };
+  }
+});
+ipcMain.handle("get-shortcut-registration-state", () => {
+  const config = getRunningHubConfig();
+  return {
+    captureShortcut: config.captureShortcut,
+    captureRegistered: globalShortcut.isRegistered(config.captureShortcut),
+    togglePinnedShortcut: config.togglePinnedShortcut,
+    togglePinnedRegistered: globalShortcut.isRegistered(config.togglePinnedShortcut),
+  };
+});
+ipcMain.on("settings-close", () => {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.close();
+  }
+});
+
 app.whenReady().then(() => {
   logDebug("app ready");
   ensureRunningHubFiles();
   createTray();
+  app.setLoginItemSettings({
+    openAtLogin: Boolean(getRunningHubConfig().launchAtStartup),
+  });
+  registerGlobalShortcuts();
 });
 
-app.on("window-all-closed", (e) => {
-  e.preventDefault();
+app.on("window-all-closed", () => undefined);
+
+app.on("activate", () => {
+  if (!settingsWindow || settingsWindow.isDestroyed()) {
+    return;
+  }
+  settingsWindow.show();
+  settingsWindow.focus();
+});
+
+app.on("will-quit", () => {
+  globalShortcut.unregisterAll();
 });

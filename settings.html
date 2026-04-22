@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnapAI 设置</title>
+    <style>
+      :root{color-scheme:dark;--bg:#0b1016;--panel:#101722;--panel2:#0e141d;--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08);--text:#edf3ff;--muted:rgba(237,243,255,.62);--primary:#5b8cff;--primary2:#6b5cff;--ok:#7ee787;--bad:#ff8f8f}
+      *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;font-family:"Segoe UI","Microsoft YaHei",sans-serif;background:radial-gradient(circle at top right,rgba(91,140,255,.12),transparent 28%),radial-gradient(circle at bottom left,rgba(107,92,255,.10),transparent 24%),linear-gradient(180deg,#090d13,#0d131b 58%,#0b1016);color:var(--text)}body{padding:16px}
+      #shell{width:100%;height:100%;display:grid;grid-template-columns:220px 1fr;border-radius:22px;overflow:hidden;border:1px solid var(--border);background:rgba(9,13,19,.8);box-shadow:0 28px 90px rgba(0,0,0,.48)}
+      aside{background:linear-gradient(180deg,var(--panel),var(--panel2));border-right:1px solid rgba(255,255,255,.06);padding:22px 16px 16px;display:flex;flex-direction:column;gap:18px}.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(146,176,255,.85)}.brandTitle{margin-top:8px;font-size:22px;font-weight:700}.brandDesc{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.6}
+      .nav{display:flex;flex-direction:column;gap:8px}.navButton{width:100%;padding:12px 14px;border-radius:14px;border:1px solid transparent;background:transparent;color:rgba(237,243,255,.86);text-align:left;cursor:pointer}.navButton strong{display:block;font-size:14px}.navButton span{display:block;margin-top:4px;font-size:12px;line-height:1.45;color:rgba(237,243,255,.54)}.navButton:hover{background:rgba(255,255,255,.04)}.navButton.active{background:linear-gradient(135deg,rgba(91,140,255,.18),rgba(107,92,255,.12));border-color:rgba(107,132,255,.3)}
+      .sideTip{margin-top:auto;padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}.sideTip strong{display:block;font-size:13px;margin-bottom:8px}.sideTip span{font-size:12px;line-height:1.6;color:var(--muted)}
+      main{min-width:0;display:grid;grid-template-rows:auto 1fr auto;background:linear-gradient(180deg,rgba(13,18,27,.78),rgba(10,14,20,.9))}header{display:flex;justify-content:space-between;gap:18px;padding:24px 28px 18px;border-bottom:1px solid rgba(255,255,255,.06)}.headerTitle{font-size:26px;font-weight:720}.headerDesc{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.7}.meta{display:flex;gap:10px;flex-wrap:wrap}.tag{padding:9px 12px;border-radius:999px;font-size:12px;color:rgba(237,243,255,.74);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+      #content{overflow:auto;padding:24px 28px 18px}.section{display:none}.section.active{display:block}.stack{display:flex;flex-direction:column;gap:16px}.card{border-radius:18px;border:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.06),var(--card))}.cardHeader{padding:18px 20px 12px}.cardTitle{font-size:17px;font-weight:700}.cardDesc{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.65}.cardBody{padding:0 20px 20px}
+      .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.full{grid-column:1/-1}.field{display:flex;flex-direction:column;gap:8px}.fieldLabel{display:flex;justify-content:space-between;gap:8px}.fieldLabel strong{font-size:13px}.hint{font-size:11px;color:rgba(237,243,255,.46)}input[type="text"]{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(6,10,16,.66);color:#f6f9ff;outline:none;font-size:13px}input[type="text"]:focus{border-color:rgba(91,140,255,.9);box-shadow:0 0 0 4px rgba(91,140,255,.15)}
+      .statusGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.statusCard{padding:14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}.statusCard strong{display:block;font-size:13px;margin-bottom:6px}.statusValue{font-size:12px;color:var(--muted);line-height:1.65;word-break:break-all}
+      .switchList{display:flex;flex-direction:column;gap:12px}.switchItem{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03)}.switchInfo strong{display:block;font-size:14px;margin-bottom:6px}.switchInfo span{display:block;color:var(--muted);font-size:12px;line-height:1.65}.switch{position:relative;width:48px;height:28px}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.14)}.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;border-radius:50%;background:#fff;transition:transform .18s ease}.switch input:checked+.slider{background:linear-gradient(135deg,var(--primary),var(--primary2))}.switch input:checked+.slider:before{transform:translateX(20px)}
+      .note{padding:14px 16px;border-radius:14px;border:1px solid rgba(91,140,255,.16);background:rgba(91,140,255,.06);font-size:12px;line-height:1.75;color:rgba(230,238,255,.84)}footer{display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:16px 28px 20px;border-top:1px solid rgba(255,255,255,.06)}.statusBar{min-height:20px;font-size:13px;color:var(--ok)}.statusBar.error{color:var(--bad)}.footerActions{display:flex;gap:10px}button.actionBtn{border:none;border-radius:14px;padding:12px 18px;cursor:pointer;font-size:13px;font-weight:700}#closeBtn{background:rgba(255,255,255,.08);color:#eef4ff}#saveBtn{background:linear-gradient(135deg,#4e86ff,#705cff);color:#fff}
+      .inlineRow{display:flex;gap:10px}.inlineRow input{flex:1}
+      #browseSaveDirectoryBtn{background:rgba(255,255,255,.08);color:#eef4ff;min-width:88px}
+      @media (max-width:980px){#shell{grid-template-columns:180px 1fr}.grid,.statusGrid{grid-template-columns:1fr}.inlineRow{flex-direction:column}}
+    </style>
+  </head>
+  <body>
+    <div id="shell">
+      <aside>
+        <div>
+          <div class="eyebrow">Settings Center</div>
+          <div class="brandTitle">SnapAI</div>
+          <div class="brandDesc">偏桌面化的设置中心，聚焦截图工作流、快捷操作与生图能力配置。</div>
+        </div>
+        <nav class="nav">
+          <button class="navButton active" data-target="section-runninghub"><strong>RunningHub</strong><span>接口、鉴权与任务流配置</span></button>
+          <button class="navButton" data-target="section-shortcuts"><strong>快捷键</strong><span>系统级调用与快速操作</span></button>
+          <button class="navButton" data-target="section-preferences"><strong>偏好</strong><span>贴图行为、启动与剪贴板</span></button>
+        </nav>
+        <div class="sideTip"><strong>专业模式提示</strong><span>推荐优先配置 API Key、默认保存位置和全局快捷键。保存后会立即生效。</span></div>
+      </aside>
+      <main>
+        <header>
+          <div>
+            <div class="headerTitle">设置中心</div>
+            <div class="headerDesc">采用更接近专业桌面软件的结构：左侧导航、右侧分组面板、底部统一操作区。</div>
+          </div>
+          <div class="meta"><div class="tag">Desktop-style UI</div><div class="tag">Dark Pro Theme</div></div>
+        </header>
+        <div id="content">
+          <section id="section-runninghub" class="section active">
+            <div class="stack">
+              <div class="card">
+                <div class="cardHeader"><div class="cardTitle">RunningHub 接入</div><div class="cardDesc">管理 API Key 与各阶段接口地址。默认值适用于标准 RunningHub OpenAPI。</div></div>
+                <div class="cardBody">
+                  <div class="grid">
+                    <label class="field full"><div class="fieldLabel"><strong>API Key</strong><span class="hint">用于上传与创建任务</span></div><input id="apiKey" type="text" placeholder="请输入 RunningHub API Key" /></label>
+                    <label class="field"><div class="fieldLabel"><strong>上传接口</strong><span class="hint">Upload</span></div><input id="uploadUrl" type="text" /></label>
+                    <label class="field"><div class="fieldLabel"><strong>创建任务接口</strong><span class="hint">Create Task</span></div><input id="createTaskUrl" type="text" /></label>
+                    <label class="field"><div class="fieldLabel"><strong>任务状态接口</strong><span class="hint">Task Status</span></div><input id="taskStatusUrl" type="text" /></label>
+                    <label class="field"><div class="fieldLabel"><strong>Webhook 详情接口</strong><span class="hint">Webhook Detail</span></div><input id="webhookDetailUrl" type="text" /></label>
+                  </div>
+                </div>
+              </div>
+              <div class="note">如果你的 RunningHub 接口地址是私有网关或做了代理转发，也可以在这里替换成自己的地址。</div>
+            </div>
+          </section>
+          <section id="section-shortcuts" class="section">
+            <div class="stack">
+              <div class="card">
+                <div class="cardHeader"><div class="cardTitle">全局快捷键</div><div class="cardDesc">点击输入框后直接按下快捷键即可录入。Backspace / Delete 可清空，Escape 可取消本次录制。</div></div>
+                <div class="cardBody">
+                  <div class="grid">
+                    <label class="field"><div class="fieldLabel"><strong>区域截图</strong><span class="hint">点击后直接按键录入</span></div><input id="captureShortcut" class="shortcut-input" type="text" placeholder="点击这里，然后按下快捷键" readonly /></label>
+                    <label class="field"><div class="fieldLabel"><strong>显示 / 隐藏所有置顶贴图</strong><span class="hint">点击后直接按键录入</span></div><input id="togglePinnedShortcut" class="shortcut-input" type="text" placeholder="点击这里，然后按下快捷键" readonly /></label>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="cardHeader"><div class="cardTitle">快捷键状态</div><div class="cardDesc">显示当前配置是否已被系统成功注册，方便快速定位冲突问题。</div></div>
+                <div class="cardBody"><div id="shortcutState" class="statusGrid"></div></div>
+              </div>
+            </div>
+          </section>
+          <section id="section-preferences" class="section">
+            <div class="stack">
+              <div class="card">
+                <div class="cardHeader"><div class="cardTitle">行为偏好</div><div class="cardDesc">管理截图完成后的默认行为，以及程序的常驻体验。</div></div>
+                <div class="cardBody">
+                  <div class="switchList">
+                    <label class="switchItem"><div class="switchInfo"><strong>新贴图默认开启鼠标穿透</strong><span>适合作为参考图层，避免影响鼠标操作。</span></div><span class="switch"><input id="defaultClickThrough" type="checkbox" /><span class="slider"></span></span></label>
+                    <label class="switchItem"><div class="switchInfo"><strong>截图后自动复制到剪贴板</strong><span>截图完成时同步把图片写入系统剪贴板，便于快速粘贴。</span></div><span class="switch"><input id="autoCopyToClipboard" type="checkbox" /><span class="slider"></span></span></label>
+                    <label class="field">
+                      <div class="fieldLabel"><strong>默认保存位置</strong><span class="hint">点击贴图上的保存后会直接写入这里</span></div>
+                      <div class="inlineRow">
+                        <input id="defaultSaveDirectory" type="text" placeholder="请选择默认保存目录" />
+                        <button id="browseSaveDirectoryBtn" type="button" class="actionBtn">浏览</button>
+                      </div>
+                    </label>
+                    <label class="switchItem"><div class="switchInfo"><strong>开机自动启动</strong><span>适合希望常驻托盘、随时调用截图能力的使用场景。</span></div><span class="switch"><input id="launchAtStartup" type="checkbox" /><span class="slider"></span></span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <footer>
+          <div id="status" class="statusBar"></div>
+          <div class="footerActions"><button id="closeBtn" class="actionBtn">关闭</button><button id="saveBtn" class="actionBtn">保存设置</button></div>
+        </footer>
+      </main>
+    </div>
+    <script src="./settings.js"></script>
+  </body>
+</html>

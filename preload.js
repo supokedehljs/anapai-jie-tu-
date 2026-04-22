@@ -19,6 +19,9 @@ contextBridge.exposeInMainWorld("api", {
   saveImage(dataUrl) {
     return ipcRenderer.invoke("save-image", dataUrl);
   },
+  chooseDirectory() {
+    return ipcRenderer.invoke("choose-directory");
+  },
   recapture() {
     ipcRenderer.send("pin-recapture");
   },
@@ -71,6 +74,23 @@ contextBridge.exposeInMainWorld("api", {
   onRunningHubStatus(callback) {
     ipcRenderer.on("runninghub-status", (_event, message) =>
       callback(String(message || ""))
+    );
+  },
+  getSettings() {
+    return ipcRenderer.invoke("get-settings");
+  },
+  saveSettings(payload) {
+    return ipcRenderer.invoke("save-settings", payload);
+  },
+  getShortcutRegistrationState() {
+    return ipcRenderer.invoke("get-shortcut-registration-state");
+  },
+  closeSettings() {
+    ipcRenderer.send("settings-close");
+  },
+  onSettingsData(callback) {
+    ipcRenderer.on("settings-data", (_event, settings) =>
+      callback(settings && typeof settings === "object" ? settings : {})
     );
   },
   reportError(source, message) {

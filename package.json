@@ -4,13 +4,45 @@
   "description": "极简托盘截图工具（区域截图 + 置顶钉图）",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build:win": "electron-builder --win portable"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "dependencies": {
-    "electron": "^41.2.1"
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^41.2.1",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.snapai.jietu",
+    "productName": "SnapAI截图工具",
+    "directories": {
+      "output": "../SnapAI-jie-tu-release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "*.html",
+      "*.js",
+      "runninghub-workflows/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "main.js"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "SnapAI截图工具-${version}-Portable.${ext}"
+    }
   }
 }
