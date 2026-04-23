@@ -1,7 +1,7 @@
 {
-  "name": "snapai-jie-tu",
+  "name": "jie",
   "version": "1.0.0",
-  "description": "极简托盘截图工具（区域截图 + 置顶钉图）",
+  "description": "杰 v1.0 - 极简托盘截图工具（区域截图 + 置顶钉图）",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -17,10 +17,10 @@
     "electron-builder": "^26.0.12"
   },
   "build": {
-    "appId": "com.snapai.jietu",
-    "productName": "SnapAI截图工具",
+    "appId": "com.jie.v1",
+    "productName": "杰 v1.0",
     "directories": {
-      "output": "../SnapAI-jie-tu-release"
+      "output": "../jie-v1.0-test-package"
     },
     "files": [
       "main.js",
@@ -34,6 +34,7 @@
       "main": "main.js"
     },
     "win": {
+      "icon": "assets/jie-icon.ico",
       "target": [
         {
           "target": "portable",
@@ -42,7 +43,7 @@
           ]
         }
       ],
-      "artifactName": "SnapAI截图工具-${version}-Portable.${ext}"
+      "artifactName": "杰-v${version}-Portable.${ext}"
     }
   }
 }

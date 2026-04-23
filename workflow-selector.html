@@ -33,6 +33,7 @@
       #runBtn { background: linear-gradient(135deg, #3d85ff, #6b5cff); color: #fff; }
       #uploadBtn, .pickerBtn { background: rgba(255,255,255,.12); color: #eef3fb; }
       #closeBtn, #cancelWorkflowBtn { background: rgba(255,255,255,.08); color: #eef3fb; }
+      #deleteWorkflowBtn { margin-right: auto; background: rgba(255,92,92,.16); color: #ffd7d7; border: 1px solid rgba(255,92,92,.22); }
       #content { flex: 1; min-height: 0; padding: 10px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
       #tips { font-size: 13px; color: rgba(232,238,249,.74); }
       #grid {
@@ -139,7 +140,7 @@
         </div>
       </div>
       <div id="content">
-        <div id="tips">这里展示 `runninghub-workflows` 目录中的所有 JSON 工作流。每个 JSON 都有自己的独立配置；左键选择，右键或点击“编辑配置”即可修改图像输入节点、字段、缩略图和工作流文件。</div>
+        <div id="tips">这里展示 `runninghub-workflows` 目录中的所有 JSON 工作流。每个 JSON 都有自己的独立配置；左键选择，右键或点击“编辑配置”即可修改图像输入节点、出图节点、字段、缩略图和工作流文件。</div>
         <div id="empty">当前还没有工作流。点击右上角“上传工作流”导入新的 JSON。</div>
         <div id="grid"></div>
         <div id="status"></div>
@@ -199,6 +200,13 @@
           </label>
           <label class="field full">
             <div class="fieldLabel">
+              <strong>出图节点 ID</strong>
+              <span class="hint">例如最终结果由 `#295` 输出，这里就填 `295`；留空则自动识别</span>
+            </div>
+            <input id="outputNodeId" type="text" placeholder="295" />
+          </label>
+          <label class="field full">
+            <div class="fieldLabel">
               <strong>工作流缩略图</strong>
               <span class="hint">可选，支持 png / jpg / jpeg / webp / gif</span>
             </div>
@@ -212,6 +220,7 @@
             </div>
           </label>
           <div class="modalActions">
+            <button id="deleteWorkflowBtn" type="button" hidden>删除此工作流</button>
             <button id="cancelWorkflowBtn" type="button">取消</button>
             <button id="saveWorkflowBtn" type="submit">保存</button>
           </div>

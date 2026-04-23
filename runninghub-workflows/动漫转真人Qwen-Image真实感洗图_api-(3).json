@@ -1,0 +1,592 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 970012276917815,
+      "steps": 8,
+      "cfg": 1,
+      "sampler_name": "res_2m",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "169",
+        0
+      ],
+      "positive": [
+        "110",
+        0
+      ],
+      "negative": [
+        "77",
+        0
+      ],
+      "latent_image": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "37": {
+    "inputs": {
+      "unet_name": "Qwen-image Edit Anything to Real Characters动漫转真人.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNET加载器"
+    }
+  },
+  "38": {
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "CLIP加载器"
+    }
+  },
+  "39": {
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAE加载器"
+    }
+  },
+  "77": {
+    "inputs": {
+      "prompt": "",
+      "clip": [
+        "38",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "TextEncodeQwenImageEdit",
+    "_meta": {
+      "title": "TextEncodeQwenImageEdit"
+    }
+  },
+  "78": {
+    "inputs": {
+      "image": "ddc6896c1fd6e87ab52ecd2b351dc8f3f64dd0da64b8670415e6c6ec20a9e5f7.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "加载图像"
+    }
+  },
+  "88": {
+    "inputs": {
+      "pixels": [
+        "243",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE编码"
+    }
+  },
+  "110": {
+    "inputs": {
+      "prompt": "动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，动漫转写实真人，",
+      "clip": [
+        "38",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ],
+      "image1": [
+        "243",
+        0
+      ]
+    },
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "_meta": {
+      "title": "TextEncodeQwenImageEditPlus"
+    }
+  },
+  "169": {
+    "inputs": {
+      "lora_name": "Qwen-Image-Lightning-8steps-V2.0 bf16.safetensors",
+      "strength_model": 1.0000000000000002,
+      "model": [
+        "37",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器(仅模型)"
+    }
+  },
+  "243": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "megapixels": 1,
+      "resolution_steps": 1,
+      "image": [
+        "78",
+        0
+      ]
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "图像按像素缩放"
+    }
+  },
+  "249": {
+    "inputs": {
+      "unet_name": "z_image_turbo_bf16.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNET加载器"
+    }
+  },
+  "252": {
+    "inputs": {
+      "pixels": [
+        "264",
+        0
+      ],
+      "vae": [
+        "254",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE编码"
+    }
+  },
+  "254": {
+    "inputs": {
+      "vae_name": "UltraFlux-v1_model.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAE加载器"
+    }
+  },
+  "257": {
+    "inputs": {
+      "conditioning": [
+        "261",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "条件零化"
+    }
+  },
+  "258": {
+    "inputs": {
+      "text": "一位粉发猫耳女仆角色，身着精致的黑白蕾丝女仆装，搭配黑色渔网袜与高筒皮靴，手持带猫爪装饰的细长权杖，慵懒地侧卧于柔软床榻之上。她双眸清澈，神情略带魅惑，长发如丝绸般散落，猫耳与尾巴轻盈摇曳，增添灵动俏皮感。胸前系有红色樱桃装饰的蝴蝶结，颈间佩戴黑色项圈，整体造型融合了甜美与性感元素，充满二次元动漫风格的戏剧张力。\n\n前景聚焦于角色上半身与手部动作，右手轻握权杖，左手自然垂放，指尖微翘，营造出亲密又略带挑逗的视觉焦点。床单褶皱细腻，光影在肌肤与布料间流转，强化了立体感与柔美感。床边散落着红色游戏手柄与酒杯，暗示着私密放松的场景氛围。\n\n中景为角色身体与床铺，以低角度仰拍强化其曲线美感，同时通过床单的延伸线条引导视线向角色中心汇聚。角色身体呈对角线姿态，形成动态平衡，增强画面张力。\n\n背景为朦胧的室内空间，暖紫色调灯光营造暧昧氛围，远处隐约可见沙发、酒瓶与落地灯，窗帘半掩，光影交错中透出私密而奢华的居家感。背景虚化处理，使主体更加突出，同时保留空间层次。\n\n构图采用中心偏右构图，角色头部与视线略微朝向观者，形成情感连接。画面整体呈暖调，主光源来自右上方，柔和地勾勒出角色轮廓与肌肤质感，阴影部分则加深层次感，营造出梦幻而略带神秘的氛围。背景点缀着星光与心形光斑，强化浪漫与幻想元素。\n\n整体氛围融合了性感、可爱、神秘与幻想色彩，如深夜卧室中的秘密游戏场景，充满戏剧性与沉浸感。画面细节丰富，光影细腻，兼具动漫风格的夸张美感与写实质感，适合用于高质量视觉艺术创作或游戏宣传图。",
+      "anything": [
+        "271",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "展示任何"
+    }
+  },
+  "259": {
+    "inputs": {
+      "delimiter": "",
+      "string1": [
+        "332",
+        0
+      ],
+      "string2": [
+        "258",
+        0
+      ]
+    },
+    "class_type": "JoinStrings",
+    "_meta": {
+      "title": "合并字符串"
+    }
+  },
+  "261": {
+    "inputs": {
+      "text": [
+        "262",
+        0
+      ],
+      "clip": [
+        "265",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器"
+    }
+  },
+  "262": {
+    "inputs": {
+      "text": [
+        "259",
+        0
+      ]
+    },
+    "class_type": "ShowText|pysssss",
+    "_meta": {
+      "title": "展示文本"
+    }
+  },
+  "264": {
+    "inputs": {
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "crop",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "scale_to_length": 1920,
+      "background_color": "#000000",
+      "image": [
+        "286",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "按宽高比缩放_V2"
+    }
+  },
+  "265": {
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "CLIP加载器"
+    }
+  },
+  "271": {
+    "inputs": {
+      "text": "你是一位专业的AI图像生成提示词工程师。请详细描述这张图像主体、前景、中景、背景、构图、视觉引导、光影氛围等细节并创作出具有深度、氛围和艺术感或日常业余设备拍摄的图像提示词。\n\n要求：中文提示词，不用出现对图像水印的描述，不要出现无关的文字和符号，不需要总结，限制在800字以内",
+      "model": "Qwen3-VL-8B-Instruct",
+      "quantization": "none",
+      "keep_model_loaded": false,
+      "temperature": 0.7,
+      "max_new_tokens": 2048,
+      "min_pixels": 200704,
+      "max_pixels": 1003520,
+      "seed": 1301,
+      "attention": "eager",
+      "image": [
+        "286",
+        0
+      ]
+    },
+    "class_type": "Qwen3_VQA",
+    "_meta": {
+      "title": "Qwen3 VQA"
+    }
+  },
+  "285": {
+    "inputs": {
+      "purge_cache": true,
+      "purge_models": true,
+      "anything": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM V2",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM V2"
+    }
+  },
+  "286": {
+    "inputs": {
+      "anything": [
+        "285",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "清理GPU占用"
+    }
+  },
+  "288": {
+    "inputs": {
+      "purge_cache": true,
+      "purge_models": true,
+      "anything": [
+        "323",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM V2",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM V2"
+    }
+  },
+  "289": {
+    "inputs": {
+      "model": "ema_vae_fp16.safetensors",
+      "device": "cuda:0",
+      "encode_tiled": true,
+      "encode_tile_size": 1024,
+      "encode_tile_overlap": 128,
+      "decode_tiled": true,
+      "decode_tile_size": 1024,
+      "decode_tile_overlap": 128,
+      "tile_debug": "false",
+      "offload_device": "cpu"
+    },
+    "class_type": "SeedVR2LoadVAEModel",
+    "_meta": {
+      "title": "SeedVR2 (Down)Load VAE Model"
+    }
+  },
+  "290": {
+    "inputs": {
+      "model": "seedvr2_ema_3b_fp8_e4m3fn.safetensors",
+      "device": "cuda:0",
+      "blocks_to_swap": 32,
+      "swap_io_components": true,
+      "offload_device": "cpu",
+      "attention_mode": "sdpa"
+    },
+    "class_type": "SeedVR2LoadDiTModel",
+    "_meta": {
+      "title": "SeedVR2 (Down)Load DiT Model"
+    }
+  },
+  "291": {
+    "inputs": {
+      "anything": [
+        "288",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "清理GPU占用"
+    }
+  },
+  "292": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "scale_by": 0.5000000000000001,
+      "image": [
+        "291",
+        0
+      ]
+    },
+    "class_type": "ImageScaleBy",
+    "_meta": {
+      "title": "图像按系数缩放"
+    }
+  },
+  "293": {
+    "inputs": {
+      "seed": 2162527847,
+      "resolution": 2048,
+      "max_resolution": 3800,
+      "batch_size": 5,
+      "uniform_batch_size": false,
+      "color_correction": "lab",
+      "temporal_overlap": 16,
+      "prepend_frames": 0,
+      "input_noise_scale": 0.15000000000000002,
+      "latent_noise_scale": 0,
+      "offload_device": "cpu",
+      "enable_debug": false,
+      "image": [
+        "292",
+        0
+      ],
+      "dit": [
+        "290",
+        0
+      ],
+      "vae": [
+        "289",
+        0
+      ]
+    },
+    "class_type": "SeedVR2VideoUpscaler",
+    "_meta": {
+      "title": "SeedVR2 Video Upscaler (v2.5.15)"
+    }
+  },
+  "295": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "293",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "保存图像"
+    }
+  },
+  "321": {
+    "inputs": {
+      "seed": 174462573430079,
+      "steps": 5,
+      "cfg": 1,
+      "sampler_name": "dpmpp_2m_sde",
+      "scheduler": "FlowMatchEulerDiscreteScheduler",
+      "denoise": 0.6000000000000001,
+      "model": [
+        "249",
+        0
+      ],
+      "positive": [
+        "261",
+        0
+      ],
+      "negative": [
+        "257",
+        0
+      ],
+      "latent_image": [
+        "252",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "323": {
+    "inputs": {
+      "samples": [
+        "324",
+        0
+      ],
+      "vae": [
+        "254",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "324": {
+    "inputs": {
+      "anything": [
+        "328",
+        0
+      ]
+    },
+    "class_type": "easy clearCacheAll",
+    "_meta": {
+      "title": "清除全部缓存"
+    }
+  },
+  "328": {
+    "inputs": {
+      "seed": 210,
+      "steps": 10,
+      "cfg": 1.6,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.3500000000000001,
+      "model": [
+        "249",
+        0
+      ],
+      "positive": [
+        "261",
+        0
+      ],
+      "negative": [
+        "257",
+        0
+      ],
+      "latent_image": [
+        "321",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "332": {
+    "inputs": {
+      "text": "1girl, solo, looking at viewer, blush, short hair, shirt, black hair, long sleeves, green eyes, white shirt, upper body, tears, blurry, sweater, sleeves past wrists, shadow, depth of field, crying, tearing up, crying with eyes open, blurry foreground, covering own mouth, covered mouth, grey sweater",
+      "anything": [
+        "333",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "展示任何"
+    }
+  },
+  "333": {
+    "inputs": {
+      "model": "wd-eva02-large-tagger-v3",
+      "threshold": 0.4000000000000001,
+      "character_threshold": 0.85,
+      "replace_underscore": true,
+      "trailing_comma": false,
+      "exclude_tags": "",
+      "tags": "1girl, solo, looking at viewer, blush, short hair, shirt, black hair, long sleeves, green eyes, white shirt, upper body, tears, blurry, sweater, sleeves past wrists, shadow, depth of field, crying, tearing up, crying with eyes open, blurry foreground, covering own mouth, covered mouth, grey sweater",
+      "image": [
+        "243",
+        0
+      ]
+    },
+    "class_type": "WD14Tagger|pysssss",
+    "_meta": {
+      "title": "WD14反推提示词"
+    }
+  }
+}

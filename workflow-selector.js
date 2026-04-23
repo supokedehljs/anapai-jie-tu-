@@ -9,169 +9,34 @@ const modalTitle=document.getElementById("modalTitle");
 const modalHint=document.getElementById("modalHint");
 const workflowForm=document.getElementById("workflowForm");
 const saveWorkflowBtn=document.getElementById("saveWorkflowBtn");
+const deleteWorkflowBtn=document.getElementById("deleteWorkflowBtn");
 const cancelWorkflowBtn=document.getElementById("cancelWorkflowBtn");
 const chooseWorkflowJsonBtn=document.getElementById("chooseWorkflowJsonBtn");
 const chooseWorkflowThumbnailBtn=document.getElementById("chooseWorkflowThumbnailBtn");
 const thumbnailPreview=document.getElementById("thumbnailPreview");
 const thumbnailPreviewImage=document.getElementById("thumbnailPreviewImage");
-const formElements={
-  fileName:document.getElementById("workflowFileName"),
-  displayName:document.getElementById("workflowDisplayName"),
-  workflowId:document.getElementById("workflowId"),
-  imageNodeId:document.getElementById("imageNodeId"),
-  imageFieldName:document.getElementById("imageFieldName"),
-  workflowJsonPath:document.getElementById("workflowJsonPath"),
-  workflowThumbnailPath:document.getElementById("workflowThumbnailPath"),
-  importOnlyFields:Array.from(document.querySelectorAll('[data-mode="import"]')),
-};
-let workflows=[];
-let selectedFileName="";
-let running=false;
-let modalMode="import";
-let editingFileName="";
-let selectedWorkflowJsonSourcePath="";
-let selectedThumbnailSourcePath="";
-const escapeHtml=(v)=>String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+const formElements={fileName:document.getElementById("workflowFileName"),displayName:document.getElementById("workflowDisplayName"),workflowId:document.getElementById("workflowId"),imageNodeId:document.getElementById("imageNodeId"),imageFieldName:document.getElementById("imageFieldName"),outputNodeId:document.getElementById("outputNodeId"),workflowJsonPath:document.getElementById("workflowJsonPath"),workflowThumbnailPath:document.getElementById("workflowThumbnailPath"),importOnlyFields:Array.from(document.querySelectorAll('[data-mode="import"]'))};
+let workflows=[];let selectedFileName="";let running=false;let modalMode="import";let editingFileName="";let selectedWorkflowJsonSourcePath="";let selectedThumbnailSourcePath="";
+const escapeHtml=(v)=>String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;");
 const setStatus=(m="")=>statusEl.textContent=m;
 const updateRunButton=()=>{runBtn.disabled=running||!selectedFileName;uploadBtn.disabled=running;};
 const getFileNameFromPath=(p="")=>String(p||"").split(/[/\\]/).pop()||"";
 function setThumbnailPreview(src=""){const has=Boolean(src);thumbnailPreview.dataset.hasImage=has?"true":"false";thumbnailPreviewImage.src=has?src:"";}
-function render(){
-  const hasItems=workflows.length>0;
-  empty.style.display=hasItems?"none":"flex";
-  grid.style.display=hasItems?"grid":"none";
-  if(!hasItems){grid.innerHTML="";updateRunButton();return;}
-  grid.innerHTML=workflows.map((workflow)=>{
-    const isSelected=workflow.fileName===selectedFileName;
-    const thumb=workflow.thumbnailDataUrl?`<img src="${workflow.thumbnailDataUrl}" alt="${escapeHtml(workflow.name)}">`:`<div class="thumbPlaceholder">暂无缩略图</div>`;
-    return `<div class="card${isSelected?" selected":""}" data-file-name="${escapeHtml(workflow.fileName)}" tabindex="0" title="左键选择，右键编辑配置">
-      ${isSelected?'<div class="selectedBadge">已选中</div>':""}
-      <div class="thumb">${thumb}</div>
-      <div class="name">${escapeHtml(workflow.name||workflow.fileName)}</div>
-      <div class="metaRow"><span class="metaTag">节点 #${escapeHtml(workflow.imageNodeId||"36")}</span><span class="metaTag">字段 ${escapeHtml(workflow.imageFieldName||"image")}</span></div>
-      <div class="file">${escapeHtml(workflow.fileName)}</div>
-      <button class="cardEditBtn" type="button" data-action="edit" data-file-name="${escapeHtml(workflow.fileName)}">编辑配置</button>
-    </div>`;
-  }).join("");
-  updateRunButton();
-}
+function render(){const hasItems=workflows.length>0;empty.style.display=hasItems?"none":"flex";grid.style.display=hasItems?"grid":"none";if(!hasItems){grid.innerHTML="";updateRunButton();return;}grid.innerHTML=workflows.map((workflow)=>{const isSelected=workflow.fileName===selectedFileName;const thumb=workflow.thumbnailDataUrl?`<img src="${workflow.thumbnailDataUrl}" alt="${escapeHtml(workflow.name)}">`:`<div class="thumbPlaceholder">暂无缩略图</div>`;const outputTag=workflow.outputNodeId?`<span class="metaTag">出图 #${escapeHtml(workflow.outputNodeId)}</span>`:"";return `<div class="card${isSelected?" selected":""}" data-file-name="${escapeHtml(workflow.fileName)}" tabindex="0" title="左键选择，右键编辑配置">${isSelected?'<div class="selectedBadge">已选中</div>':""}<div class="thumb">${thumb}</div><div class="name">${escapeHtml(workflow.name||workflow.fileName)}</div><div class="metaRow"><span class="metaTag">节点 #${escapeHtml(workflow.imageNodeId||"36")}</span><span class="metaTag">字段 ${escapeHtml(workflow.imageFieldName||"image")}</span>${outputTag}</div><div class="file">${escapeHtml(workflow.fileName)}</div><button class="cardEditBtn" type="button" data-action="edit" data-file-name="${escapeHtml(workflow.fileName)}">编辑配置</button></div>`;}).join("");updateRunButton();}
 async function refreshWorkflows(){applyWorkflows(await window.api.getWorkflowSummaries());}
-async function selectWorkflow(fileName){
-  if(!fileName||running)return;
-  selectedFileName=fileName;render();
-  try{
-    const result=await window.api.selectWorkflow(fileName);
-    if(!result||result.ok!==true)throw new Error((result&&result.error)||"选择工作流失败");
-    const selectedWorkflow=workflows.find((item)=>item.fileName===fileName);
-    setStatus(`已选择工作流：${(selectedWorkflow&&selectedWorkflow.name)||fileName}`);
-  }catch(error){window.api.reportError("workflow-selector:select",error.message||String(error));setStatus(`选择失败：${error.message||error}`);}
-}
-async function runSelectedWorkflow(){
-  if(!selectedFileName||running)return;
-  running=true;updateRunButton();setStatus("正在运行工作流，请稍候...");
-  try{
-    const result=await window.api.runSelectedWorkflow();
-    if(!result||result.ok!==true)throw new Error((result&&result.error)||"运行工作流失败");
-    const processedCount=Number(result.processedCount)||1;
-    setStatus(`运行完成：${result.workflowName||selectedFileName}（已处理 ${processedCount} 张图片）`);window.api.closeWorkflowSelector();
-  }catch(error){window.api.reportError("workflow-selector:run",error.message||String(error));setStatus(`运行失败：${error.message||error}`);
-  }finally{running=false;updateRunButton();}
-}
-function applyWorkflows(nextWorkflows){
-  workflows=Array.isArray(nextWorkflows)?nextWorkflows:[];
-  const selected=workflows.find((item)=>item.selected);
-  selectedFileName=selected?selected.fileName:workflows[0]?.fileName||"";
-  render();
-  if(selected)setStatus(`当前已选：${selected.name||selected.fileName}`);
-  else if(selectedFileName)setStatus("请选择一个工作流后运行。右键卡片可编辑该 JSON 的独立配置。");
-  else setStatus("你可以先点击“上传工作流”导入新的 JSON。");
-}
-function resetModalState(){selectedWorkflowJsonSourcePath="";selectedThumbnailSourcePath="";formElements.workflowJsonPath.value="";formElements.workflowThumbnailPath.value="";setThumbnailPreview("");}
-function openModal(mode,initialValues={}){
-  modalMode=mode;editingFileName=String(initialValues.fileName||"");modal.dataset.open="true";
-  modalTitle.textContent=mode==="edit"?"编辑工作流配置":"上传新的工作流";
-  modalHint.textContent=mode==="edit"?"在这个界面里直接修改工作流配置，也可以替换工作流 JSON 和缩略图，然后点击保存。":"直接在这个界面选择工作流 JSON、缩略图并填写配置，然后点击保存。";
-  workflowForm.reset();resetModalState();
-  formElements.fileName.value=String(initialValues.fileName?initialValues.fileName.replace(/\.json$/i,""):"");
-  formElements.fileName.disabled=mode==="edit";
-  formElements.displayName.value=initialValues.name||initialValues.displayName||"";
-  formElements.workflowId.value=initialValues.workflowId||"";
-  formElements.imageNodeId.value=initialValues.imageNodeId||"36";
-  formElements.imageFieldName.value=initialValues.imageFieldName||"image";
-  formElements.workflowThumbnailPath.value=initialValues.thumbnailPath||"";
-  setThumbnailPreview(initialValues.thumbnailDataUrl||"");
-  formElements.importOnlyFields.forEach((n)=>n.style.display=mode==="import"?"flex":"none");
-  setTimeout(()=>{(mode==="edit"?formElements.displayName:chooseWorkflowJsonBtn)?.focus();},10);
-}
+async function selectWorkflow(fileName){if(!fileName||running)return;selectedFileName=fileName;render();try{const result=await window.api.selectWorkflow(fileName);if(!result||result.ok!==true)throw new Error((result&&result.error)||"选择工作流失败");const selectedWorkflow=workflows.find((item)=>item.fileName===fileName);setStatus(`已选择工作流：${(selectedWorkflow&&selectedWorkflow.name)||fileName}`);}catch(error){window.api.reportError("workflow-selector:select",error.message||String(error));setStatus(`选择失败：${error.message||error}`);}}
+async function runSelectedWorkflow(){if(!selectedFileName||running)return;running=true;updateRunButton();setStatus("正在运行工作流，请稍候...");try{const result=await window.api.runSelectedWorkflow();if(!result||result.ok!==true)throw new Error((result&&result.error)||"运行工作流失败");const processedCount=Number(result.processedCount)||1;setStatus(`运行完成：${result.workflowName||selectedFileName}（已处理 ${processedCount} 张图片）`);window.api.closeWorkflowSelector();}catch(error){window.api.reportError("workflow-selector:run",error.message||String(error));setStatus(`运行失败：${error.message||error}`);}finally{running=false;updateRunButton();}}
+function applyWorkflows(nextWorkflows){workflows=Array.isArray(nextWorkflows)?nextWorkflows:[];const selected=workflows.find((item)=>item.selected);selectedFileName=selected?selected.fileName:workflows[0]?.fileName||"";render();if(selected)setStatus(`当前已选：${selected.name||selected.fileName}`);else if(selectedFileName)setStatus("请选择一个工作流后运行。右键卡片可编辑该 JSON 的独立配置。");else setStatus("你可以先点击“上传工作流”导入新的 JSON。");}
+function resetModalState(){selectedWorkflowJsonSourcePath="";selectedThumbnailSourcePath="";formElements.workflowJsonPath.value="";formElements.workflowThumbnailPath.value="";setThumbnailPreview("");if(deleteWorkflowBtn)deleteWorkflowBtn.hidden=true;}
+function openModal(mode,initialValues={}){modalMode=mode;editingFileName=String(initialValues.fileName||"");modal.dataset.open="true";modalTitle.textContent=mode==="edit"?"编辑工作流配置":"上传新的工作流";modalHint.textContent=mode==="edit"?"在这个界面里直接修改工作流配置，也可以替换工作流 JSON 和缩略图，然后点击保存。":"直接在这个界面选择工作流 JSON、缩略图并填写配置，然后点击保存。";workflowForm.reset();resetModalState();formElements.fileName.value=String(initialValues.fileName?initialValues.fileName.replace(/\.json$/i,""):"");formElements.fileName.disabled=mode==="edit";formElements.displayName.value=initialValues.name||initialValues.displayName||"";formElements.workflowId.value=initialValues.workflowId||"";formElements.imageNodeId.value=initialValues.imageNodeId||"36";formElements.imageFieldName.value=initialValues.imageFieldName||"image";if(formElements.outputNodeId)formElements.outputNodeId.value=initialValues.outputNodeId||"";formElements.workflowThumbnailPath.value=initialValues.thumbnailPath||"";setThumbnailPreview(initialValues.thumbnailDataUrl||"");formElements.importOnlyFields.forEach((n)=>n.style.display=mode==="import"?"flex":"none");if(deleteWorkflowBtn)deleteWorkflowBtn.hidden=mode!=="edit";setTimeout(()=>{(mode==="edit"?formElements.displayName:chooseWorkflowJsonBtn)?.focus();},10);}
 function closeModal(){modal.dataset.open="false";editingFileName="";workflowForm.reset();formElements.fileName.disabled=false;resetModalState();}
-function collectFormValues(){return{fileBaseName:formElements.fileName.value.trim(),displayName:formElements.displayName.value.trim(),workflowId:formElements.workflowId.value.trim(),imageNodeId:formElements.imageNodeId.value.trim()||"36",imageFieldName:formElements.imageFieldName.value.trim()||"image",workflowJsonSourcePath:selectedWorkflowJsonSourcePath,thumbnailSourcePath:selectedThumbnailSourcePath};}
-async function openEditModal(fileName){
-  if(!fileName)return;
-  try{
-    const result=await window.api.getWorkflowConfig(fileName);
-    if(!result||result.ok!==true||!result.workflow)throw new Error((result&&result.error)||"读取工作流配置失败");
-    const summary=workflows.find((item)=>item.fileName===fileName);
-    openModal("edit",{...result.workflow,thumbnailDataUrl:summary&&summary.thumbnailDataUrl?summary.thumbnailDataUrl:""});
-  }catch(error){window.api.reportError("workflow-selector:openEdit",error.message||String(error));setStatus(`读取配置失败：${error.message||error}`);}
-}
-async function chooseWorkflowJson(){
-  try{
-    const result=await window.api.chooseWorkflowJsonFile();
-    if(!result||result.cancelled)return;
-    if(!result.ok)throw new Error(result.error||"选择工作流 JSON 失败");
-    selectedWorkflowJsonSourcePath=String(result.sourcePath||"");
-    formElements.workflowJsonPath.value=selectedWorkflowJsonSourcePath;
-    if(!formElements.fileName.value.trim())formElements.fileName.value=String(result.fileBaseName||"");
-    setStatus(`已选择工作流 JSON：${result.fileName||getFileNameFromPath(selectedWorkflowJsonSourcePath)}`);
-  }catch(error){window.api.reportError("workflow-selector:chooseJson",error.message||String(error));setStatus(`选择 JSON 失败：${error.message||error}`);}
-}
-async function chooseWorkflowThumbnail(){
-  try{
-    const result=await window.api.chooseWorkflowThumbnailFile();
-    if(!result||result.cancelled)return;
-    if(!result.ok)throw new Error(result.error||"选择缩略图失败");
-    selectedThumbnailSourcePath=String(result.sourcePath||"");
-    formElements.workflowThumbnailPath.value=selectedThumbnailSourcePath;
-    setThumbnailPreview(`file:///${selectedThumbnailSourcePath.replace(/\\/g,"/")}`);
-    setStatus(`已选择缩略图：${result.fileName||getFileNameFromPath(selectedThumbnailSourcePath)}`);
-  }catch(error){window.api.reportError("workflow-selector:chooseThumbnail",error.message||String(error));setStatus(`选择缩略图失败：${error.message||error}`);}
-}
-async function submitModal(){
-  const values=collectFormValues();
-  if(!values.displayName){setStatus("请填写工作流名称");formElements.displayName.focus();return;}
-  if(modalMode==="import"&&!values.fileBaseName){setStatus("请填写 JSON 保存名称");formElements.fileName.focus();return;}
-  if(modalMode==="import"&&!values.workflowJsonSourcePath){setStatus("请先选择工作流 JSON 文件");chooseWorkflowJsonBtn.focus();return;}
-  saveWorkflowBtn.disabled=true;
-  try{
-    if(modalMode==="edit"){
-      const result=await window.api.saveWorkflowConfig({fileName:editingFileName,displayName:values.displayName,workflowId:values.workflowId,imageNodeId:values.imageNodeId,imageFieldName:values.imageFieldName,workflowJsonSourcePath:values.workflowJsonSourcePath,thumbnailSourcePath:values.thumbnailSourcePath});
-      if(!result||result.ok!==true)throw new Error((result&&result.error)||"保存工作流配置失败");
-      await refreshWorkflows();closeModal();setStatus(`已更新配置：${values.displayName}`);return;
-    }
-    const result=await window.api.importWorkflowJson(values);
-    if(result&&result.cancelled){closeModal();setStatus("已取消导入工作流");return;}
-    if(!result||result.ok!==true)throw new Error((result&&result.error)||"导入工作流失败");
-    await refreshWorkflows();if(result.fileName)await selectWorkflow(result.fileName);closeModal();setStatus(`已导入工作流：${(result.workflow&&result.workflow.name)||values.displayName}`);
-  }catch(error){window.api.reportError("workflow-selector:submitModal",error.message||String(error));setStatus(`操作失败：${error.message||error}`);
-  }finally{saveWorkflowBtn.disabled=false;}
-}
+function collectFormValues(){return{fileBaseName:formElements.fileName.value.trim(),displayName:formElements.displayName.value.trim(),workflowId:formElements.workflowId.value.trim(),imageNodeId:formElements.imageNodeId.value.trim()||"36",imageFieldName:formElements.imageFieldName.value.trim()||"image",outputNodeId:(formElements.outputNodeId&&formElements.outputNodeId.value.trim().replace(/^#/,""))||"",workflowJsonSourcePath:selectedWorkflowJsonSourcePath,thumbnailSourcePath:selectedThumbnailSourcePath};}
+async function openEditModal(fileName){if(!fileName)return;try{const result=await window.api.getWorkflowConfig(fileName);if(!result||result.ok!==true||!result.workflow)throw new Error((result&&result.error)||"读取工作流配置失败");const summary=workflows.find((item)=>item.fileName===fileName);openModal("edit",{...result.workflow,thumbnailDataUrl:summary&&summary.thumbnailDataUrl?summary.thumbnailDataUrl:""});}catch(error){window.api.reportError("workflow-selector:openEdit",error.message||String(error));setStatus(`读取配置失败：${error.message||error}`);}}
+async function chooseWorkflowJson(){try{const result=await window.api.chooseWorkflowJsonFile();if(!result||result.cancelled)return;if(!result.ok)throw new Error(result.error||"选择工作流 JSON 失败");selectedWorkflowJsonSourcePath=String(result.sourcePath||"");formElements.workflowJsonPath.value=selectedWorkflowJsonSourcePath;if(!formElements.fileName.value.trim())formElements.fileName.value=String(result.fileBaseName||"");setStatus(`已选择工作流 JSON：${result.fileName||getFileNameFromPath(selectedWorkflowJsonSourcePath)}`);}catch(error){window.api.reportError("workflow-selector:chooseJson",error.message||String(error));setStatus(`选择 JSON 失败：${error.message||error}`);}}
+async function chooseWorkflowThumbnail(){try{const result=await window.api.chooseWorkflowThumbnailFile();if(!result||result.cancelled)return;if(!result.ok)throw new Error(result.error||"选择缩略图失败");selectedThumbnailSourcePath=String(result.sourcePath||"");formElements.workflowThumbnailPath.value=selectedThumbnailSourcePath;setThumbnailPreview(`file:///${selectedThumbnailSourcePath.replace(/\\/g,"/")}`);setStatus(`已选择缩略图：${result.fileName||getFileNameFromPath(selectedThumbnailSourcePath)}`);}catch(error){window.api.reportError("workflow-selector:chooseThumbnail",error.message||String(error));setStatus(`选择缩略图失败：${error.message||error}`);}}
+async function deleteEditingWorkflow(){if(!editingFileName||running)return;const target=workflows.find((item)=>item.fileName===editingFileName);const targetName=(target&&target.name)||editingFileName;const confirmed=window.confirm(`确定要删除工作流“${targetName}”吗？\n这会同时删除 JSON、独立配置和缩略图，且无法撤销。`);if(!confirmed)return;running=true;updateRunButton();saveWorkflowBtn.disabled=true;if(deleteWorkflowBtn)deleteWorkflowBtn.disabled=true;try{const result=await window.api.deleteWorkflow(editingFileName);if(!result||result.ok!==true)throw new Error((result&&result.error)||"删除工作流失败");await refreshWorkflows();closeModal();setStatus(`已删除工作流：${targetName}`);}catch(error){window.api.reportError("workflow-selector:deleteWorkflow",error.message||String(error));setStatus(`删除失败：${error.message||error}`);}finally{running=false;updateRunButton();saveWorkflowBtn.disabled=false;if(deleteWorkflowBtn)deleteWorkflowBtn.disabled=false;}}
+async function submitModal(){const values=collectFormValues();if(!values.displayName){setStatus("请填写工作流名称");formElements.displayName.focus();return;}if(modalMode==="import"&&!values.fileBaseName){setStatus("请填写 JSON 保存名称");formElements.fileName.focus();return;}if(modalMode==="import"&&!values.workflowJsonSourcePath){setStatus("请先选择工作流 JSON 文件");chooseWorkflowJsonBtn.focus();return;}saveWorkflowBtn.disabled=true;try{if(modalMode==="edit"){const result=await window.api.saveWorkflowConfig({fileName:editingFileName,displayName:values.displayName,workflowId:values.workflowId,imageNodeId:values.imageNodeId,imageFieldName:values.imageFieldName,outputNodeId:values.outputNodeId,workflowJsonSourcePath:values.workflowJsonSourcePath,thumbnailSourcePath:values.thumbnailSourcePath});if(!result||result.ok!==true)throw new Error((result&&result.error)||"保存工作流配置失败");await refreshWorkflows();closeModal();setStatus(`已更新配置：${values.displayName}`);return;}const result=await window.api.importWorkflowJson(values);if(result&&result.cancelled){closeModal();setStatus("已取消导入工作流");return;}if(!result||result.ok!==true)throw new Error((result&&result.error)||"导入工作流失败");await refreshWorkflows();if(result.fileName)await selectWorkflow(result.fileName);closeModal();setStatus(`已导入工作流：${(result.workflow&&result.workflow.name)||values.displayName}`);}catch(error){window.api.reportError("workflow-selector:submitModal",error.message||String(error));setStatus(`操作失败：${error.message||error}`);}finally{saveWorkflowBtn.disabled=false;}}
 grid.addEventListener("click",(event)=>{const editBtn=event.target.closest("[data-action='edit']");if(editBtn){event.preventDefault();event.stopPropagation();openEditModal(editBtn.dataset.fileName||"");return;}const card=event.target.closest(".card");if(card)selectWorkflow(card.dataset.fileName||"");});
 grid.addEventListener("contextmenu",(event)=>{const card=event.target.closest(".card");if(!card)return;event.preventDefault();openEditModal(card.dataset.fileName||"");});
 grid.addEventListener("keydown",(event)=>{const card=event.target.closest(".card");if(!card)return;if(event.key==="Enter"||event.key===" "){event.preventDefault();selectWorkflow(card.dataset.fileName||"");return;}if(event.key.toLowerCase()==="e"){event.preventDefault();openEditModal(card.dataset.fileName||"");}});
-runBtn.addEventListener("click",runSelectedWorkflow);
-uploadBtn.addEventListener("click",()=>openModal("import",{}));
-closeBtn.addEventListener("click",()=>window.api.closeWorkflowSelector());
-cancelWorkflowBtn.addEventListener("click",closeModal);
-chooseWorkflowJsonBtn.addEventListener("click",chooseWorkflowJson);
-chooseWorkflowThumbnailBtn.addEventListener("click",chooseWorkflowThumbnail);
-workflowForm.addEventListener("submit",(event)=>{event.preventDefault();submitModal();});
-modal.addEventListener("click",(event)=>{if(event.target===modal)closeModal();});
-window.api.onWorkflowSelectionData((items)=>applyWorkflows(items));
-window.api.onWorkflowEditRequest((fileName)=>openEditModal(fileName));
-window.addEventListener("keydown",(event)=>{
-  if(modal.dataset.open==="true"){if(event.key==="Escape")closeModal();return;}
-  if(event.key==="Escape"){window.api.closeWorkflowSelector();return;}
-  if((event.key==="Enter"&&selectedFileName)||(event.ctrlKey&&event.key==="Enter")){event.preventDefault();runSelectedWorkflow();return;}
-  if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="u"){event.preventDefault();openModal("import",{});}
-});
-(async function init(){try{applyWorkflows(await window.api.getWorkflowSummaries());}catch(error){window.api.reportError("workflow-selector:init",error.message||String(error));setStatus(`加载工作流失败：${error.message||error}`);}})();
+runBtn.addEventListener("click",runSelectedWorkflow);uploadBtn.addEventListener("click",()=>openModal("import",{}));closeBtn.addEventListener("click",()=>window.api.closeWorkflowSelector());cancelWorkflowBtn.addEventListener("click",closeModal);if(deleteWorkflowBtn)deleteWorkflowBtn.addEventListener("click",deleteEditingWorkflow);chooseWorkflowJsonBtn.addEventListener("click",chooseWorkflowJson);chooseWorkflowThumbnailBtn.addEventListener("click",chooseWorkflowThumbnail);workflowForm.addEventListener("submit",(event)=>{event.preventDefault();submitModal();});modal.addEventListener("click",(event)=>{if(event.target===modal)closeModal();});window.api.onWorkflowSelectionData((items)=>applyWorkflows(items));window.api.onWorkflowEditRequest((fileName)=>openEditModal(fileName));window.addEventListener("keydown",(event)=>{if(modal.dataset.open==="true"){if(event.key==="Escape")closeModal();return;}if(event.key==="Escape"){window.api.closeWorkflowSelector();return;}if((event.key==="Enter"&&selectedFileName)||(event.ctrlKey&&event.key==="Enter")){event.preventDefault();runSelectedWorkflow();return;}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="u"){event.preventDefault();openModal("import",{});}});(async function init(){try{applyWorkflows(await window.api.getWorkflowSummaries());}catch(error){window.api.reportError("workflow-selector:init",error.message||String(error));setStatus(`加载工作流失败：${error.message||error}`);}})();

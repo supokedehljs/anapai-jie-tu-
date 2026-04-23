@@ -130,6 +130,7 @@ function getDefaultWorkflowConfig(fileName = "") {
     workflowId: "",
     imageNodeId: "36",
     imageFieldName: "image",
+    outputNodeId: "",
     imagePlaceholder: WORKFLOW_IMAGE_PLACEHOLDER,
   };
 }
@@ -147,6 +148,22 @@ function removeWorkflowThumbnailFiles(fileName) {
       fs.unlinkSync(targetPath);
     }
   });
+}
+
+function deleteWorkflowFiles(fileName) {
+  const normalizedFileName = String(fileName || "").trim();
+  if (!normalizedFileName) {
+    throw new Error("无效的工作流文件名");
+  }
+  const jsonPath = path.join(runningHubWorkflowDir, normalizedFileName);
+  const configPath = getWorkflowConfigPath(normalizedFileName);
+  if (fs.existsSync(jsonPath)) {
+    fs.unlinkSync(jsonPath);
+  }
+  if (fs.existsSync(configPath)) {
+    fs.unlinkSync(configPath);
+  }
+  removeWorkflowThumbnailFiles(normalizedFileName);
 }
 
 function saveWorkflowThumbnail(fileName, sourcePath = "") {
@@ -202,10 +219,9 @@ function logDebug(message, extra = "") {
 
 function createTrayIcon() {
   const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
-    <rect x="10" y="18" width="44" height="30" rx="6" fill="#2f7fff"/>
-    <circle cx="32" cy="33" r="9" fill="#ffffff"/>
-    <rect x="17" y="14" width="10" height="6" rx="2" fill="#2f7fff"/>
+  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+    <rect width="64" height="64" rx="14" fill="#1f6feb"/>
+    <text x="32" y="44" text-anchor="middle" font-size="34" font-family="Microsoft YaHei, SimHei, sans-serif" font-weight="700" fill="#ffffff">杰</text>
   </svg>`;
   return nativeImage.createFromDataURL(
     `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`
@@ -214,7 +230,7 @@ function createTrayIcon() {
 
 function createTray() {
   tray = new Tray(createTrayIcon());
-  tray.setToolTip("SnapAI 简易截图");
+  tray.setToolTip("杰 v1.0");
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -406,6 +422,7 @@ function readWorkflowConfig(fileName, workflowJson = null) {
     workflowId: String(parsed.workflowId || derived.workflowId || defaults.workflowId),
     imageNodeId: String(parsed.imageNodeId || defaults.imageNodeId),
     imageFieldName: String(parsed.imageFieldName || defaults.imageFieldName),
+    outputNodeId: String(parsed.outputNodeId || defaults.outputNodeId),
     imagePlaceholder: String(parsed.imagePlaceholder || derived.imagePlaceholder || defaults.imagePlaceholder),
   };
 }
@@ -453,6 +470,7 @@ function getWorkflowSummaries() {
       workflowId: workflow.workflowId,
       imageNodeId: workflow.imageNodeId,
       imageFieldName: workflow.imageFieldName,
+      outputNodeId: workflow.outputNodeId,
       selected: config.selectedWorkflowFile === fileName,
       thumbnailDataUrl: thumbnailPath ? fileToDataUrl(thumbnailPath) : "",
     };
@@ -483,6 +501,7 @@ function readWorkflow(fileName) {
     workflowId: String(workflowConfig.workflowId || parsed.workflowId || ""),
     imageNodeId: String(workflowConfig.imageNodeId || "36"),
     imageFieldName: String(workflowConfig.imageFieldName || "image"),
+    outputNodeId: String(workflowConfig.outputNodeId || ""),
     imagePlaceholder: String(
       workflowConfig.imagePlaceholder || parsed.imagePlaceholder || WORKFLOW_IMAGE_PLACEHOLDER
     ),
@@ -533,6 +552,7 @@ async function importWorkflowFromJson(metadata = {}) {
     workflowId: String(metadata.workflowId || parsed.workflowId || ""),
     imageNodeId: String(metadata.imageNodeId || "36"),
     imageFieldName: String(metadata.imageFieldName || "image"),
+    outputNodeId: String(metadata.outputNodeId || ""),
     imagePlaceholder: String(metadata.imagePlaceholder || WORKFLOW_IMAGE_PLACEHOLDER),
   });
 
@@ -589,6 +609,39 @@ function collectStringCandidates(input, output = []) {
     Object.values(input).forEach((value) => collectStringCandidates(value, output));
   }
   return output;
+}
+
+function summarizeForLog(input, depth = 0) {
+  if (depth >= 3) {
+    if (Array.isArray(input)) return `[Array(${input.length})]`;
+    if (input && typeof input === "object") return `[Object keys=${Object.keys(input).join(",")}]`;
+    return input;
+  }
+  if (Array.isArray(input)) {
+    return input.slice(0, 5).map((item) => summarizeForLog(item, depth + 1));
+  }
+  if (input && typeof input === "object") {
+    return Object.fromEntries(
+      Object.entries(input)
+        .slice(0, 20)
+        .map(([key, value]) => [key, summarizeForLog(value, depth + 1)])
+    );
+  }
+  if (typeof input === "string") {
+    return input.length > 240 ? `${input.slice(0, 240)}...` : input;
+  }
+  return input;
+}
+
+function logRunningHubFailure(stage, details = {}) {
+  try {
+    logDebug(`runninghub failure @ ${stage}`, JSON.stringify(summarizeForLog(details)).slice(0, 4000));
+  } catch (error) {
+    logDebug(
+      `runninghub failure @ ${stage} (serialize failed)`,
+      error && error.message ? error.message : String(error)
+    );
+  }
 }
 
 function pickRunningHubImageRef(data) {
@@ -667,6 +720,19 @@ async function createRunningHubTask(config, workflow, imageUrl) {
     body.workflowId = workflow.workflowId;
   }
   body.apiKey = config.apiKey;
+  logDebug(
+    "runninghub create request",
+    JSON.stringify(
+      summarizeForLog({
+        workflowName: workflow.name,
+        workflowId: body.workflowId,
+        imageNodeId: workflow.imageNodeId,
+        imageFieldName: workflow.imageFieldName,
+        outputNodeId: workflow.outputNodeId,
+        body,
+      })
+    ).slice(0, 4000)
+  );
 
   const response = await fetch(config.createTaskUrl, {
     method: "POST",
@@ -677,6 +743,12 @@ async function createRunningHubTask(config, workflow, imageUrl) {
     body: JSON.stringify(body),
   });
   if (!response.ok) {
+    logRunningHubFailure("createTask.http", {
+      workflowName: workflow.name,
+      workflowId: body.workflowId,
+      status: response.status,
+      body,
+    });
     throw new Error(`创建任务失败: HTTP ${response.status}`);
   }
   const json = await response.json();
@@ -725,14 +797,42 @@ function looksLikeImageRef(value) {
   );
 }
 
-function pickResultImageUrl(data) {
+function pickResultImageUrl(data, preferredNodeId = "") {
   if (!data) return "";
+  const normalizedNodeId = String(preferredNodeId || "").trim().replace(/^#/, "");
+  if (normalizedNodeId && typeof data === "object") {
+    const preferredNodeData =
+      (data && typeof data === "object" && data[normalizedNodeId]) ||
+      (data && typeof data === "object" && data.outputs && data.outputs[normalizedNodeId]) ||
+      (data && typeof data === "object" && data.output && data.output[normalizedNodeId]) ||
+      (data && typeof data === "object" && data.results && data.results[normalizedNodeId]) ||
+      null;
+    if (preferredNodeData) {
+      const preferredUrl = pickResultImageUrl(preferredNodeData, "");
+      if (preferredUrl) {
+        return preferredUrl;
+      }
+    }
+    if (Array.isArray(data.nodeInfoList)) {
+      const matchedNode = data.nodeInfoList.find((item) => {
+        if (!item || typeof item !== "object") return false;
+        const nodeId = String(item.nodeId || item.id || item.node_id || "").trim().replace(/^#/, "");
+        return nodeId === normalizedNodeId;
+      });
+      if (matchedNode) {
+        const preferredUrl = pickResultImageUrl(matchedNode, "");
+        if (preferredUrl) {
+          return preferredUrl;
+        }
+      }
+    }
+  }
   if (typeof data === "string") {
     return looksLikeImageRef(data) ? data.trim() : "";
   }
   if (Array.isArray(data)) {
     for (const item of data) {
-      const url = pickResultImageUrl(item);
+      const url = pickResultImageUrl(item, normalizedNodeId);
       if (url) return url;
     }
     return "";
@@ -758,16 +858,72 @@ function pickResultImageUrl(data) {
     const arrayKeys = ["results", "images", "outputs", "output", "fileList", "data"];
     for (const key of arrayKeys) {
       if (key in data) {
-        const url = pickResultImageUrl(data[key]);
+        const url = pickResultImageUrl(data[key], normalizedNodeId);
         if (url) return url;
       }
     }
     for (const value of Object.values(data)) {
-      const url = pickResultImageUrl(value);
+      const url = pickResultImageUrl(value, normalizedNodeId);
       if (url) return url;
     }
   }
   return "";
+}
+
+function pickRunningHubExecutionError(data) {
+  if (!data) return null;
+  if (typeof data === "string") {
+    return /error|exception|failed/i.test(data)
+      ? { message: data.trim() }
+      : null;
+  }
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const error = pickRunningHubExecutionError(item);
+      if (error) return error;
+    }
+    return null;
+  }
+  if (typeof data === "object") {
+    const payload = data.data && typeof data.data === "object" ? data.data : data;
+    const message =
+      payload.exception_message ||
+      payload.errorMessage ||
+      payload.failedReason ||
+      payload.msg ||
+      payload.message ||
+      "";
+    const nodeId = payload.node_id || payload.nodeId || payload.failedNodeId || "";
+    const nodeType = payload.node_type || payload.nodeType || payload.failedNodeType || "";
+    const errorType = payload.exception_type || payload.errorType || "";
+    const hasSignal =
+      data.type === "execution_error" ||
+      payload.type === "execution_error" ||
+      Boolean(message && (nodeId || errorType || /error|exception|failed/i.test(message)));
+    if (hasSignal && message) {
+      return {
+        nodeId: String(nodeId || ""),
+        nodeType: String(nodeType || ""),
+        errorType: String(errorType || ""),
+        message: String(message || ""),
+      };
+    }
+    for (const value of Object.values(data)) {
+      const error = pickRunningHubExecutionError(value);
+      if (error) return error;
+    }
+  }
+  return null;
+}
+
+function formatRunningHubExecutionError(error) {
+  if (!error || !error.message) return "";
+  const parts = [];
+  if (error.nodeId) parts.push(`节点 ${error.nodeId}`);
+  if (error.nodeType) parts.push(error.nodeType);
+  if (error.errorType) parts.push(error.errorType);
+  const prefix = parts.length ? `${parts.join(" / ")}：` : "";
+  return `${prefix}${error.message}`;
 }
 
 function pickRunningHubWebSocketUrl(input) {
@@ -811,9 +967,10 @@ async function readWebSocketMessageData(data) {
   return String(data || "");
 }
 
-function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress) {
+function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeId = "") {
   let socket = null;
   let latestImageUrl = "";
+  let latestExecutionError = null;
   let settled = false;
   let timeoutId = null;
 
@@ -868,7 +1025,17 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress) {
         } catch (_error) {
           parsed = text;
         }
-        const imageUrl = pickResultImageUrl(parsed);
+        const imageUrl = pickResultImageUrl(parsed, outputNodeId);
+        const executionError = pickRunningHubExecutionError(parsed);
+        if (executionError) {
+          latestExecutionError = executionError;
+          logRunningHubFailure("websocket.execution_error", {
+            taskId,
+            outputNodeId,
+            executionError,
+            payload: parsed,
+          });
+        }
         if (imageUrl) {
           latestImageUrl = imageUrl;
           finish(imageUrl);
@@ -893,6 +1060,9 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress) {
   return {
     getImageUrl() {
       return latestImageUrl;
+    },
+    getExecutionError() {
+      return latestExecutionError;
     },
     async waitForImage(timeoutMs = 8000) {
       const immediate = latestImageUrl;
@@ -957,11 +1127,16 @@ async function queryRunningHubWebhookDetail(config, taskId) {
   return getRunningHubResultData(json);
 }
 
-async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}) {
+async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}, workflow = null) {
   const maxTries = 120;
   const wsWatcher =
     options.wsUrl && typeof options.wsUrl === "string"
-      ? createRunningHubWebSocketWatcher(options.wsUrl, taskId, onProgress)
+      ? createRunningHubWebSocketWatcher(
+          options.wsUrl,
+          taskId,
+          onProgress,
+          workflow && workflow.outputNodeId
+        )
       : null;
 
   try {
@@ -972,17 +1147,35 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
           ? data
           : (data && (data.status || data.taskStatus || data.state)) || ""
       ).toUpperCase();
-      const imageUrl = pickResultImageUrl(data) || (wsWatcher ? wsWatcher.getImageUrl() : "");
+      const imageUrl =
+        pickResultImageUrl(data, workflow && workflow.outputNodeId) ||
+        (wsWatcher ? wsWatcher.getImageUrl() : "");
+      const executionError =
+        pickRunningHubExecutionError(data) ||
+        (wsWatcher ? wsWatcher.getExecutionError() : null);
       if (onProgress) {
         const seconds = Math.round(((i + 1) * 2500) / 1000);
         onProgress(`任务 ${taskId} 状态: ${status || "UNKNOWN"}（已等待 ${seconds}s）`);
       }
       if (status === "FAILED") {
+        const detailedError = formatRunningHubExecutionError(executionError);
         const errMsg =
+          detailedError ||
           (typeof data === "object" &&
             data &&
             (data.errorMessage || data.failedReason || data.msg)) ||
           "任务执行失败";
+        logRunningHubFailure("taskStatus.failed", {
+          taskId,
+          workflowName: workflow && workflow.name,
+          workflowId: workflow && workflow.workflowId,
+          imageNodeId: workflow && workflow.imageNodeId,
+          imageFieldName: workflow && workflow.imageFieldName,
+          outputNodeId: workflow && workflow.outputNodeId,
+          status,
+          executionError,
+          statusData: data,
+        });
         throw new Error(String(errMsg));
       }
       if (status === "SUCCESS" && imageUrl) {
@@ -1003,7 +1196,20 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
         }
         try {
           const webhookData = await queryRunningHubWebhookDetail(config, taskId);
-          const webhookImageUrl = pickResultImageUrl(webhookData);
+          const webhookExecutionError = pickRunningHubExecutionError(webhookData);
+          const webhookImageUrl = pickResultImageUrl(
+            webhookData,
+            workflow && workflow.outputNodeId
+          );
+          if (webhookExecutionError) {
+            logRunningHubFailure("webhook.execution_error", {
+              taskId,
+              workflowName: workflow && workflow.name,
+              executionError: webhookExecutionError,
+              webhookData,
+            });
+            throw new Error(formatRunningHubExecutionError(webhookExecutionError));
+          }
           if (webhookImageUrl) {
             return webhookImageUrl;
           }
@@ -1017,11 +1223,27 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
             error && error.message ? error.message : String(error)
           );
         }
-        logDebug(
-          "runninghub success without image",
-          JSON.stringify({ taskId, statusData: data, wsUrl: options.wsUrl || "" }).slice(0, 2000)
-        );
+        logRunningHubFailure("taskStatus.success_without_image", {
+          taskId,
+          workflowName: workflow && workflow.name,
+          workflowId: workflow && workflow.workflowId,
+          imageNodeId: workflow && workflow.imageNodeId,
+          imageFieldName: workflow && workflow.imageFieldName,
+          outputNodeId: workflow && workflow.outputNodeId,
+          wsUrl: options.wsUrl || "",
+          statusData: data,
+        });
         throw new Error("任务已成功，但未获取到结果图链接");
+      }
+      if (!status && executionError) {
+        const detailedError = formatRunningHubExecutionError(executionError) || "任务执行失败";
+        logRunningHubFailure("taskStatus.execution_error_without_status", {
+          taskId,
+          workflowName: workflow && workflow.name,
+          executionError,
+          statusData: data,
+        });
+        throw new Error(detailedError);
       }
       if (!status && imageUrl) {
         return imageUrl;
@@ -1038,10 +1260,12 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
 
 async function imageUrlToDataUrl(imageUrl) {
   if (!looksLikeImageRef(imageUrl)) {
+    logRunningHubFailure("download.invalid_image_ref", { imageUrl });
     throw new Error(`返回的结果不是可下载图片地址: ${imageUrl}`);
   }
   const response = await fetch(imageUrl);
   if (!response.ok) {
+    logRunningHubFailure("download.http", { imageUrl, status: response.status });
     throw new Error(`下载结果图片失败: HTTP ${response.status}`);
   }
   const contentType = response.headers.get("content-type") || "image/png";
@@ -1060,27 +1284,50 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
     throw new Error("请先在右键菜单中选择一个工作流");
   }
   const workflow = readWorkflow(workflowFile);
-  if (onProgress) onProgress(`开始上传截图（工作流：${workflow.name}）...`);
-  const imageUrl = await uploadImageToRunningHub(dataUrl, config);
-  if (onProgress) onProgress("上传成功，开始创建任务...");
-  const taskResult = await createRunningHubTask(config, workflow, imageUrl);
-  const taskId = pickTaskId(taskResult);
-  const wsUrl = pickRunningHubWebSocketUrl(taskResult);
-  if (!taskId) {
-    throw new Error(`已创建任务但未拿到 taskId: ${JSON.stringify(taskResult)}`);
+  let taskId = "";
+  try {
+    if (onProgress) onProgress(`开始上传截图（工作流：${workflow.name}）...`);
+    const imageUrl = await uploadImageToRunningHub(dataUrl, config);
+    if (onProgress) onProgress("上传成功，开始创建任务...");
+    const taskResult = await createRunningHubTask(config, workflow, imageUrl);
+    taskId = pickTaskId(taskResult);
+    const wsUrl = pickRunningHubWebSocketUrl(taskResult);
+    if (!taskId) {
+      logRunningHubFailure("createTask.no_task_id", {
+        workflowName: workflow.name,
+        workflowId: workflow.workflowId,
+        imageNodeId: workflow.imageNodeId,
+        imageFieldName: workflow.imageFieldName,
+        outputNodeId: workflow.outputNodeId,
+        taskResult,
+      });
+      throw new Error(`已创建任务但未拿到 taskId: ${JSON.stringify(taskResult)}`);
+    }
+    logDebug(
+      "runninghub create parsed",
+      JSON.stringify({ taskId, wsUrl, taskStatus: taskResult && taskResult.taskStatus }).slice(0, 2000)
+    );
+    if (onProgress) onProgress(`任务已创建，taskId=${taskId}`);
+    const resultImageUrl = await waitRunningHubTaskResult(config, taskId, onProgress, {
+      wsUrl,
+    }, workflow);
+    if (onProgress) onProgress("已拿到结果图链接，正在下载结果...");
+    const resultImageDataUrl = await imageUrlToDataUrl(resultImageUrl);
+    if (onProgress) onProgress("结果已下载，正在替换贴图...");
+    return { workflowName: workflow.name, imageUrl, taskResult, taskId, resultImageDataUrl };
+  } catch (error) {
+    logRunningHubFailure("runGeneration.catch", {
+      workflowFile,
+      workflowName: workflow.name,
+      workflowId: workflow.workflowId,
+      imageNodeId: workflow.imageNodeId,
+      imageFieldName: workflow.imageFieldName,
+      outputNodeId: workflow.outputNodeId,
+      taskId,
+      error: error && error.message ? error.message : String(error),
+    });
+    throw error;
   }
-  logDebug(
-    "runninghub create parsed",
-    JSON.stringify({ taskId, wsUrl, taskStatus: taskResult && taskResult.taskStatus }).slice(0, 2000)
-  );
-  if (onProgress) onProgress(`任务已创建，taskId=${taskId}`);
-  const resultImageUrl = await waitRunningHubTaskResult(config, taskId, onProgress, {
-    wsUrl,
-  });
-  if (onProgress) onProgress("已拿到结果图链接，正在下载结果...");
-  const resultImageDataUrl = await imageUrlToDataUrl(resultImageUrl);
-  if (onProgress) onProgress("结果已下载，正在替换贴图...");
-  return { workflowName: workflow.name, imageUrl, taskResult, taskId, resultImageDataUrl };
 }
 
 function sendPinStatus(message, targetEntries = []) {
@@ -1619,6 +1866,7 @@ ipcMain.handle("get-workflow-config", (_event, fileName) => {
         workflowId: workflow.workflowId,
         imageNodeId: workflow.imageNodeId,
         imageFieldName: workflow.imageFieldName,
+        outputNodeId: workflow.outputNodeId,
         imagePlaceholder: workflow.imagePlaceholder,
         thumbnailPath: getWorkflowThumbnailPath(fileName),
       },
@@ -1649,6 +1897,7 @@ ipcMain.handle("save-workflow-config", (_event, payload = {}) => {
       workflowId: String(payload.workflowId || "").trim(),
       imageNodeId: String(payload.imageNodeId || "36").trim() || "36",
       imageFieldName: String(payload.imageFieldName || "image").trim() || "image",
+      outputNodeId: String(payload.outputNodeId || "").trim(),
       imagePlaceholder:
         String(payload.imagePlaceholder || WORKFLOW_IMAGE_PLACEHOLDER).trim() ||
         WORKFLOW_IMAGE_PLACEHOLDER,
@@ -1687,6 +1936,28 @@ ipcMain.handle("select-workflow", (_event, fileName) => {
   }
   setSelectedWorkflow(fileName);
   return { ok: true };
+});
+ipcMain.handle("delete-workflow", (_event, fileName) => {
+  const normalizedFileName = String(fileName || "").trim();
+  if (!normalizedFileName) {
+    return { ok: false, error: "无效的工作流文件名" };
+  }
+  try {
+    deleteWorkflowFiles(normalizedFileName);
+    const currentConfig = getRunningHubConfig();
+    if (currentConfig.selectedWorkflowFile === normalizedFileName) {
+      const remainingFiles = getWorkflowFiles();
+      saveRunningHubConfig({ selectedWorkflowFile: remainingFiles[0] || "" });
+    }
+    sendWorkflowSelectionData();
+    sendSettingsData();
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error && error.message ? error.message : String(error),
+    };
+  }
 });
 ipcMain.handle("run-selected-workflow", async () => {
   if (runningHubUploading) {
