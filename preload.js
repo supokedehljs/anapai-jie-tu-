@@ -34,6 +34,15 @@ contextBridge.exposeInMainWorld("api", {
   getWorkflowSummaries() {
     return ipcRenderer.invoke("get-workflow-summaries");
   },
+  getWorkflowConfig(fileName) {
+    return ipcRenderer.invoke("get-workflow-config", fileName);
+  },
+  saveWorkflowConfig(payload) {
+    return ipcRenderer.invoke("save-workflow-config", payload);
+  },
+  importWorkflowJson(payload) {
+    return ipcRenderer.invoke("import-workflow-json", payload);
+  },
   selectWorkflow(fileName) {
     return ipcRenderer.invoke("select-workflow", fileName);
   },
@@ -46,6 +55,11 @@ contextBridge.exposeInMainWorld("api", {
   onWorkflowSelectionData(callback) {
     ipcRenderer.on("workflow-selection-data", (_event, workflows) =>
       callback(Array.isArray(workflows) ? workflows : [])
+    );
+  },
+  onWorkflowEditRequest(callback) {
+    ipcRenderer.on("workflow-edit-request", (_event, fileName) =>
+      callback(String(fileName || ""))
     );
   },
   setPinClickThrough(enable) {

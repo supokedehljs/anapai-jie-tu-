@@ -1,0 +1,213 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 287547680919789,
+      "steps": 15,
+      "cfg": 8,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 0.8,
+      "model": [
+        "31",
+        0
+      ],
+      "positive": [
+        "60",
+        0
+      ],
+      "negative": [
+        "60",
+        1
+      ],
+      "latent_image": [
+        "52",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "waiNSFWIllustrious_v150.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Checkpoint加载器(简易)"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "Yoneyama Mai, 1girl, solo, long hair, round eyewear, glasses, green hair, jacket, open mouth, railing, white dress, balcony, plant, smile, dress, sky, off shoulder, potted plant, outdoors, green jacket, flower,<lora:米山舞插画-XL-V2-000018:0.6>,",
+      "clip": [
+        "31",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "(worst quality, low quality, very displeasing, lowres),(interlocked fingers, badly drawn hands and fingers, anatomically incorrect hands),blurry,watermark,multiple views,comic,censored,jpeg artifacts,patreon logo,patreon username,web address,signature,watermark,text,logo,artist name,safe_neg,unfinished,displeasing,oldest,early,chromatic aberration,signature,artistic error,scan,",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "31": {
+    "inputs": {
+      "lora_name": "Yoneyama Mai-米山舞-插画_v1_米山舞_V1.safetensors",
+      "strength_model": 0.5,
+      "strength_clip": 1,
+      "model": [
+        "4",
+        0
+      ],
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "LoRA加载器"
+    }
+  },
+  "52": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空Latent"
+    }
+  },
+  "54": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "保存图像"
+    }
+  },
+  "55": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "width": 1024,
+      "height": 1024,
+      "crop": "disabled",
+      "image": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "图像缩放"
+    }
+  },
+  "56": {
+    "inputs": {
+      "control_net_name": "controlnet-scribble-sdxl-1.0-anime-xinsir.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet加载器"
+    }
+  },
+  "57": {
+    "inputs": {
+      "preprocessor": "PyraCannyPreprocessor",
+      "resolution": 512,
+      "image": [
+        "55",
+        0
+      ]
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": {
+      "title": "Aux集成预处理器"
+    }
+  },
+  "58": {
+    "inputs": {
+      "images": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "预览图像"
+    }
+  },
+  "59": {
+    "inputs": {
+      "image": "pasted/b1eb639f935a34d1acb33eba3d6e7f8b65f329917cf746b2d6f527dcaa54e418.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "加载图像"
+    }
+  },
+  "60": {
+    "inputs": {
+      "strength": 0.6500000000000001,
+      "start_percent": 0,
+      "end_percent": 0.3490000000000001,
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "control_net": [
+        "56",
+        0
+      ],
+      "image": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "ControlNet应用（旧版高级）"
+    }
+  }
+}

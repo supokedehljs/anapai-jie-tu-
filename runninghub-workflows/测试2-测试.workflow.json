@@ -1,0 +1,8 @@
+{
+  "fileName": "测试2-测试.json",
+  "displayName": "测试2",
+  "workflowId": "2046084739047628802",
+  "imageNodeId": "59",
+  "imageFieldName": "image",
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
+}

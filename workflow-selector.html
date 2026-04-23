@@ -84,8 +84,12 @@
         background: linear-gradient(135deg, #3d85ff, #6b5cff);
         color: #fff;
       }
+      #uploadBtn {
+        background: rgba(255, 255, 255, 0.12);
+        color: #eef3fb;
+      }
       #closeBtn {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.08);
         color: #eef3fb;
       }
       #content {
@@ -105,7 +109,7 @@
         min-height: 0;
         overflow: auto;
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
         gap: 16px;
         align-content: start;
         padding-right: 6px;
@@ -168,10 +172,29 @@
         line-height: 1.45;
         word-break: break-word;
       }
+      .metaRow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .metaTag {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        color: rgba(242, 246, 255, 0.92);
+        background: rgba(86, 115, 178, 0.28);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
       .file {
         font-size: 12px;
         color: rgba(232, 238, 249, 0.56);
         word-break: break-all;
+      }
+      .cardEditBtn {
+        margin-top: auto;
+        background: rgba(255, 255, 255, 0.08);
+        color: #eef3fb;
+        width: 100%;
       }
       .selectedBadge {
         position: absolute;
@@ -201,6 +224,98 @@
         font-size: 13px;
         color: rgba(232, 238, 249, 0.72);
       }
+      #modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+        z-index: 20;
+      }
+      #modal[data-open="true"] {
+        display: flex;
+      }
+      .modalPanel {
+        width: min(640px, calc(100vw - 48px));
+        max-height: calc(100vh - 48px);
+        overflow: auto;
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(16, 20, 28, 0.98), rgba(10, 13, 18, 0.98));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
+        padding: 22px;
+        box-sizing: border-box;
+      }
+      .modalHeader {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+      .modalTitle {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .modalHint {
+        font-size: 13px;
+        color: rgba(232, 238, 249, 0.72);
+        line-height: 1.6;
+      }
+      #workflowForm {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .field.full {
+        grid-column: 1 / -1;
+      }
+      .fieldLabel {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 13px;
+      }
+      .fieldLabel .hint {
+        color: rgba(232, 238, 249, 0.58);
+        font-size: 12px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #eef3fb;
+        padding: 12px 13px;
+        font-size: 14px;
+        outline: none;
+      }
+      input:focus {
+        border-color: rgba(74, 136, 255, 0.86);
+        box-shadow: 0 0 0 3px rgba(61, 133, 255, 0.16);
+      }
+      .modalActions {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 6px;
+      }
+      #saveWorkflowBtn {
+        background: linear-gradient(135deg, #3d85ff, #6b5cff);
+        color: #fff;
+      }
+      #cancelWorkflowBtn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #eef3fb;
+      }
       ::-webkit-scrollbar {
         width: 10px;
         height: 10px;
@@ -212,6 +327,11 @@
       ::-webkit-scrollbar-track {
         background: transparent;
       }
+      @media (max-width: 760px) {
+        #workflowForm {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
@@ -219,20 +339,72 @@
       <div id="topbar">
         <div id="titleWrap">
           <div id="title">选择工作流</div>
-          <div id="subtitle">空格打开此界面，选择一个 JSON 工作流后直接运行</div>
+          <div id="subtitle">选择、上传并管理你的 JSON 工作流</div>
         </div>
         <div id="actions">
+          <button id="uploadBtn">上传工作流</button>
           <button id="runBtn" disabled>运行当前工作流</button>
           <button id="closeBtn">关闭</button>
         </div>
       </div>
       <div id="content">
-        <div id="tips">展示的是 `runninghub-workflows` 目录中的全部 JSON 文件；缩略图会自动读取与 JSON 同名的图片文件。</div>
-        <div id="empty">当前工作流目录中还没有 JSON 文件。</div>
+        <div id="tips">这里展示 `runninghub-workflows` 目录中的所有 JSON 工作流。每个 JSON 都有自己的独立配置；左键选择，右键或点击“编辑配置”即可修改图像输入节点、字段和工作流信息。</div>
+        <div id="empty">当前还没有工作流。点击右上角“上传工作流”导入新的 JSON。</div>
         <div id="grid"></div>
         <div id="status"></div>
       </div>
     </div>
+
+    <div id="modal" data-open="false">
+      <div class="modalPanel">
+        <div class="modalHeader">
+          <div id="modalTitle" class="modalTitle">上传新的工作流</div>
+          <div id="modalHint" class="modalHint"></div>
+        </div>
+        <form id="workflowForm">
+          <label class="field full">
+            <div class="fieldLabel">
+              <strong>JSON 保存名称</strong>
+              <span class="hint">用于保存到本地工作流目录，不需要手动加 `.json` 后缀</span>
+            </div>
+            <input id="workflowFileName" type="text" placeholder="例如：my-img2img-workflow" />
+          </label>
+          <label class="field full">
+            <div class="fieldLabel">
+              <strong>工作流显示名称</strong>
+              <span class="hint">显示在工作流选择卡片上的名字</span>
+            </div>
+            <input id="workflowDisplayName" type="text" placeholder="例如：我的图生图工作流" />
+          </label>
+          <label class="field">
+            <div class="fieldLabel">
+              <strong>网页工作流 ID</strong>
+              <span class="hint">对应 RunningHub 网页上的工作流 id</span>
+            </div>
+            <input id="workflowId" type="text" placeholder="例如：2046084739047628802" />
+          </label>
+          <label class="field">
+            <div class="fieldLabel">
+              <strong>输入图像节点 ID</strong>
+              <span class="hint">例如你的图像输入在 `#36`，这里就填 `36`</span>
+            </div>
+            <input id="imageNodeId" type="text" placeholder="36" value="36" />
+          </label>
+          <label class="field full">
+            <div class="fieldLabel">
+              <strong>输入图像字段名</strong>
+              <span class="hint">默认一般是 `image`，如果你的 JSON 不是这个名字可以单独改</span>
+            </div>
+            <input id="imageFieldName" type="text" placeholder="image" value="image" />
+          </label>
+          <div class="modalActions">
+            <button id="cancelWorkflowBtn" type="button">取消</button>
+            <button id="saveWorkflowBtn" type="submit">继续并选择 JSON</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script src="./workflow-selector.js"></script>
   </body>
 </html>
