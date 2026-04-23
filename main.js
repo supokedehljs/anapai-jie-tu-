@@ -83,6 +83,10 @@ function createTray() {
       click: () => startCapture(),
     },
     {
+      label: "选择工作流窗口",
+      click: () => showWorkflowWindow(),
+    },
+    {
       label: pinnedWindowsHidden ? "显示置顶贴图" : "隐藏置顶贴图",
       click: () => togglePinnedImagesVisibility(),
     },
@@ -106,6 +110,10 @@ function refreshTrayMenu() {
     {
       label: "区域截图",
       click: () => startCapture(),
+    },
+    {
+      label: "选择工作流窗口",
+      click: () => showWorkflowWindow(),
     },
     {
       label: pinnedWindowsHidden ? "显示置顶贴图" : "隐藏置顶贴图",
@@ -815,16 +823,15 @@ function setSelectedWorkflow(fileName) {
 }
 
 function showWorkflowWindow() {
-  if (!pinWindow || pinWindow.isDestroyed()) {
-    return;
-  }
-
   if (workflowWindow && !workflowWindow.isDestroyed()) {
     workflowWindow.show();
     workflowWindow.focus();
     sendWorkflowSelectionData();
     return;
   }
+
+  const parentWindow =
+    pinWindow && !pinWindow.isDestroyed() ? pinWindow : undefined;
 
   workflowWindow = new BrowserWindow({
     width: 1080,
@@ -839,7 +846,7 @@ function showWorkflowWindow() {
     resizable: true,
     skipTaskbar: true,
     autoHideMenuBar: true,
-    parent: pinWindow,
+    parent: parentWindow,
     modal: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
