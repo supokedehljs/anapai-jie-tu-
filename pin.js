@@ -8,6 +8,21 @@ let zoom = 1;
 let baseImageWidth = 0;
 let baseImageHeight = 0;
 let dragState = null;
+let pinWindowId = "";
+let isSelected = false;
+
+function applySelectionState(nextSelected) {
+  isSelected = Boolean(nextSelected);
+  document.body.classList.toggle("selected", isSelected);
+}
+
+function shouldUseAdditiveSelection(event) {
+  return Boolean(event.ctrlKey || event.metaKey || event.shiftKey);
+}
+
+function requestSelection(event) {
+  window.api.selectPin({ additive: shouldUseAdditiveSelection(event) });
+}
 
 function getScaledSize(nextZoom = zoom) {
   const width = Math.max(120, Math.round(baseImageWidth * nextZoom));
@@ -32,6 +47,7 @@ function shouldStartDrag(event) {
 
 function startDrag(event) {
   if (!shouldStartDrag(event)) return;
+  requestSelection(event);
   event.preventDefault();
   dragState = {
     pointerId: event.pointerId,
@@ -69,6 +85,7 @@ window.api.onSetImage((dataUrl) => {
 });
 
 saveBtn.addEventListener("click", async () => {
+  requestSelection({});
   if (!currentDataUrl) return;
   try {
     const result = await window.api.saveImage(currentDataUrl);
@@ -90,8 +107,14 @@ stage.addEventListener("dblclick", () => {
   window.api.closePin();
 });
 
+stage.addEventListener("click", (event) => {
+  if (event.target.closest("button")) return;
+  requestSelection(event);
+});
+
 stage.addEventListener("contextmenu", (event) => {
   event.preventDefault();
+  requestSelection(event);
   if (!currentDataUrl) return;
   window.api.showPinContextMenu(currentDataUrl);
 });
@@ -129,9 +152,21 @@ window.api.onRunningHubStatus((message) => {
   }
 });
 
+window.api.onPinSelectionState((payload) => {
+  applySelectionState(Boolean(payload.selected));
+});
+
+window.api.onPinWindowMeta((payload) => {
+  pinWindowId = String(payload.id || "");
+});
+
 window.addEventListener("keydown", (event) => {
   if (event.key === " " || event.code === "Space") {
     event.preventDefault();
     window.api.openWorkflowSelector();
+  }
+  if ((event.key === "Enter" || event.key === "NumpadEnter") && pinWindowId) {
+    event.preventDefault();
+    requestSelection(event);
   }
 });

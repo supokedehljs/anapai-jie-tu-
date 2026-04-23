@@ -17,6 +17,9 @@
       body {
         overflow: hidden;
       }
+      body.selected #stage {
+        box-shadow: 0 0 0 2px rgba(50, 132, 255, 0.95), 0 0 0 6px rgba(50, 132, 255, 0.2);
+      }
       #stage {
         position: relative;
         width: 100%;
@@ -25,6 +28,9 @@
         overflow: hidden;
         -webkit-app-region: no-drag;
         cursor: grab;
+        box-sizing: border-box;
+        border: 2px solid transparent;
+        transition: box-shadow 0.16s ease, border-color 0.16s ease;
       }
       #stage:active {
         cursor: grabbing;
@@ -109,7 +115,7 @@
       <div id="toolbar">
         <button id="saveBtn">保存</button>
       </div>
-      <div id="hint">滚轮缩放，空格打开工作流选择器</div>
+      <div id="hint">滚轮缩放，单击选中，按 Ctrl/Shift 多选，空格打开工作流选择器</div>
       <div id="runningStatus"></div>
     </div>
     <script src="./pin.js"></script>

@@ -88,6 +88,19 @@ contextBridge.exposeInMainWorld("api", {
       callback(Boolean(enabled))
     );
   },
+  selectPin(payload) {
+    ipcRenderer.send("pin-select", payload && typeof payload === "object" ? payload : {});
+  },
+  onPinSelectionState(callback) {
+    ipcRenderer.on("pin-selection-state", (_event, payload) =>
+      callback(payload && typeof payload === "object" ? payload : {})
+    );
+  },
+  onPinWindowMeta(callback) {
+    ipcRenderer.on("pin-window-meta", (_event, payload) =>
+      callback(payload && typeof payload === "object" ? payload : {})
+    );
+  },
   showPinContextMenu(dataUrl) {
     ipcRenderer.send("pin-show-context-menu", dataUrl);
   },

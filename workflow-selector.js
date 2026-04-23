@@ -72,7 +72,8 @@ async function runSelectedWorkflow(){
   try{
     const result=await window.api.runSelectedWorkflow();
     if(!result||result.ok!==true)throw new Error((result&&result.error)||"运行工作流失败");
-    setStatus(`运行完成：${result.workflowName||selectedFileName}`);window.api.closeWorkflowSelector();
+    const processedCount=Number(result.processedCount)||1;
+    setStatus(`运行完成：${result.workflowName||selectedFileName}（已处理 ${processedCount} 张图片）`);window.api.closeWorkflowSelector();
   }catch(error){window.api.reportError("workflow-selector:run",error.message||String(error));setStatus(`运行失败：${error.message||error}`);
   }finally{running=false;updateRunButton();}
 }

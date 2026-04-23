@@ -16,11 +16,13 @@ const fs = require("fs");
 
 let tray = null;
 let captureWindow = null;
-let pinWindow = null;
 let workflowWindow = null;
 let settingsWindow = null;
 let pinDragState = null;
 let pinnedWindowsHidden = false;
+const pinnedImageWindows = new Map();
+let lastFocusedPinWindowId = null;
+let selectedPinnedImageIds = new Set();
 const isPackagedApp = app.isPackaged;
 const bundledConfigPath = path.join(__dirname, "runninghub.config.json");
 const bundledWorkflowDir = path.join(__dirname, "runninghub-workflows");
@@ -33,8 +35,93 @@ const runningHubWorkflowDir = isPackagedApp
   ? path.join(appDataRoot, "runninghub-workflows")
   : bundledWorkflowDir;
 let runningHubUploading = false;
-let currentPinnedImageDataUrl = "";
 const WORKFLOW_IMAGE_PLACEHOLDER = "{{RUNNINGHUB_IMAGE_URL}}";
+
+function generatePinnedImageId() {
+  return `pin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function getPinnedWindowEntries() {
+  return Array.from(pinnedImageWindows.values()).filter(
+    (entry) => entry && entry.window && !entry.window.isDestroyed()
+  );
+}
+
+function getPinnedWindowEntryByWebContents(webContents) {
+  if (!webContents) return null;
+  return (
+    getPinnedWindowEntries().find((entry) => entry.window.webContents.id === webContents.id) ||
+    null
+  );
+}
+
+function getSelectedPinnedWindowEntries() {
+  const selectedEntries = getPinnedWindowEntries().filter((entry) =>
+    selectedPinnedImageIds.has(entry.id)
+  );
+  return selectedEntries.length ? selectedEntries : [];
+}
+
+function getPrimaryPinnedWindowEntry() {
+  const selectedEntries = getSelectedPinnedWindowEntries();
+  if (selectedEntries.length) {
+    return selectedEntries[selectedEntries.length - 1] || null;
+  }
+  if (lastFocusedPinWindowId && pinnedImageWindows.has(lastFocusedPinWindowId)) {
+    const focusedEntry = pinnedImageWindows.get(lastFocusedPinWindowId);
+    if (focusedEntry && focusedEntry.window && !focusedEntry.window.isDestroyed()) {
+      return focusedEntry;
+    }
+  }
+  const entries = getPinnedWindowEntries();
+  return entries[entries.length - 1] || null;
+}
+
+function syncPinnedSelectionStyles() {
+  getPinnedWindowEntries().forEach((entry) => {
+    entry.window.webContents.send("pin-selection-state", {
+      selected: selectedPinnedImageIds.has(entry.id),
+      selectionCount: selectedPinnedImageIds.size,
+    });
+  });
+}
+
+function setSelectedPinnedImages(ids = []) {
+  const validIds = new Set(
+    ids.filter((id) => typeof id === "string" && pinnedImageWindows.has(id))
+  );
+  selectedPinnedImageIds = validIds;
+  syncPinnedSelectionStyles();
+}
+
+function togglePinnedImageSelection(id, additive = false) {
+  if (!id || !pinnedImageWindows.has(id)) return;
+  if (!additive) {
+    setSelectedPinnedImages([id]);
+    return;
+  }
+  const nextSelected = new Set(selectedPinnedImageIds);
+  if (nextSelected.has(id)) {
+    nextSelected.delete(id);
+  } else {
+    nextSelected.add(id);
+  }
+  setSelectedPinnedImages(Array.from(nextSelected));
+}
+
+function deletePinnedWindowEntry(id) {
+  if (!id) return;
+  pinnedImageWindows.delete(id);
+  if (selectedPinnedImageIds.has(id)) {
+    const nextSelected = new Set(selectedPinnedImageIds);
+    nextSelected.delete(id);
+    selectedPinnedImageIds = nextSelected;
+  }
+  if (lastFocusedPinWindowId === id) {
+    lastFocusedPinWindowId = null;
+  }
+  syncPinnedSelectionStyles();
+}
 
 function getDefaultWorkflowConfig(fileName = "") {
   return {
@@ -996,10 +1083,13 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
   return { workflowName: workflow.name, imageUrl, taskResult, taskId, resultImageDataUrl };
 }
 
-function sendPinStatus(message) {
-  if (pinWindow && !pinWindow.isDestroyed()) {
-    pinWindow.webContents.send("runninghub-status", message);
-  }
+function sendPinStatus(message, targetEntries = []) {
+  const entries = Array.isArray(targetEntries) && targetEntries.length
+    ? targetEntries.filter((entry) => entry && entry.window && !entry.window.isDestroyed())
+    : getPinnedWindowEntries();
+  entries.forEach((entry) => {
+    entry.window.webContents.send("runninghub-status", message);
+  });
 }
 
 function sendWorkflowSelectionData() {
@@ -1031,8 +1121,8 @@ function showWorkflowWindow(options = {}) {
     return;
   }
 
-  const parentWindow =
-    pinWindow && !pinWindow.isDestroyed() ? pinWindow : undefined;
+  const parentEntry = getPrimaryPinnedWindowEntry();
+  const parentWindow = parentEntry ? parentEntry.window : undefined;
 
   workflowWindow = new BrowserWindow({
     width: 1080,
@@ -1123,19 +1213,20 @@ function registerGlobalShortcuts() {
 }
 
 function togglePinnedImagesVisibility(forceVisible) {
-  if (!pinWindow || pinWindow.isDestroyed()) {
+  const entries = getPinnedWindowEntries();
+  if (!entries.length) {
     return false;
   }
   const nextHidden =
     typeof forceVisible === "boolean" ? !forceVisible : !pinnedWindowsHidden;
   pinnedWindowsHidden = nextHidden;
   if (pinnedWindowsHidden) {
-    pinWindow.hide();
+    entries.forEach((entry) => entry.window.hide());
     if (workflowWindow && !workflowWindow.isDestroyed()) {
       workflowWindow.hide();
     }
   } else {
-    pinWindow.show();
+    entries.forEach((entry) => entry.window.show());
     if (workflowWindow && !workflowWindow.isDestroyed()) {
       workflowWindow.show();
     }
@@ -1179,27 +1270,51 @@ function showSettingsWindow() {
     settingsWindow = null;
   });
 }
-function buildPinContextMenu(dataUrl) {
+
+function buildPinContextMenu(pinEntry) {
   const currentConfig = getRunningHubConfig();
   const currentWorkflowFile = currentConfig.selectedWorkflowFile;
+  const selectedEntries = getSelectedPinnedWindowEntries();
+  const targetEntries =
+    selectedEntries.length && pinEntry && selectedPinnedImageIds.has(pinEntry.id)
+      ? selectedEntries
+      : pinEntry
+        ? [pinEntry]
+        : [];
+  const targetCount = targetEntries.length;
+
   return Menu.buildFromTemplate([
     {
-      label: runningHubUploading ? "RunningHub 正在处理..." : "上传到 RunningHub 生图",
-      enabled: !runningHubUploading && Boolean(dataUrl),
+      label: runningHubUploading
+        ? "RunningHub 正在处理..."
+        : `上传到 RunningHub 生图${targetCount > 1 ? `（${targetCount} 张）` : ""}`,
+      enabled:
+        !runningHubUploading &&
+        targetEntries.length > 0 &&
+        targetEntries.every((entry) => Boolean(entry.dataUrl)),
       click: async () => {
         runningHubUploading = true;
-        sendPinStatus("RunningHub: 准备开始...");
+        sendPinStatus("RunningHub: 准备开始...", targetEntries);
         try {
-          const result = await runRunningHubGeneration(dataUrl, (msg) =>
-            sendPinStatus(`RunningHub: ${msg}`)
-          );
-          currentPinnedImageDataUrl = result.resultImageDataUrl;
-          if (pinWindow && !pinWindow.isDestroyed()) {
-            pinWindow.webContents.send("set-image", result.resultImageDataUrl);
+          const workflowNames = [];
+          for (let index = 0; index < targetEntries.length; index += 1) {
+            const entry = targetEntries[index];
+            sendPinStatus(
+              `RunningHub: 正在处理第 ${index + 1}/${targetEntries.length} 张图片...`,
+              [entry]
+            );
+            const result = await runRunningHubGeneration(entry.dataUrl, (msg) =>
+              sendPinStatus(`RunningHub: ${msg}`, [entry])
+            );
+            entry.dataUrl = result.resultImageDataUrl;
+            workflowNames.push(result.workflowName);
+            if (entry.window && !entry.window.isDestroyed()) {
+              entry.window.webContents.send("set-image", result.resultImageDataUrl);
+            }
           }
-          sendPinStatus(`RunningHub 生图完成（${result.workflowName}）`);
+          sendPinStatus(`RunningHub 生图完成（${workflowNames.join("、")})`, targetEntries);
         } catch (error) {
-          sendPinStatus(`RunningHub 失败: ${error.message || error}`);
+          sendPinStatus(`RunningHub 失败: ${error.message || error}`, targetEntries);
         } finally {
           runningHubUploading = false;
         }
@@ -1262,12 +1377,12 @@ function startCapture() {
 
 function openPinnedImage(dataUrl, selectionRect) {
   logDebug("openPinnedImage called", `dataUrlLength=${dataUrl ? dataUrl.length : 0}`);
-  currentPinnedImageDataUrl = typeof dataUrl === "string" ? dataUrl : "";
   pinnedWindowsHidden = false;
+  const pinId = generatePinnedImageId();
   const config = getRunningHubConfig();
-  if (config.autoCopyToClipboard && currentPinnedImageDataUrl) {
+  if (config.autoCopyToClipboard && dataUrl) {
     try {
-      clipboard.writeImage(nativeImage.createFromDataURL(currentPinnedImageDataUrl));
+      clipboard.writeImage(nativeImage.createFromDataURL(dataUrl));
     } catch (error) {
       logDebug(
         "clipboard write failed",
@@ -1282,27 +1397,9 @@ function openPinnedImage(dataUrl, selectionRect) {
     Number.isFinite(selectionRect.width) &&
     Number.isFinite(selectionRect.height);
 
-  if (pinWindow && !pinWindow.isDestroyed()) {
-    pinWindow.webContents.send("pin-click-through-state", config.defaultClickThrough);
-    pinWindow.setIgnoreMouseEvents(Boolean(config.defaultClickThrough), { forward: true });
-    if (hasSelectionRect) {
-      pinWindow.setBounds({
-        x: Math.round(selectionRect.left),
-        y: Math.round(selectionRect.top),
-        width: Math.max(120, Math.round(selectionRect.width)),
-        height: Math.max(80, Math.round(selectionRect.height)),
-      });
-    }
-    pinWindow.webContents.send("set-image", dataUrl);
-    pinWindow.show();
-    pinWindow.focus();
-    refreshTrayMenu();
-    return;
-  }
-
-  pinWindow = new BrowserWindow({
-    width: 560,
-    height: 360,
+  const pinWindow = new BrowserWindow({
+    width: Math.max(120, Math.round(selectionRect?.width || 560)),
+    height: Math.max(80, Math.round(selectionRect?.height || 360)),
     minWidth: 120,
     minHeight: 80,
     frame: false,
@@ -1320,40 +1417,58 @@ function openPinnedImage(dataUrl, selectionRect) {
     },
   });
 
+  const pinEntry = {
+    id: pinId,
+    dataUrl,
+    window: pinWindow,
+  };
+  pinnedImageWindows.set(pinId, pinEntry);
+  lastFocusedPinWindowId = pinId;
+
   pinWindow.setAlwaysOnTop(true, "screen-saver");
   pinWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   pinWindow.setMenuBarVisibility(false);
   pinWindow.setIgnoreMouseEvents(Boolean(config.defaultClickThrough), {
     forward: true,
   });
+  if (hasSelectionRect) {
+    pinWindow.setBounds({
+      x: Math.round(selectionRect.left),
+      y: Math.round(selectionRect.top),
+      width: Math.max(120, Math.round(selectionRect.width)),
+      height: Math.max(80, Math.round(selectionRect.height)),
+    });
+  }
   pinWindow.loadFile(path.join(__dirname, "pin.html"));
   pinWindow.webContents.on("console-message", (_e, _level, msg) => {
     logDebug("pin console", msg);
   });
   pinWindow.webContents.once("did-finish-load", () => {
     logDebug("pin did-finish-load, sending image");
-    if (hasSelectionRect) {
-      pinWindow.setBounds({
-        x: Math.round(selectionRect.left),
-        y: Math.round(selectionRect.top),
-        width: Math.max(120, Math.round(selectionRect.width)),
-        height: Math.max(80, Math.round(selectionRect.height)),
-      });
-    }
     pinWindow.webContents.send("set-image", dataUrl);
     pinWindow.webContents.send("pin-click-through-state", config.defaultClickThrough);
+    pinWindow.webContents.send("pin-window-meta", { id: pinId });
+    syncPinnedSelectionStyles();
+  });
+  pinWindow.on("focus", () => {
+    lastFocusedPinWindowId = pinId;
   });
   pinWindow.on("closed", () => {
-    logDebug("pinWindow closed");
+    logDebug("pinWindow closed", pinId);
     pinDragState = null;
-    pinnedWindowsHidden = false;
-    currentPinnedImageDataUrl = "";
-    if (workflowWindow && !workflowWindow.isDestroyed()) {
-      workflowWindow.close();
+    deletePinnedWindowEntry(pinId);
+    if (!getPinnedWindowEntries().length) {
+      pinnedWindowsHidden = false;
+      if (workflowWindow && !workflowWindow.isDestroyed()) {
+        workflowWindow.close();
+      }
     }
     refreshTrayMenu();
-    pinWindow = null;
   });
+  setSelectedPinnedImages([pinId]);
+  pinWindow.show();
+  pinWindow.focus();
+  refreshTrayMenu();
 }
 
 ipcMain.on("close-capture", () => {
@@ -1479,11 +1594,10 @@ ipcMain.handle("get-screen-image-data-url", async (_event, payload = {}) => {
 });
 
 ipcMain.on("pin-recapture", () => startCapture());
-ipcMain.on("pin-close", () => {
-  if (workflowWindow && !workflowWindow.isDestroyed()) {
-    workflowWindow.close();
-  }
-  if (pinWindow && !pinWindow.isDestroyed()) pinWindow.close();
+ipcMain.on("pin-close", (event) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return;
+  pinEntry.window.close();
 });
 ipcMain.on("pin-open-workflow-selector", () => {
   showWorkflowWindow();
@@ -1578,60 +1692,73 @@ ipcMain.handle("run-selected-workflow", async () => {
   if (runningHubUploading) {
     return { ok: false, error: "RunningHub 正在处理，请稍后再试" };
   }
-  if (!currentPinnedImageDataUrl) {
-    return { ok: false, error: "当前没有可用截图" };
+  const selectedEntries = getSelectedPinnedWindowEntries();
+  if (!selectedEntries.length) {
+    return { ok: false, error: "请先选中至少一张置顶截图" };
   }
 
   runningHubUploading = true;
-  sendPinStatus("RunningHub: 准备开始...");
+  sendPinStatus("RunningHub: 准备开始...", selectedEntries);
   try {
-    const result = await runRunningHubGeneration(currentPinnedImageDataUrl, (msg) =>
-      sendPinStatus(`RunningHub: ${msg}`)
-    );
-    currentPinnedImageDataUrl = result.resultImageDataUrl;
-    if (pinWindow && !pinWindow.isDestroyed()) {
-      pinWindow.webContents.send("set-image", result.resultImageDataUrl);
+    const workflowNames = [];
+    for (let index = 0; index < selectedEntries.length; index += 1) {
+      const entry = selectedEntries[index];
+      sendPinStatus(`RunningHub: 正在运行第 ${index + 1}/${selectedEntries.length} 张...`, [entry]);
+      const result = await runRunningHubGeneration(entry.dataUrl, (msg) =>
+        sendPinStatus(`RunningHub: ${msg}`, [entry])
+      );
+      entry.dataUrl = result.resultImageDataUrl;
+      workflowNames.push(result.workflowName);
+      if (entry.window && !entry.window.isDestroyed()) {
+        entry.window.webContents.send("set-image", result.resultImageDataUrl);
+      }
     }
-    sendPinStatus(`RunningHub 生图完成（${result.workflowName}）`);
-    return { ok: true, workflowName: result.workflowName };
+    sendPinStatus(`RunningHub 生图完成（共 ${selectedEntries.length} 张）`, selectedEntries);
+    return { ok: true, workflowName: workflowNames.join("、"), processedCount: selectedEntries.length };
   } catch (error) {
     const message = error && error.message ? error.message : String(error);
-    sendPinStatus(`RunningHub 失败: ${message}`);
+    sendPinStatus(`RunningHub 失败: ${message}`, selectedEntries);
     return { ok: false, error: message };
   } finally {
     runningHubUploading = false;
   }
 });
-ipcMain.handle("pin-set-click-through", (_event, enable) => {
-  if (!pinWindow || pinWindow.isDestroyed()) return false;
+ipcMain.handle("pin-set-click-through", (event, enable) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;
   const clickThrough = Boolean(enable);
-  pinWindow.setIgnoreMouseEvents(clickThrough, { forward: true });
-  pinWindow.webContents.send("pin-click-through-state", clickThrough);
+  pinEntry.window.setIgnoreMouseEvents(clickThrough, { forward: true });
+  pinEntry.window.webContents.send("pin-click-through-state", clickThrough);
   return clickThrough;
 });
-ipcMain.handle("pin-set-size", (_event, payload = {}) => {
-  if (!pinWindow || pinWindow.isDestroyed()) return false;
+ipcMain.handle("pin-set-size", (event, payload = {}) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;
   const width = Math.max(120, Math.floor(Number(payload.width) || 0));
   const height = Math.max(80, Math.floor(Number(payload.height) || 0));
   if (!Number.isFinite(width) || !Number.isFinite(height)) return false;
-  pinWindow.setContentSize(width, height);
+  pinEntry.window.setContentSize(width, height);
   return true;
 });
-ipcMain.on("pin-start-drag", (_event, payload = {}) => {
-  if (!pinWindow || pinWindow.isDestroyed()) return;
+ipcMain.on("pin-start-drag", (event, payload = {}) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return;
   pinDragState = {
-    startBounds: pinWindow.getBounds(),
+    pinId: pinEntry.id,
+    startBounds: pinEntry.window.getBounds(),
     startX: Number(payload.screenX) || 0,
     startY: Number(payload.screenY) || 0,
   };
 });
 ipcMain.on("pin-drag", (_event, payload = {}) => {
-  if (!pinWindow || pinWindow.isDestroyed() || !pinDragState) return;
+  if (!pinDragState || !pinDragState.pinId || !pinnedImageWindows.has(pinDragState.pinId)) return;
+  const pinEntry = pinnedImageWindows.get(pinDragState.pinId);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return;
   const currentX = Number(payload.screenX) || 0;
   const currentY = Number(payload.screenY) || 0;
   const deltaX = currentX - pinDragState.startX;
   const deltaY = currentY - pinDragState.startY;
-  pinWindow.setBounds({
+  pinEntry.window.setBounds({
     ...pinDragState.startBounds,
     x: Math.round(pinDragState.startBounds.x + deltaX),
     y: Math.round(pinDragState.startBounds.y + deltaY),
@@ -1645,10 +1772,17 @@ ipcMain.on("renderer-error", (_event, payload) => {
   const message = payload && payload.message ? payload.message : "empty message";
   logDebug("renderer-error", `${source}: ${message}`);
 });
-ipcMain.on("pin-show-context-menu", (_event, dataUrl) => {
-  if (!pinWindow || pinWindow.isDestroyed()) return;
-  const menu = buildPinContextMenu(dataUrl);
-  menu.popup({ window: pinWindow });
+ipcMain.on("pin-show-context-menu", (event) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return;
+  const menu = buildPinContextMenu(pinEntry);
+  menu.popup({ window: pinEntry.window });
+});
+ipcMain.on("pin-select", (event, payload = {}) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry) return;
+  lastFocusedPinWindowId = pinEntry.id;
+  togglePinnedImageSelection(pinEntry.id, Boolean(payload.additive));
 });
 ipcMain.on("workflow-selector-close", () => {
   if (workflowWindow && !workflowWindow.isDestroyed()) {
