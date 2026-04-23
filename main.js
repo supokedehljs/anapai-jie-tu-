@@ -47,6 +47,46 @@ function getDefaultWorkflowConfig(fileName = "") {
   };
 }
 
+function getThumbnailExtensionFromPath(filePath = "") {
+  const ext = path.extname(String(filePath || "")).toLowerCase();
+  return [".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(ext) ? ext : ".png";
+}
+
+function removeWorkflowThumbnailFiles(fileName) {
+  const baseName = path.basename(String(fileName || ""), path.extname(String(fileName || "")));
+  [".png", ".jpg", ".jpeg", ".webp", ".gif"].forEach((ext) => {
+    const targetPath = path.join(runningHubWorkflowDir, `${baseName}${ext}`);
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+    }
+  });
+}
+
+function saveWorkflowThumbnail(fileName, sourcePath = "") {
+  if (!sourcePath) {
+    return "";
+  }
+  ensureRunningHubFiles();
+  const baseName = path.basename(String(fileName || ""), path.extname(String(fileName || "")));
+  const ext = getThumbnailExtensionFromPath(sourcePath);
+  const targetPath = path.join(runningHubWorkflowDir, `${baseName}${ext}`);
+  removeWorkflowThumbnailFiles(fileName);
+  fs.copyFileSync(sourcePath, targetPath);
+  return targetPath;
+}
+
+function replaceWorkflowJsonFile(fileName, sourcePath = "") {
+  if (!sourcePath) {
+    return "";
+  }
+  ensureRunningHubFiles();
+  const targetPath = path.join(runningHubWorkflowDir, String(fileName || ""));
+  const rawContent = fs.readFileSync(sourcePath, "utf8");
+  const parsed = JSON.parse(rawContent);
+  fs.writeFileSync(targetPath, JSON.stringify(parsed, null, 2), "utf8");
+  return targetPath;
+}
+
 function getDefaultAppSettings() {
   return {
     apiKey: "",
@@ -367,18 +407,23 @@ function readWorkflow(fileName) {
 
 async function importWorkflowFromJson(metadata = {}) {
   ensureRunningHubFiles();
-  const result = await dialog.showOpenDialog({
-    title: "选择要导入的工作流 JSON",
-    defaultPath: runningHubWorkflowDir,
-    properties: ["openFile"],
-    filters: [{ name: "JSON Files", extensions: ["json"] }],
-  });
 
-  if (result.canceled || !Array.isArray(result.filePaths) || !result.filePaths[0]) {
-    return { ok: false, cancelled: true };
+  let sourcePath = String(metadata.workflowJsonSourcePath || "").trim();
+  if (!sourcePath) {
+    const result = await dialog.showOpenDialog({
+      title: "选择要导入的工作流 JSON",
+      defaultPath: runningHubWorkflowDir,
+      properties: ["openFile"],
+      filters: [{ name: "JSON Files", extensions: ["json"] }],
+    });
+
+    if (result.canceled || !Array.isArray(result.filePaths) || !result.filePaths[0]) {
+      return { ok: false, cancelled: true };
+    }
+
+    sourcePath = result.filePaths[0];
   }
 
-  const sourcePath = result.filePaths[0];
   const rawContent = fs.readFileSync(sourcePath, "utf8");
   const parsed = JSON.parse(rawContent);
   const requestedBaseName = sanitizeWorkflowFileBaseName(
@@ -1369,6 +1414,45 @@ ipcMain.handle("choose-directory", async () => {
   return { ok: true, directoryPath: result.filePaths[0] };
 });
 
+ipcMain.handle("choose-workflow-json-file", async () => {
+  const result = await dialog.showOpenDialog({
+    title: "选择工作流 JSON 文件",
+    defaultPath: runningHubWorkflowDir,
+    properties: ["openFile"],
+    filters: [{ name: "JSON Files", extensions: ["json"] }],
+  });
+
+  if (result.canceled || !Array.isArray(result.filePaths) || !result.filePaths[0]) {
+    return { ok: false, cancelled: true };
+  }
+
+  const sourcePath = result.filePaths[0];
+  return {
+    ok: true,
+    sourcePath,
+    fileName: path.basename(sourcePath),
+    fileBaseName: path.basename(sourcePath, path.extname(sourcePath)),
+  };
+});
+ipcMain.handle("choose-workflow-thumbnail-file", async () => {
+  const result = await dialog.showOpenDialog({
+    title: "选择工作流缩略图",
+    defaultPath: runningHubWorkflowDir,
+    properties: ["openFile"],
+    filters: [{ name: "Image Files", extensions: ["png", "jpg", "jpeg", "webp", "gif"] }],
+  });
+
+  if (result.canceled || !Array.isArray(result.filePaths) || !result.filePaths[0]) {
+    return { ok: false, cancelled: true };
+  }
+
+  const sourcePath = result.filePaths[0];
+  return {
+    ok: true,
+    sourcePath,
+    fileName: path.basename(sourcePath),
+  };
+});
 ipcMain.handle("get-screen-image-data-url", async (_event, payload = {}) => {
   const width = Number.isFinite(payload.width) ? payload.width : 1920;
   const height = Number.isFinite(payload.height) ? payload.height : 1080;
@@ -1422,6 +1506,7 @@ ipcMain.handle("get-workflow-config", (_event, fileName) => {
         imageNodeId: workflow.imageNodeId,
         imageFieldName: workflow.imageFieldName,
         imagePlaceholder: workflow.imagePlaceholder,
+        thumbnailPath: getWorkflowThumbnailPath(fileName),
       },
     };
   } catch (error) {
@@ -1438,6 +1523,13 @@ ipcMain.handle("save-workflow-config", (_event, payload = {}) => {
   }
 
   try {
+    if (payload.workflowJsonSourcePath) {
+      replaceWorkflowJsonFile(fileName, String(payload.workflowJsonSourcePath || ""));
+    }
+    if (payload.thumbnailSourcePath) {
+      saveWorkflowThumbnail(fileName, String(payload.thumbnailSourcePath || ""));
+    }
+
     const saved = saveWorkflowConfig(fileName, {
       displayName: String(payload.displayName || "").trim(),
       workflowId: String(payload.workflowId || "").trim(),
@@ -1461,6 +1553,9 @@ ipcMain.handle("import-workflow-json", async (_event, payload = {}) => {
   try {
     const result = await importWorkflowFromJson(payload);
     if (result.ok) {
+      if (payload.thumbnailSourcePath) {
+        saveWorkflowThumbnail(result.fileName, String(payload.thumbnailSourcePath || ""));
+      }
       setSelectedWorkflow(result.fileName);
       sendWorkflowSelectionData();
     }

@@ -1,0 +1,8 @@
+{
+  "fileName": "脸部测试-3_api.json",
+  "displayName": "脸部测试3",
+  "workflowId": "2047168766164869121",
+  "imageNodeId": "36",
+  "imageFieldName": "image",
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
+}

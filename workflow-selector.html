@@ -5,332 +5,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>选择工作流</title>
     <style>
-      :root {
-        color-scheme: dark;
+      :root { color-scheme: dark; }
+      html, body {
+        margin: 0; width: 100%; height: 100%; overflow: hidden;
+        font-family: "Microsoft YaHei", sans-serif; color: #f6f8fc; background: transparent;
       }
-      html,
-      body {
-        margin: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        font-family: "Microsoft YaHei", sans-serif;
-        color: #f6f8fc;
-        background: transparent;
-      }
-      body {
-        display: flex;
-        align-items: stretch;
-        justify-content: stretch;
-      }
+      body { display: flex; }
       #app {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        margin: 14px;
-        border-radius: 22px;
-        overflow: hidden;
-        background: linear-gradient(180deg, rgba(16, 20, 28, 0.96), rgba(10, 13, 18, 0.94));
-        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        flex: 1; display: flex; flex-direction: column; margin: 14px; border-radius: 22px; overflow: hidden;
+        background: linear-gradient(180deg, rgba(16,20,28,.96), rgba(10,13,18,.94));
+        box-shadow: 0 24px 80px rgba(0,0,0,.42); border: 1px solid rgba(255,255,255,.08);
       }
       #topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 18px 22px 12px;
-        gap: 16px;
+        display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 12px; gap: 16px;
         -webkit-app-region: drag;
       }
-      #titleWrap {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-      #title {
-        font-size: 20px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-      }
-      #subtitle {
-        font-size: 13px;
-        color: rgba(232, 238, 249, 0.7);
-      }
-      #actions {
-        display: flex;
-        gap: 10px;
-        -webkit-app-region: no-drag;
-      }
+      #titleWrap { display: flex; flex-direction: column; gap: 4px; }
+      #title { font-size: 20px; font-weight: 700; letter-spacing: .5px; }
+      #subtitle { font-size: 13px; color: rgba(232,238,249,.7); }
+      #actions { display: flex; gap: 10px; -webkit-app-region: no-drag; }
       button {
-        border: none;
-        border-radius: 12px;
-        padding: 10px 16px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
+        border: none; border-radius: 12px; padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+        transition: transform .15s ease, filter .15s ease, background .15s ease;
       }
-      button:hover {
-        filter: brightness(1.06);
-        transform: translateY(-1px);
-      }
-      button:disabled {
-        cursor: not-allowed;
-        filter: none;
-        transform: none;
-        opacity: 0.55;
-      }
-      #runBtn {
-        background: linear-gradient(135deg, #3d85ff, #6b5cff);
-        color: #fff;
-      }
-      #uploadBtn {
-        background: rgba(255, 255, 255, 0.12);
-        color: #eef3fb;
-      }
-      #closeBtn {
-        background: rgba(255, 255, 255, 0.08);
-        color: #eef3fb;
-      }
-      #content {
-        flex: 1;
-        min-height: 0;
-        padding: 10px 22px 22px;
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-      }
-      #tips {
-        font-size: 13px;
-        color: rgba(232, 238, 249, 0.74);
-      }
+      button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+      button:disabled { cursor: not-allowed; filter: none; transform: none; opacity: .55; }
+      #runBtn { background: linear-gradient(135deg, #3d85ff, #6b5cff); color: #fff; }
+      #uploadBtn, .pickerBtn { background: rgba(255,255,255,.12); color: #eef3fb; }
+      #closeBtn, #cancelWorkflowBtn { background: rgba(255,255,255,.08); color: #eef3fb; }
+      #content { flex: 1; min-height: 0; padding: 10px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
+      #tips { font-size: 13px; color: rgba(232,238,249,.74); }
       #grid {
-        flex: 1;
-        min-height: 0;
-        overflow: auto;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-        gap: 16px;
-        align-content: start;
-        padding-right: 6px;
+        flex: 1; min-height: 0; overflow: auto; display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; align-content: start; padding-right: 6px;
       }
       .card {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 12px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        cursor: pointer;
-        transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+        position: relative; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 18px;
+        background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); cursor: pointer;
+        transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease;
       }
       .card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(97, 146, 255, 0.56);
-        background: rgba(255, 255, 255, 0.07);
-        box-shadow: 0 14px 30px rgba(22, 36, 67, 0.24);
+        transform: translateY(-2px); border-color: rgba(97,146,255,.56); background: rgba(255,255,255,.07);
+        box-shadow: 0 14px 30px rgba(22,36,67,.24);
       }
       .card.selected {
-        border-color: rgba(82, 153, 255, 0.95);
-        background: linear-gradient(180deg, rgba(55, 110, 255, 0.2), rgba(255, 255, 255, 0.06));
-        box-shadow: 0 16px 34px rgba(53, 112, 255, 0.22);
+        border-color: rgba(82,153,255,.95);
+        background: linear-gradient(180deg, rgba(55,110,255,.2), rgba(255,255,255,.06));
+        box-shadow: 0 16px 34px rgba(53,112,255,.22);
       }
       .thumb {
-        aspect-ratio: 1 / 1;
-        width: 100%;
-        border-radius: 14px;
-        background: linear-gradient(135deg, rgba(55, 110, 255, 0.16), rgba(138, 73, 255, 0.18));
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        aspect-ratio: 1 / 1; width: 100%; border-radius: 14px;
+        background: linear-gradient(135deg, rgba(55,110,255,.16), rgba(138,73,255,.18));
+        border: 1px solid rgba(255,255,255,.08); overflow: hidden; display: flex; align-items: center; justify-content: center;
       }
-      .thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
+      .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .thumbPlaceholder, .thumbnailPreviewPlaceholder {
+        display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 14px;
+        color: rgba(237,242,252,.82); text-align: center; padding: 18px; box-sizing: border-box;
       }
-      .thumbPlaceholder {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        font-size: 15px;
-        color: rgba(237, 242, 252, 0.82);
-        text-align: center;
-        padding: 18px;
-        box-sizing: border-box;
-      }
-      .name {
-        font-size: 14px;
-        font-weight: 700;
-        line-height: 1.45;
-        word-break: break-word;
-      }
-      .metaRow {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
+      .name { font-size: 14px; font-weight: 700; line-height: 1.45; word-break: break-word; }
+      .metaRow { display: flex; flex-wrap: wrap; gap: 8px; }
       .metaTag {
-        padding: 4px 8px;
-        border-radius: 999px;
-        font-size: 11px;
-        color: rgba(242, 246, 255, 0.92);
-        background: rgba(86, 115, 178, 0.28);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 4px 8px; border-radius: 999px; font-size: 11px; color: rgba(242,246,255,.92);
+        background: rgba(86,115,178,.28); border: 1px solid rgba(255,255,255,.08);
       }
-      .file {
-        font-size: 12px;
-        color: rgba(232, 238, 249, 0.56);
-        word-break: break-all;
-      }
-      .cardEditBtn {
-        margin-top: auto;
-        background: rgba(255, 255, 255, 0.08);
-        color: #eef3fb;
-        width: 100%;
-      }
+      .file { font-size: 12px; color: rgba(232,238,249,.56); word-break: break-all; }
+      .cardEditBtn { margin-top: auto; background: rgba(255,255,255,.08); color: #eef3fb; width: 100%; }
       .selectedBadge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        padding: 4px 8px;
-        border-radius: 999px;
-        background: rgba(59, 128, 255, 0.92);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 700;
+        position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 999px;
+        background: rgba(59,128,255,.92); color: #fff; font-size: 11px; font-weight: 700;
       }
       #empty {
-        display: none;
-        flex: 1;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        color: rgba(232, 238, 249, 0.72);
-        font-size: 15px;
-        border-radius: 18px;
-        border: 1px dashed rgba(255, 255, 255, 0.16);
-        background: rgba(255, 255, 255, 0.03);
+        display: none; flex: 1; align-items: center; justify-content: center; text-align: center; color: rgba(232,238,249,.72);
+        font-size: 15px; border-radius: 18px; border: 1px dashed rgba(255,255,255,.16); background: rgba(255,255,255,.03);
       }
-      #status {
-        min-height: 20px;
-        font-size: 13px;
-        color: rgba(232, 238, 249, 0.72);
-      }
+      #status { min-height: 20px; font-size: 13px; color: rgba(232,238,249,.72); }
       #modal {
-        position: fixed;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 0, 0, 0.45);
-        backdrop-filter: blur(8px);
-        z-index: 20;
+        position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.45);
+        backdrop-filter: blur(8px); z-index: 20;
       }
-      #modal[data-open="true"] {
-        display: flex;
-      }
+      #modal[data-open="true"] { display: flex; }
       .modalPanel {
-        width: min(640px, calc(100vw - 48px));
-        max-height: calc(100vh - 48px);
-        overflow: auto;
-        border-radius: 20px;
-        background: linear-gradient(180deg, rgba(16, 20, 28, 0.98), rgba(10, 13, 18, 0.98));
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
-        padding: 22px;
-        box-sizing: border-box;
+        width: min(720px, calc(100vw - 48px)); max-height: calc(100vh - 48px); overflow: auto; border-radius: 20px;
+        background: linear-gradient(180deg, rgba(16,20,28,.98), rgba(10,13,18,.98)); border: 1px solid rgba(255,255,255,.1);
+        box-shadow: 0 28px 80px rgba(0,0,0,.45); padding: 22px; box-sizing: border-box;
       }
-      .modalHeader {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-bottom: 16px;
-      }
-      .modalTitle {
-        font-size: 20px;
-        font-weight: 700;
-      }
-      .modalHint {
-        font-size: 13px;
-        color: rgba(232, 238, 249, 0.72);
-        line-height: 1.6;
-      }
-      #workflowForm {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-      }
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .field.full {
-        grid-column: 1 / -1;
-      }
-      .fieldLabel {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        font-size: 13px;
-      }
-      .fieldLabel .hint {
-        color: rgba(232, 238, 249, 0.58);
-        font-size: 12px;
-      }
+      .modalHeader { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+      .modalTitle { font-size: 20px; font-weight: 700; }
+      .modalHint { font-size: 13px; color: rgba(232,238,249,.72); line-height: 1.6; }
+      #workflowForm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .field { display: flex; flex-direction: column; gap: 8px; }
+      .field.full { grid-column: 1 / -1; }
+      .fieldLabel { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+      .fieldLabel .hint { color: rgba(232,238,249,.58); font-size: 12px; }
       input {
-        width: 100%;
-        box-sizing: border-box;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.06);
-        color: #eef3fb;
-        padding: 12px 13px;
-        font-size: 14px;
-        outline: none;
+        width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
+        background: rgba(255,255,255,.06); color: #eef3fb; padding: 12px 13px; font-size: 14px; outline: none;
       }
-      input:focus {
-        border-color: rgba(74, 136, 255, 0.86);
-        box-shadow: 0 0 0 3px rgba(61, 133, 255, 0.16);
+      input:focus { border-color: rgba(74,136,255,.86); box-shadow: 0 0 0 3px rgba(61,133,255,.16); }
+      input[readonly] { color: rgba(238,243,251,.78); }
+      .filePickerRow { display: flex; gap: 10px; }
+      .filePickerRow input { flex: 1; }
+      .pickerBtn { min-width: 112px; }
+      .thumbnailPreview {
+        margin-top: 8px; min-height: 180px; border-radius: 16px; border: 1px solid rgba(255,255,255,.08);
+        background: rgba(255,255,255,.04); overflow: hidden; display: flex; align-items: center; justify-content: center;
       }
-      .modalActions {
-        grid-column: 1 / -1;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 6px;
-      }
-      #saveWorkflowBtn {
-        background: linear-gradient(135deg, #3d85ff, #6b5cff);
-        color: #fff;
-      }
-      #cancelWorkflowBtn {
-        background: rgba(255, 255, 255, 0.1);
-        color: #eef3fb;
-      }
-      ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.16);
-        border-radius: 999px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
+      .thumbnailPreview img { width: 100%; max-height: 280px; object-fit: cover; display: none; }
+      .thumbnailPreview[data-has-image="true"] img { display: block; }
+      .thumbnailPreview[data-has-image="true"] .thumbnailPreviewPlaceholder { display: none; }
+      .modalActions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+      #saveWorkflowBtn { background: linear-gradient(135deg, #3d85ff, #6b5cff); color: #fff; }
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 999px; }
+      ::-webkit-scrollbar-track { background: transparent; }
       @media (max-width: 760px) {
-        #workflowForm {
-          grid-template-columns: 1fr;
-        }
+        #workflowForm { grid-template-columns: 1fr; }
+        .filePickerRow { flex-direction: column; }
       }
     </style>
   </head>
@@ -348,13 +139,12 @@
         </div>
       </div>
       <div id="content">
-        <div id="tips">这里展示 `runninghub-workflows` 目录中的所有 JSON 工作流。每个 JSON 都有自己的独立配置；左键选择，右键或点击“编辑配置”即可修改图像输入节点、字段和工作流信息。</div>
+        <div id="tips">这里展示 `runninghub-workflows` 目录中的所有 JSON 工作流。每个 JSON 都有自己的独立配置；左键选择，右键或点击“编辑配置”即可修改图像输入节点、字段、缩略图和工作流文件。</div>
         <div id="empty">当前还没有工作流。点击右上角“上传工作流”导入新的 JSON。</div>
         <div id="grid"></div>
         <div id="status"></div>
       </div>
     </div>
-
     <div id="modal" data-open="false">
       <div class="modalPanel">
         <div class="modalHeader">
@@ -362,10 +152,20 @@
           <div id="modalHint" class="modalHint"></div>
         </div>
         <form id="workflowForm">
+          <label class="field full" data-mode="import">
+            <div class="fieldLabel">
+              <strong>工作流 JSON 文件</strong>
+              <span class="hint">直接在这个界面选择要导入的工作流 JSON</span>
+            </div>
+            <div class="filePickerRow">
+              <input id="workflowJsonPath" type="text" placeholder="请选择工作流 JSON 文件" readonly />
+              <button id="chooseWorkflowJsonBtn" type="button" class="pickerBtn">选择 JSON</button>
+            </div>
+          </label>
           <label class="field full">
             <div class="fieldLabel">
               <strong>JSON 保存名称</strong>
-              <span class="hint">用于保存到本地工作流目录，不需要手动加 `.json` 后缀</span>
+              <span class="hint">保存到本地工作流目录时使用，不需要手动加 `.json` 后缀</span>
             </div>
             <input id="workflowFileName" type="text" placeholder="例如：my-img2img-workflow" />
           </label>
@@ -397,14 +197,27 @@
             </div>
             <input id="imageFieldName" type="text" placeholder="image" value="image" />
           </label>
+          <label class="field full">
+            <div class="fieldLabel">
+              <strong>工作流缩略图</strong>
+              <span class="hint">可选，支持 png / jpg / jpeg / webp / gif</span>
+            </div>
+            <div class="filePickerRow">
+              <input id="workflowThumbnailPath" type="text" placeholder="可选：请选择缩略图文件" readonly />
+              <button id="chooseWorkflowThumbnailBtn" type="button" class="pickerBtn">选择缩略图</button>
+            </div>
+            <div id="thumbnailPreview" class="thumbnailPreview" data-has-image="false">
+              <img id="thumbnailPreviewImage" alt="工作流缩略图预览" />
+              <div class="thumbnailPreviewPlaceholder">暂无缩略图</div>
+            </div>
+          </label>
           <div class="modalActions">
             <button id="cancelWorkflowBtn" type="button">取消</button>
-            <button id="saveWorkflowBtn" type="submit">继续并选择 JSON</button>
+            <button id="saveWorkflowBtn" type="submit">保存</button>
           </div>
         </form>
       </div>
     </div>
-
     <script src="./workflow-selector.js"></script>
   </body>
 </html>

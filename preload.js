@@ -43,6 +43,12 @@ contextBridge.exposeInMainWorld("api", {
   importWorkflowJson(payload) {
     return ipcRenderer.invoke("import-workflow-json", payload);
   },
+  chooseWorkflowJsonFile() {
+    return ipcRenderer.invoke("choose-workflow-json-file");
+  },
+  chooseWorkflowThumbnailFile() {
+    return ipcRenderer.invoke("choose-workflow-thumbnail-file");
+  },
   selectWorkflow(fileName) {
     return ipcRenderer.invoke("select-workflow", fileName);
   },
