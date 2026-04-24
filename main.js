@@ -163,7 +163,7 @@ function deletePinnedWindowEntry(id) {
 function getDefaultWorkflowConfig(fileName = "") {
   return {
     fileName: String(fileName || ""),
-    displayName: "",
+    displayName: path.basename(String(fileName || ""), path.extname(String(fileName || ""))),
     workflowId: "",
     imageNodeId: "36",
     imageFieldName: "image",
@@ -440,7 +440,6 @@ function readWorkflowConfig(fileName, workflowJson = null) {
 
   const derived = workflowJson && typeof workflowJson === "object"
     ? {
-        displayName: String(workflowJson.name || ""),
         workflowId: String(workflowJson.workflowId || ""),
         imagePlaceholder: String(
           workflowJson.imagePlaceholder || defaults.imagePlaceholder
@@ -453,9 +452,7 @@ function readWorkflowConfig(fileName, workflowJson = null) {
     ...derived,
     ...parsed,
     fileName: String(fileName || defaults.fileName),
-    displayName: String(
-      parsed.displayName || derived.displayName || defaults.displayName || path.basename(fileName, path.extname(fileName))
-    ),
+    displayName: path.basename(String(fileName || defaults.fileName), path.extname(String(fileName || defaults.fileName))),
     workflowId: String(parsed.workflowId || derived.workflowId || defaults.workflowId),
     imageNodeId: String(parsed.imageNodeId || defaults.imageNodeId),
     imageFieldName: String(parsed.imageFieldName || defaults.imageFieldName),
@@ -470,6 +467,7 @@ function saveWorkflowConfig(fileName, nextValues = {}) {
     ...current,
     ...nextValues,
     fileName: String(fileName || current.fileName),
+    displayName: path.basename(String(fileName || current.fileName), path.extname(String(fileName || current.fileName))),
   };
   fs.writeFileSync(getWorkflowConfigPath(fileName), JSON.stringify(merged, null, 2), "utf8");
   return merged;
@@ -534,7 +532,7 @@ function readWorkflow(fileName) {
 
   return {
     fileName,
-    name: String(workflowConfig.displayName || parsed.name || fileName),
+    name: path.basename(String(fileName || ""), path.extname(String(fileName || ""))),
     workflowId: String(workflowConfig.workflowId || parsed.workflowId || ""),
     imageNodeId: String(workflowConfig.imageNodeId || "36"),
     imageFieldName: String(workflowConfig.imageFieldName || "image"),
@@ -570,7 +568,7 @@ async function importWorkflowFromJson(metadata = {}) {
   const rawContent = fs.readFileSync(sourcePath, "utf8");
   const parsed = JSON.parse(rawContent);
   const requestedBaseName = sanitizeWorkflowFileBaseName(
-    metadata.fileBaseName || metadata.displayName || path.basename(sourcePath, path.extname(sourcePath))
+    metadata.fileBaseName || path.basename(sourcePath, path.extname(sourcePath))
   );
 
   let targetFileName = `${requestedBaseName}.json`;
@@ -585,7 +583,6 @@ async function importWorkflowFromJson(metadata = {}) {
   fs.writeFileSync(targetPath, JSON.stringify(parsed, null, 2), "utf8");
 
   const workflowConfig = saveWorkflowConfig(targetFileName, {
-    displayName: String(metadata.displayName || parsed.name || requestedBaseName),
     workflowId: String(metadata.workflowId || parsed.workflowId || ""),
     imageNodeId: String(metadata.imageNodeId || "36"),
     imageFieldName: String(metadata.imageFieldName || "image"),
@@ -834,10 +831,35 @@ function looksLikeImageRef(value) {
   );
 }
 
+function getResultNodeId(data) {
+  if (!data || typeof data !== "object") return "";
+  return String(
+    data.node ||
+      data.display_node ||
+      data.nodeId ||
+      data.node_id ||
+      data.id ||
+      data.outputNodeId ||
+      ""
+  ).trim().replace(/^#/, "");
+}
+
 function pickResultImageUrl(data, preferredNodeId = "") {
   if (!data) return "";
   const normalizedNodeId = String(preferredNodeId || "").trim().replace(/^#/, "");
   if (normalizedNodeId && typeof data === "object") {
+    const currentNodeId = getResultNodeId(data);
+    if (currentNodeId === normalizedNodeId) {
+      const nodePayload =
+        data.output || data.outputs || data.result || data.results || data.data || data;
+      const preferredUrl = pickResultImageUrl(nodePayload, "");
+      if (preferredUrl) {
+        return preferredUrl;
+      }
+    }
+    if (currentNodeId && currentNodeId !== normalizedNodeId) {
+      return "";
+    }
     const preferredNodeData =
       (data && typeof data === "object" && data[normalizedNodeId]) ||
       (data && typeof data === "object" && data.outputs && data.outputs[normalizedNodeId]) ||
@@ -1929,7 +1951,6 @@ ipcMain.handle("save-workflow-config", (_event, payload = {}) => {
     }
 
     const saved = saveWorkflowConfig(fileName, {
-      displayName: String(payload.displayName || "").trim(),
       workflowId: String(payload.workflowId || "").trim(),
       imageNodeId: String(payload.imageNodeId || "36").trim() || "36",
       imageFieldName: String(payload.imageFieldName || "image").trim() || "image",

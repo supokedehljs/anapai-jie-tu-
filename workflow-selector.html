@@ -33,17 +33,17 @@
       #runBtn { background: linear-gradient(135deg, #3d85ff, #6b5cff); color: #fff; }
       #uploadBtn, .pickerBtn { background: rgba(255,255,255,.12); color: #eef3fb; }
       #closeBtn, #cancelWorkflowBtn { background: rgba(255,255,255,.08); color: #eef3fb; }
-      #deleteWorkflowBtn { margin-right: auto; background: rgba(255,92,92,.16); color: #ffd7d7; border: 1px solid rgba(255,92,92,.22); }
       #content { flex: 1; min-height: 0; padding: 10px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
       #tips { font-size: 13px; color: rgba(232,238,249,.74); }
       #grid {
         flex: 1; min-height: 0; overflow: auto; display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; align-content: start; padding-right: 6px;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; align-content: start; padding-right: 6px;
       }
       .card {
-        position: relative; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 18px;
+        position: relative; display: block; padding: 0; border-radius: 18px;
         background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); cursor: pointer;
         transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease;
+        overflow: hidden;
       }
       .card:hover {
         transform: translateY(-2px); border-color: rgba(97,146,255,.56); background: rgba(255,255,255,.07);
@@ -55,27 +55,32 @@
         box-shadow: 0 16px 34px rgba(53,112,255,.22);
       }
       .thumb {
-        aspect-ratio: 1 / 1; width: 100%; border-radius: 14px;
+        aspect-ratio: 1 / 1; width: 100%; border-radius: 17px;
         background: linear-gradient(135deg, rgba(55,110,255,.16), rgba(138,73,255,.18));
-        border: 1px solid rgba(255,255,255,.08); overflow: hidden; display: flex; align-items: center; justify-content: center;
+        overflow: hidden; display: flex; align-items: center; justify-content: center;
       }
       .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
       .thumbPlaceholder, .thumbnailPreviewPlaceholder {
         display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 14px;
         color: rgba(237,242,252,.82); text-align: center; padding: 18px; box-sizing: border-box;
       }
-      .name { font-size: 14px; font-weight: 700; line-height: 1.45; word-break: break-word; }
-      .metaRow { display: flex; flex-wrap: wrap; gap: 8px; }
-      .metaTag {
-        padding: 4px 8px; border-radius: 999px; font-size: 11px; color: rgba(242,246,255,.92);
-        background: rgba(86,115,178,.28); border: 1px solid rgba(255,255,255,.08);
-      }
-      .file { font-size: 12px; color: rgba(232,238,249,.56); word-break: break-all; }
-      .cardEditBtn { margin-top: auto; background: rgba(255,255,255,.08); color: #eef3fb; width: 100%; }
       .selectedBadge {
         position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 999px;
         background: rgba(59,128,255,.92); color: #fff; font-size: 11px; font-weight: 700;
       }
+      #cardMenu {
+        position: fixed; display: none; min-width: 150px; padding: 6px; border-radius: 12px;
+        background: rgba(18,23,32,.98); border: 1px solid rgba(255,255,255,.12);
+        box-shadow: 0 18px 48px rgba(0,0,0,.4); z-index: 30;
+      }
+      #cardMenu[data-open="true"] { display: block; }
+      .menuItem {
+        display: block; width: 100%; text-align: left; padding: 9px 10px; border-radius: 9px;
+        background: transparent; color: #eef3fb; font-size: 13px;
+      }
+      .menuItem:hover { background: rgba(255,255,255,.09); transform: none; filter: none; }
+      .menuItem.danger { color: #ffd7d7; }
+      .menuItem.danger:hover { background: rgba(255,92,92,.16); }
       #empty {
         display: none; flex: 1; align-items: center; justify-content: center; text-align: center; color: rgba(232,238,249,.72);
         font-size: 15px; border-radius: 18px; border: 1px dashed rgba(255,255,255,.16); background: rgba(255,255,255,.03);
@@ -87,18 +92,22 @@
       }
       #modal[data-open="true"] { display: flex; }
       .modalPanel {
-        width: min(720px, calc(100vw - 48px)); max-height: calc(100vh - 48px); overflow: auto; border-radius: 20px;
+        width: min(680px, calc(100vw - 48px)); max-height: calc(100vh - 48px); overflow: auto; border-radius: 20px;
         background: linear-gradient(180deg, rgba(16,20,28,.98), rgba(10,13,18,.98)); border: 1px solid rgba(255,255,255,.1);
         box-shadow: 0 28px 80px rgba(0,0,0,.45); padding: 22px; box-sizing: border-box;
       }
-      .modalHeader { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+      .modalHeader { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
       .modalTitle { font-size: 20px; font-weight: 700; }
-      .modalHint { font-size: 13px; color: rgba(232,238,249,.72); line-height: 1.6; }
-      #workflowForm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .modalHint { display: none; }
+      #workflowForm { display: flex; flex-direction: column; gap: 18px; }
+      .formSection {
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 16px; border-radius: 18px;
+        background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08);
+      }
+      .sectionTitle { grid-column: 1 / -1; font-size: 13px; font-weight: 700; color: rgba(242,246,255,.9); }
       .field { display: flex; flex-direction: column; gap: 8px; }
-      .field.full { grid-column: 1 / -1; }
-      .fieldLabel { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
-      .fieldLabel .hint { color: rgba(232,238,249,.58); font-size: 12px; }
+      .field.full, .formSection > .full { grid-column: 1 / -1; }
+      .fieldLabel { font-size: 13px; color: rgba(242,246,255,.86); }
       input {
         width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
         background: rgba(255,255,255,.06); color: #eef3fb; padding: 12px 13px; font-size: 14px; outline: none;
@@ -109,19 +118,19 @@
       .filePickerRow input { flex: 1; }
       .pickerBtn { min-width: 112px; }
       .thumbnailPreview {
-        margin-top: 8px; min-height: 180px; border-radius: 16px; border: 1px solid rgba(255,255,255,.08);
+        margin-top: 2px; min-height: 180px; border-radius: 16px; border: 1px solid rgba(255,255,255,.08);
         background: rgba(255,255,255,.04); overflow: hidden; display: flex; align-items: center; justify-content: center;
       }
       .thumbnailPreview img { width: 100%; max-height: 280px; object-fit: cover; display: none; }
       .thumbnailPreview[data-has-image="true"] img { display: block; }
       .thumbnailPreview[data-has-image="true"] .thumbnailPreviewPlaceholder { display: none; }
-      .modalActions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+      .modalActions { display: flex; justify-content: flex-end; gap: 10px; }
       #saveWorkflowBtn { background: linear-gradient(135deg, #3d85ff, #6b5cff); color: #fff; }
       ::-webkit-scrollbar { width: 10px; height: 10px; }
       ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 999px; }
       ::-webkit-scrollbar-track { background: transparent; }
       @media (max-width: 760px) {
-        #workflowForm { grid-template-columns: 1fr; }
+        .formSection { grid-template-columns: 1fr; }
         .filePickerRow { flex-direction: column; }
       }
     </style>
@@ -140,11 +149,15 @@
         </div>
       </div>
       <div id="content">
-        <div id="tips">这里展示 `runninghub-workflows` 目录中的所有 JSON 工作流。每个 JSON 都有自己的独立配置；左键选择，右键或点击“编辑配置”即可修改图像输入节点、出图节点、字段、缩略图和工作流文件。</div>
+        <div id="tips">这里展示 `runninghub-workflows` 目录中的所有 JSON 工作流。每张卡片只显示缩略图；左键选择，右键可编辑配置或删除工作流。</div>
         <div id="empty">当前还没有工作流。点击右上角“上传工作流”导入新的 JSON。</div>
         <div id="grid"></div>
         <div id="status"></div>
       </div>
+    </div>
+    <div id="cardMenu" data-open="false">
+      <button class="menuItem" type="button" data-menu-action="edit">编辑配置</button>
+      <button class="menuItem danger" type="button" data-menu-action="delete">删除工作流</button>
     </div>
     <div id="modal" data-open="false">
       <div class="modalPanel">
@@ -153,74 +166,54 @@
           <div id="modalHint" class="modalHint"></div>
         </div>
         <form id="workflowForm">
-          <label class="field full" data-mode="import">
-            <div class="fieldLabel">
-              <strong>工作流 JSON 文件</strong>
-              <span class="hint">直接在这个界面选择要导入的工作流 JSON</span>
-            </div>
-            <div class="filePickerRow">
-              <input id="workflowJsonPath" type="text" placeholder="请选择工作流 JSON 文件" readonly />
-              <button id="chooseWorkflowJsonBtn" type="button" class="pickerBtn">选择 JSON</button>
-            </div>
-          </label>
-          <label class="field full">
-            <div class="fieldLabel">
-              <strong>JSON 保存名称</strong>
-              <span class="hint">保存到本地工作流目录时使用，不需要手动加 `.json` 后缀</span>
-            </div>
-            <input id="workflowFileName" type="text" placeholder="例如：my-img2img-workflow" />
-          </label>
-          <label class="field full">
-            <div class="fieldLabel">
-              <strong>工作流显示名称</strong>
-              <span class="hint">显示在工作流选择卡片上的名字</span>
-            </div>
-            <input id="workflowDisplayName" type="text" placeholder="例如：我的图生图工作流" />
-          </label>
-          <label class="field">
-            <div class="fieldLabel">
-              <strong>网页工作流 ID</strong>
-              <span class="hint">对应 RunningHub 网页上的工作流 id</span>
-            </div>
-            <input id="workflowId" type="text" placeholder="例如：2046084739047628802" />
-          </label>
-          <label class="field">
-            <div class="fieldLabel">
-              <strong>输入图像节点 ID</strong>
-              <span class="hint">例如你的图像输入在 `#36`，这里就填 `36`</span>
-            </div>
-            <input id="imageNodeId" type="text" placeholder="36" value="36" />
-          </label>
-          <label class="field full">
-            <div class="fieldLabel">
-              <strong>输入图像字段名</strong>
-              <span class="hint">默认一般是 `image`，如果你的 JSON 不是这个名字可以单独改</span>
-            </div>
-            <input id="imageFieldName" type="text" placeholder="image" value="image" />
-          </label>
-          <label class="field full">
-            <div class="fieldLabel">
-              <strong>出图节点 ID</strong>
-              <span class="hint">例如最终结果由 `#295` 输出，这里就填 `295`；留空则自动识别</span>
-            </div>
-            <input id="outputNodeId" type="text" placeholder="295" />
-          </label>
-          <label class="field full">
-            <div class="fieldLabel">
-              <strong>工作流缩略图</strong>
-              <span class="hint">可选，支持 png / jpg / jpeg / webp / gif</span>
-            </div>
-            <div class="filePickerRow">
-              <input id="workflowThumbnailPath" type="text" placeholder="可选：请选择缩略图文件" readonly />
-              <button id="chooseWorkflowThumbnailBtn" type="button" class="pickerBtn">选择缩略图</button>
-            </div>
-            <div id="thumbnailPreview" class="thumbnailPreview" data-has-image="false">
+          <div class="formSection" data-mode="import">
+            <div class="sectionTitle">JSON 文件</div>
+            <label class="field full">
+              <div class="fieldLabel">工作流 JSON 文件</div>
+              <div class="filePickerRow">
+                <input id="workflowJsonPath" type="text" placeholder="请选择工作流 JSON 文件" readonly />
+                <button id="chooseWorkflowJsonBtn" type="button" class="pickerBtn">选择 JSON</button>
+              </div>
+            </label>
+            <label class="field full">
+              <div class="fieldLabel">JSON 保存名称</div>
+              <input id="workflowFileName" type="text" placeholder="例如：my-img2img-workflow" />
+            </label>
+          </div>
+          <div class="formSection">
+            <div class="sectionTitle">运行参数</div>
+            <label class="field full">
+              <div class="fieldLabel">网页工作流 ID</div>
+              <input id="workflowId" type="text" placeholder="例如：2046084739047628802" />
+            </label>
+            <label class="field">
+              <div class="fieldLabel">输入图像节点 ID</div>
+              <input id="imageNodeId" type="text" placeholder="36" value="36" />
+            </label>
+            <label class="field">
+              <div class="fieldLabel">输入图像字段名</div>
+              <input id="imageFieldName" type="text" placeholder="image" value="image" />
+            </label>
+            <label class="field full">
+              <div class="fieldLabel">出图节点 ID</div>
+              <input id="outputNodeId" type="text" placeholder="可留空" />
+            </label>
+          </div>
+          <div class="formSection">
+            <div class="sectionTitle">缩略图</div>
+            <label class="field full">
+              <div class="fieldLabel">工作流缩略图</div>
+              <div class="filePickerRow">
+                <input id="workflowThumbnailPath" type="text" placeholder="可选：请选择缩略图文件" readonly />
+                <button id="chooseWorkflowThumbnailBtn" type="button" class="pickerBtn">选择缩略图</button>
+              </div>
+            </label>
+            <div id="thumbnailPreview" class="thumbnailPreview full" data-has-image="false">
               <img id="thumbnailPreviewImage" alt="工作流缩略图预览" />
               <div class="thumbnailPreviewPlaceholder">暂无缩略图</div>
             </div>
-          </label>
+          </div>
           <div class="modalActions">
-            <button id="deleteWorkflowBtn" type="button" hidden>删除此工作流</button>
             <button id="cancelWorkflowBtn" type="button">取消</button>
             <button id="saveWorkflowBtn" type="submit">保存</button>
           </div>

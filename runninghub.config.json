@@ -4,7 +4,7 @@
   "createTaskUrl": "https://www.runninghub.cn/task/openapi/create",
   "taskStatusUrl": "https://www.runninghub.cn/task/openapi/status",
   "webhookDetailUrl": "https://www.runninghub.cn/task/openapi/getWebhookDetail",
-  "selectedWorkflowFile": "脸部测试-3_api.json",
+  "selectedWorkflowFile": "动漫转真人Qwen-Image真实感洗图_api-(3).json",
   "captureShortcut": "CommandOrControl+Alt+P",
   "togglePinnedShortcut": "CommandOrControl+Alt+K",
   "defaultClickThrough": false,
