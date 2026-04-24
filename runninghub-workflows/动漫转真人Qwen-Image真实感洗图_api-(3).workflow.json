@@ -1,9 +1,0 @@
-{
-  "fileName": "动漫转真人Qwen-Image真实感洗图_api-(3).json",
-  "displayName": "动漫转真人Qwen-Image真实感洗图_api (3)",
-  "workflowId": "2047246583649013761",
-  "imageNodeId": "78",
-  "imageFieldName": "image",
-  "outputNodeId": "295",
-  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
-}

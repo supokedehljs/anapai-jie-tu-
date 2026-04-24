@@ -1,0 +1,9 @@
+{
+  "fileName": "测试222_api-(2).json",
+  "displayName": "测试222_api-(2)",
+  "workflowId": "2047607457131798530",
+  "imageNodeId": "36",
+  "imageFieldName": "image",
+  "outputNodeId": "45",
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
+}

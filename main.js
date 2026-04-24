@@ -234,6 +234,7 @@ function getDefaultAppSettings() {
     uploadUrl: "https://www.runninghub.cn/task/openapi/upload",
     createTaskUrl: "https://www.runninghub.cn/task/openapi/create",
     taskStatusUrl: "https://www.runninghub.cn/task/openapi/status",
+    taskOutputsUrl: "https://www.runninghub.ai/task/openapi/outputs",
     webhookDetailUrl: "https://www.runninghub.cn/task/openapi/getWebhookDetail",
     selectedWorkflowFile: "",
     captureShortcut: "CommandOrControl+Shift+A",
@@ -372,6 +373,7 @@ function getRunningHubConfig() {
       uploadUrl: String(parsed.uploadUrl || defaults.uploadUrl),
       createTaskUrl: String(parsed.createTaskUrl || defaults.createTaskUrl),
       taskStatusUrl: String(parsed.taskStatusUrl || defaults.taskStatusUrl),
+      taskOutputsUrl: String(parsed.taskOutputsUrl || defaults.taskOutputsUrl),
       webhookDetailUrl: String(parsed.webhookDetailUrl || defaults.webhookDetailUrl),
       selectedWorkflowFile: String(parsed.selectedWorkflowFile || defaults.selectedWorkflowFile),
       captureShortcut: String(parsed.captureShortcut || defaults.captureShortcut),
@@ -831,6 +833,44 @@ function looksLikeImageRef(value) {
   );
 }
 
+function extractRunningHubTargetBaseUrl(wsUrl = "") {
+  try {
+    const parsed = new URL(String(wsUrl || ""));
+    const target = parsed.searchParams.get("target") || "";
+    return /^https?:\/\//i.test(target) ? target.replace(/\/+$/, "") : "";
+  } catch (_error) {
+    return "";
+  }
+}
+
+function buildComfyViewImageUrl(imageInfo, baseUrl = "") {
+  if (!imageInfo || typeof imageInfo !== "object") return "";
+  const filename = String(imageInfo.filename || imageInfo.fileName || "").trim();
+  if (!filename || !/\.(png|jpg|jpeg|webp|gif)$/i.test(filename)) return "";
+  const normalizedBaseUrl = String(baseUrl || "").trim().replace(/\/+$/, "");
+  if (!normalizedBaseUrl) return filename;
+  const subfolder = String(imageInfo.subfolder || "").trim();
+  const type = String(imageInfo.type || imageInfo.fileType || "output").trim() || "output";
+  const params = new URLSearchParams({ filename, type });
+  if (subfolder) params.set("subfolder", subfolder);
+  return `${normalizedBaseUrl}/view?${params.toString()}`;
+}
+
+function summarizeRunningHubWsMessage(parsed, imageUrl = "") {
+  if (!parsed || typeof parsed !== "object") return { messageType: typeof parsed, imageUrl };
+  const data = parsed.data && typeof parsed.data === "object" ? parsed.data : parsed;
+  const output = data.output && typeof data.output === "object" ? data.output : null;
+  return {
+    type: parsed.type || data.type || "",
+    node: data.node || data.display_node || data.node_id || data.nodeId || "",
+    nodeType: data.node_type || data.nodeType || "",
+    outputKeys: output ? Object.keys(output) : [],
+    imageCount: output && Array.isArray(output.images) ? output.images.length : 0,
+    firstImage: output && Array.isArray(output.images) ? summarizeForLog(output.images[0]) : "",
+    imageUrl,
+  };
+}
+
 function getResultNodeId(data) {
   if (!data || typeof data !== "object") return "";
   return String(
@@ -844,20 +884,22 @@ function getResultNodeId(data) {
   ).trim().replace(/^#/, "");
 }
 
-function pickResultImageUrl(data, preferredNodeId = "") {
+function pickResultImageUrl(data, preferredNodeId = "", options = {}) {
   if (!data) return "";
   const normalizedNodeId = String(preferredNodeId || "").trim().replace(/^#/, "");
+  const strictNodeMatch = options.strictNodeMatch === true;
+  const baseUrl = String(options.baseUrl || "").trim();
   if (normalizedNodeId && typeof data === "object") {
     const currentNodeId = getResultNodeId(data);
     if (currentNodeId === normalizedNodeId) {
       const nodePayload =
         data.output || data.outputs || data.result || data.results || data.data || data;
-      const preferredUrl = pickResultImageUrl(nodePayload, "");
+      const preferredUrl = pickResultImageUrl(nodePayload, "", options);
       if (preferredUrl) {
         return preferredUrl;
       }
     }
-    if (currentNodeId && currentNodeId !== normalizedNodeId) {
+    if (strictNodeMatch && currentNodeId && currentNodeId !== normalizedNodeId) {
       return "";
     }
     const preferredNodeData =
@@ -867,7 +909,7 @@ function pickResultImageUrl(data, preferredNodeId = "") {
       (data && typeof data === "object" && data.results && data.results[normalizedNodeId]) ||
       null;
     if (preferredNodeData) {
-      const preferredUrl = pickResultImageUrl(preferredNodeData, "");
+      const preferredUrl = pickResultImageUrl(preferredNodeData, "", options);
       if (preferredUrl) {
         return preferredUrl;
       }
@@ -879,7 +921,7 @@ function pickResultImageUrl(data, preferredNodeId = "") {
         return nodeId === normalizedNodeId;
       });
       if (matchedNode) {
-        const preferredUrl = pickResultImageUrl(matchedNode, "");
+        const preferredUrl = pickResultImageUrl(matchedNode, "", options);
         if (preferredUrl) {
           return preferredUrl;
         }
@@ -891,7 +933,7 @@ function pickResultImageUrl(data, preferredNodeId = "") {
   }
   if (Array.isArray(data)) {
     for (const item of data) {
-      const url = pickResultImageUrl(item, normalizedNodeId);
+      const url = pickResultImageUrl(item, normalizedNodeId, options);
       if (url) return url;
     }
     return "";
@@ -914,15 +956,19 @@ function pickResultImageUrl(data, preferredNodeId = "") {
         return data[key].trim();
       }
     }
+    const comfyImageUrl = buildComfyViewImageUrl(data, baseUrl);
+    if (comfyImageUrl) {
+      return comfyImageUrl;
+    }
     const arrayKeys = ["results", "images", "outputs", "output", "fileList", "data"];
     for (const key of arrayKeys) {
       if (key in data) {
-        const url = pickResultImageUrl(data[key], normalizedNodeId);
+        const url = pickResultImageUrl(data[key], normalizedNodeId, options);
         if (url) return url;
       }
     }
     for (const value of Object.values(data)) {
-      const url = pickResultImageUrl(value, normalizedNodeId);
+      const url = pickResultImageUrl(value, normalizedNodeId, options);
       if (url) return url;
     }
   }
@@ -1032,8 +1078,9 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
   let latestExecutionError = null;
   let settled = false;
   let timeoutId = null;
+  const baseUrl = extractRunningHubTargetBaseUrl(wsUrl);
 
-  const resultPromise = new Promise((resolve) => {
+  new Promise((resolve) => {
     if (!wsUrl || typeof WebSocket !== "function") {
       resolve("");
       return;
@@ -1084,8 +1131,12 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
         } catch (_error) {
           parsed = text;
         }
-        const imageUrl = pickResultImageUrl(parsed, outputNodeId);
+        const imageUrl = pickResultImageUrl(parsed, outputNodeId, { baseUrl });
         const executionError = pickRunningHubExecutionError(parsed);
+        logDebug(
+          "runninghub websocket parsed",
+          JSON.stringify(summarizeRunningHubWsMessage(parsed, imageUrl)).slice(0, 2000)
+        );
         if (executionError) {
           latestExecutionError = executionError;
           logRunningHubFailure("websocket.execution_error", {
@@ -1126,10 +1177,9 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
     async waitForImage(timeoutMs = 8000) {
       const immediate = latestImageUrl;
       if (immediate) return immediate;
-      return Promise.race([
-        resultPromise,
-        new Promise((resolve) => setTimeout(() => resolve(latestImageUrl || ""), timeoutMs)),
-      ]);
+      return new Promise((resolve) =>
+        setTimeout(() => resolve(latestImageUrl || ""), timeoutMs)
+      );
     },
     stop() {
       if (timeoutId) clearTimeout(timeoutId);
@@ -1162,6 +1212,28 @@ async function queryRunningHubTaskStatus(config, taskId) {
   }
   const json = await response.json();
   logDebug("runninghub status response", JSON.stringify(json).slice(0, 2000));
+  return getRunningHubResultData(json);
+}
+
+async function queryRunningHubTaskOutputs(config, taskId) {
+  const outputsUrl = String(config.taskOutputsUrl || "https://www.runninghub.ai/task/openapi/outputs");
+  const response = await fetch(outputsUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": config.apiKey,
+      Authorization: `Bearer ${config.apiKey}`,
+    },
+    body: JSON.stringify({
+      apiKey: config.apiKey,
+      taskId,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`查询任务输出失败: HTTP ${response.status}`);
+  }
+  const json = await response.json();
+  logDebug("runninghub outputs response", JSON.stringify(json).slice(0, 4000));
   return getRunningHubResultData(json);
 }
 
@@ -1241,46 +1313,81 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
         return imageUrl;
       }
       if (status === "SUCCESS" && !imageUrl) {
-        if (wsWatcher) {
+        const successWaitRounds = 24;
+        for (let round = 0; round < successWaitRounds; round += 1) {
+          if (wsWatcher) {
+            if (onProgress) {
+              onProgress(`状态已成功，正在等待任务结果通道返回图片...（${round + 1}/${successWaitRounds}）`);
+            }
+            const wsImageUrl = await wsWatcher.waitForImage(2500);
+            if (wsImageUrl) {
+              return wsImageUrl;
+            }
+          }
           if (onProgress) {
-            onProgress("状态已成功，正在等待任务结果通道返回图片...");
+            onProgress(`状态接口未返回结果图，正在查询任务输出...（${round + 1}/${successWaitRounds}）`);
           }
-          const wsImageUrl = await wsWatcher.waitForImage(12000);
-          if (wsImageUrl) {
-            return wsImageUrl;
+          try {
+            const outputsData = await queryRunningHubTaskOutputs(config, taskId);
+            const outputsExecutionError = pickRunningHubExecutionError(outputsData);
+            const outputsImageUrl = pickResultImageUrl(
+              outputsData,
+              workflow && workflow.outputNodeId,
+              { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || "") }
+            );
+            if (outputsExecutionError) {
+              logRunningHubFailure("outputs.execution_error", {
+                taskId,
+                workflowName: workflow && workflow.name,
+                executionError: outputsExecutionError,
+                outputsData,
+              });
+              throw new Error(formatRunningHubExecutionError(outputsExecutionError));
+            }
+            if (outputsImageUrl) {
+              return outputsImageUrl;
+            }
+            logDebug(
+              "runninghub outputs no image",
+              JSON.stringify(outputsData).slice(0, 2000)
+            );
+          } catch (error) {
+            logDebug(
+              "runninghub outputs failed",
+              error && error.message ? error.message : String(error)
+            );
           }
-        }
-        if (onProgress) {
-          onProgress("状态接口未返回结果图，正在尝试 webhook 详情...");
-        }
-        try {
-          const webhookData = await queryRunningHubWebhookDetail(config, taskId);
-          const webhookExecutionError = pickRunningHubExecutionError(webhookData);
-          const webhookImageUrl = pickResultImageUrl(
-            webhookData,
-            workflow && workflow.outputNodeId
-          );
-          if (webhookExecutionError) {
-            logRunningHubFailure("webhook.execution_error", {
-              taskId,
-              workflowName: workflow && workflow.name,
-              executionError: webhookExecutionError,
+          try {
+            const webhookData = await queryRunningHubWebhookDetail(config, taskId);
+            const webhookExecutionError = pickRunningHubExecutionError(webhookData);
+            const webhookImageUrl = pickResultImageUrl(
               webhookData,
-            });
-            throw new Error(formatRunningHubExecutionError(webhookExecutionError));
+              workflow && workflow.outputNodeId,
+              { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || "") }
+            );
+            if (webhookExecutionError) {
+              logRunningHubFailure("webhook.execution_error", {
+                taskId,
+                workflowName: workflow && workflow.name,
+                executionError: webhookExecutionError,
+                webhookData,
+              });
+              throw new Error(formatRunningHubExecutionError(webhookExecutionError));
+            }
+            if (webhookImageUrl) {
+              return webhookImageUrl;
+            }
+            logDebug(
+              "runninghub webhook detail no image",
+              JSON.stringify(webhookData).slice(0, 2000)
+            );
+          } catch (error) {
+            logDebug(
+              "runninghub webhook detail failed",
+              error && error.message ? error.message : String(error)
+            );
           }
-          if (webhookImageUrl) {
-            return webhookImageUrl;
-          }
-          logDebug(
-            "runninghub webhook detail no image",
-            JSON.stringify(webhookData).slice(0, 2000)
-          );
-        } catch (error) {
-          logDebug(
-            "runninghub webhook detail failed",
-            error && error.message ? error.message : String(error)
-          );
+          await new Promise((resolve) => setTimeout(resolve, 2500));
         }
         logRunningHubFailure("taskStatus.success_without_image", {
           taskId,
@@ -1318,6 +1425,7 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
 }
 
 async function imageUrlToDataUrl(imageUrl) {
+  logDebug("runninghub download image ref", String(imageUrl || "").slice(0, 1000));
   if (!looksLikeImageRef(imageUrl)) {
     logRunningHubFailure("download.invalid_image_ref", { imageUrl });
     throw new Error(`返回的结果不是可下载图片地址: ${imageUrl}`);

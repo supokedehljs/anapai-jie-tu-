@@ -1,7 +1,7 @@
 {
   "3": {
     "inputs": {
-      "seed": 970012276917815,
+      "seed": 136281565607638,
       "steps": 8,
       "cfg": 1,
       "sampler_name": "res_2m",
@@ -314,7 +314,7 @@
       "max_new_tokens": 2048,
       "min_pixels": 200704,
       "max_pixels": 1003520,
-      "seed": 1301,
+      "seed": 114,
       "attention": "eager",
       "image": [
         "286",
@@ -426,7 +426,7 @@
   },
   "293": {
     "inputs": {
-      "seed": 2162527847,
+      "seed": 4145321398,
       "resolution": 2048,
       "max_resolution": 3800,
       "batch_size": 5,
@@ -471,7 +471,7 @@
   },
   "321": {
     "inputs": {
-      "seed": 174462573430079,
+      "seed": 62518710394149,
       "steps": 5,
       "cfg": 1,
       "sampler_name": "dpmpp_2m_sde",
@@ -559,7 +559,7 @@
   },
   "332": {
     "inputs": {
-      "text": "1girl, solo, looking at viewer, blush, short hair, shirt, black hair, long sleeves, green eyes, white shirt, upper body, tears, blurry, sweater, sleeves past wrists, shadow, depth of field, crying, tearing up, crying with eyes open, blurry foreground, covering own mouth, covered mouth, grey sweater",
+      "text": "1girl, solo, long hair, breasts, looking at viewer, blush, smile, open mouth, large breasts, hair ornament, thighhighs, holding, animal ears, ribbon, cleavage, bare shoulders, twintails, tail, full body, swimsuit, pink hair, hair ribbon, multicolored hair, heart, thighs, bikini, frills, boots, lying, teeth, detached sleeves, shoes, choker, tongue, indoors, cat ears, official alternate costume, tongue out, pink eyes, black footwear, nail polish, streaked hair, feet, character name, red ribbon, fingernails, legs, cat tail, maid, toes, maid headdress, thigh strap, neck ribbon, detached collar, upper teeth only, black choker, bell, skindentation, bed, copyright name, black bikini, border, on bed, soles, fangs, hair intakes, cat girl, on stomach, black nails, fishnets, bandaid, jingle bell, drinking glass, alcohol, frilled bikini, long fingernails, black sleeves, wand, pulled by self, lamp, wine glass, fishnet thighhighs, bedroom, bandaid on leg, single shoe, holding wand, wine, skull hair ornament, feet up, strap pull, nintendo switch, cat hair ornament, unconventional maid, maid bikini, heart o-ring, holding ribbon, frilled headwear, star wand",
       "anything": [
         "333",
         0
@@ -578,7 +578,6 @@
       "replace_underscore": true,
       "trailing_comma": false,
       "exclude_tags": "",
-      "tags": "1girl, solo, looking at viewer, blush, short hair, shirt, black hair, long sleeves, green eyes, white shirt, upper body, tears, blurry, sweater, sleeves past wrists, shadow, depth of field, crying, tearing up, crying with eyes open, blurry foreground, covering own mouth, covered mouth, grey sweater",
       "image": [
         "243",
         0
