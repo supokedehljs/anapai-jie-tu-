@@ -4,5 +4,6 @@
   "workflowId": "2047168766164869121",
   "imageNodeId": "36",
   "imageFieldName": "image",
+  "outputNodeId": "8",
   "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
 }

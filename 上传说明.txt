@@ -1,4 +1,4 @@
-项目上传说明
+项目上传说明（不上传 node_modules 版）
 
 GitHub 仓库地址：
 https://github.com/supokedehljs/anapai-jie-tu-.git
@@ -6,46 +6,71 @@ https://github.com/supokedehljs/anapai-jie-tu-.git
 本地项目目录：
 D:\OneDrive\cursor_workspace\SnapAI-jie-tu
 
-以后这个软件要上传到哪里：
+固定上传目标：
 - 远程仓库名：origin
 - 远程地址：https://github.com/supokedehljs/anapai-jie-tu-.git
 - 分支：main
 
-首次已经完成的内容：
+当前规则：
+- 这个项目以后默认上传当前项目里改过的、新增的、之前遗漏的内容到 GitHub
+- 不上传 node_modules 文件夹
+- node_modules 已写入 .gitignore
+- 除 node_modules 外，其它项目文件按需一起提交并推送
+- 下次更新时，默认理解为：当前项目里改过的、新增的、之前遗漏的内容，都一起提交并推送，但跳过 node_modules
+
+仓库当前基础状态：
 - 已初始化 git
 - 已连接远程仓库 origin
 - 已推送到 main 分支
+- 最近一次处理时，曾因为尝试上传 node_modules 和 Electron 大文件导致 GitHub 推送超时，所以以后不要上传 node_modules
 
-以后更新代码后，上传步骤：
-1. 打开终端，进入项目目录
-2. 执行以下命令：
+以后更新代码后的标准上传步骤：
+1. 打开终端，进入项目目录：
+   D:\OneDrive\cursor_workspace\SnapAI-jie-tu
+2. 查看当前状态：
+   git status
+3. 确认 node_modules 没有进入待提交列表：
+   git status --short
+4. 将除 node_modules 外的全部文件加入提交：
+   git add .
+5. 提交本次修改：
+   git commit -m "写一句这次修改的说明"
+6. 推送到 GitHub：
+   git push origin main
 
-git add .
-git commit -m "写一句这次修改的说明"
-git push origin main
+推荐提交说明写法：
+- "优化多个置顶图片功能"
+- "修复贴图切换按钮样式"
+- "更新 RunningHub 工作流配置"
+- "上传大致完善版本"
+- "同步项目文件到 GitHub"
 
-常用查看命令：
+常用检查命令：
 查看当前远程仓库地址：
-git remote -v
+   git remote -v
+
+查看当前分支：
+   git branch --show-current
 
 查看当前状态：
-git status
+   git status
 
-如果提交时报用户名/邮箱未配置，可执行：
-git config user.name "supokedehljs"
-git config user.email "supokedehljs@gmail.com"
+查看本次修改摘要：
+   git diff --stat
+
+查看是否有被忽略的 node_modules：
+   git status --short --ignored
+
+如果提交时报用户名或邮箱未配置，可执行：
+   git config user.name "supokedehljs"
+   git config user.email "supokedehljs@gmail.com"
 
 当前仓库使用的信息：
 - 用户名：supokedehljs
 - 邮箱：supokedehljs@gmail.com
 
-注意这些文件不要上传：
-- node_modules/
-- runninghub.config.json
-- snapai-debug.log
-- 各种 .log 文件
-
-原因：
-- node_modules 太大
-- runninghub.config.json 里可能有 apiKey
-- 日志文件没有必要上传
+以后执行上传时的默认理解：
+- 上传项目改动内容
+- 不上传 node_modules
+- 不把 node_modules 从 .gitignore 中移除
+- 如果 node_modules 出现在待提交列表，应先处理 .gitignore 或取消暂存，再提交

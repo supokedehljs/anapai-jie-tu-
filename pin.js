@@ -1,9 +1,13 @@
 const img = document.getElementById("img");
 const stage = document.getElementById("stage");
+const frame = document.getElementById("frame");
 const saveBtn = document.getElementById("saveBtn");
 const runningStatus = document.getElementById("runningStatus");
+const tabsBar = document.getElementById("tabsBar");
 
 let currentDataUrl = "";
+let currentImages = [];
+let activeImageIndex = 0;
 let zoom = 1;
 let baseImageWidth = 0;
 let baseImageHeight = 0;
@@ -41,6 +45,83 @@ async function setZoom(nextZoom) {
   await applyZoom();
 }
 
+function updateTabSelection() {
+  const tabElements = tabsBar.querySelectorAll(".tab");
+  tabElements.forEach((tabElement) => {
+    const tabIndex = Number(tabElement.dataset.index || -1);
+    const isActive = tabIndex === activeImageIndex;
+    tabElement.classList.toggle("active", isActive);
+    tabElement.setAttribute("aria-selected", String(isActive));
+  });
+}
+
+async function switchToImage(index, options = {}) {
+  const nextIndex = Math.max(0, Math.min(currentImages.length - 1, Number(index) || 0));
+  if (!currentImages.length || !currentImages[nextIndex]) return;
+  activeImageIndex = nextIndex;
+  currentDataUrl = currentImages[nextIndex];
+  zoom = 1;
+  baseImageWidth = 0;
+  baseImageHeight = 0;
+  updateTabSelection();
+  img.src = currentDataUrl;
+  if (!options.skipSync) {
+    await window.api.switchPinImage(nextIndex);
+  }
+}
+
+function renderTabs() {
+  tabsBar.innerHTML = "";
+  const shouldShowTabs = currentImages.length > 1;
+  document.body.classList.toggle("has-tabs", shouldShowTabs);
+  if (!shouldShowTabs) return;
+
+  currentImages.forEach((_image, index) => {
+    const tab = document.createElement("button");
+    tab.type = "button";
+    tab.className = "tab";
+    tab.dataset.index = String(index);
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-label", `图片 ${index + 1}`);
+    tab.textContent = String(index + 1);
+    tab.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      requestSelection(event);
+      await switchToImage(index);
+    });
+    tabsBar.appendChild(tab);
+  });
+
+  updateTabSelection();
+}
+
+function applyImagePayload(payload) {
+  if (typeof payload === "string") {
+    currentImages = payload ? [payload] : [];
+    activeImageIndex = 0;
+  } else if (payload && typeof payload === "object") {
+    currentImages = Array.isArray(payload.images)
+      ? payload.images.filter((item) => typeof item === "string" && item)
+      : [];
+    activeImageIndex = Math.max(
+      0,
+      Math.min(currentImages.length - 1, Number(payload.activeIndex) || 0)
+    );
+  } else {
+    currentImages = [];
+    activeImageIndex = 0;
+  }
+
+  renderTabs();
+
+  if (!currentImages.length) {
+    window.api.reportError("pin:onSetImage", "invalid image payload");
+    return;
+  }
+
+  switchToImage(activeImageIndex, { skipSync: true });
+}
+
 function shouldStartDrag(event) {
   return event.button === 0 && !event.target.closest("button");
 }
@@ -52,7 +133,7 @@ function startDrag(event) {
   dragState = {
     pointerId: event.pointerId,
   };
-  stage.setPointerCapture(event.pointerId);
+  frame.setPointerCapture(event.pointerId);
   window.api.startPinDrag({ screenX: event.screenX, screenY: event.screenY });
 }
 
@@ -64,24 +145,15 @@ function moveDrag(event) {
 function endDrag(event) {
   if (!dragState || dragState.pointerId !== event.pointerId) return;
   try {
-    stage.releasePointerCapture(event.pointerId);
+    frame.releasePointerCapture(event.pointerId);
   } catch (_error) {
-    // Ignore pointer capture release errors.
   }
   dragState = null;
   window.api.endPinDrag();
 }
 
-window.api.onSetImage((dataUrl) => {
-  if (!dataUrl || typeof dataUrl !== "string") {
-    window.api.reportError("pin:onSetImage", "invalid dataUrl");
-    return;
-  }
-  currentDataUrl = dataUrl;
-  zoom = 1;
-  baseImageWidth = 0;
-  baseImageHeight = 0;
-  img.src = dataUrl;
+window.api.onSetImage((payload) => {
+  applyImagePayload(payload);
 });
 
 saveBtn.addEventListener("click", async () => {
@@ -103,7 +175,7 @@ saveBtn.addEventListener("click", async () => {
   }
 });
 
-stage.addEventListener("dblclick", () => {
+frame.addEventListener("dblclick", () => {
   window.api.closePin();
 });
 
@@ -112,14 +184,14 @@ stage.addEventListener("click", (event) => {
   requestSelection(event);
 });
 
-stage.addEventListener("contextmenu", (event) => {
+frame.addEventListener("contextmenu", (event) => {
   event.preventDefault();
   requestSelection(event);
   if (!currentDataUrl) return;
   window.api.showPinContextMenu(currentDataUrl);
 });
 
-stage.addEventListener(
+frame.addEventListener(
   "wheel",
   async (event) => {
     event.preventDefault();
@@ -129,10 +201,10 @@ stage.addEventListener(
   { passive: false }
 );
 
-stage.addEventListener("pointerdown", startDrag);
-stage.addEventListener("pointermove", moveDrag);
-stage.addEventListener("pointerup", endDrag);
-stage.addEventListener("pointercancel", endDrag);
+frame.addEventListener("pointerdown", startDrag);
+frame.addEventListener("pointermove", moveDrag);
+frame.addEventListener("pointerup", endDrag);
+frame.addEventListener("pointercancel", endDrag);
 
 img.addEventListener("load", async () => {
   baseImageWidth = img.naturalWidth || img.width || 0;
@@ -160,13 +232,26 @@ window.api.onPinWindowMeta((payload) => {
   pinWindowId = String(payload.id || "");
 });
 
-window.addEventListener("keydown", (event) => {
+window.addEventListener("keydown", async (event) => {
   if (event.key === " " || event.code === "Space") {
     event.preventDefault();
     window.api.openWorkflowSelector();
+    return;
   }
   if ((event.key === "Enter" || event.key === "NumpadEnter") && pinWindowId) {
     event.preventDefault();
     requestSelection(event);
+    return;
+  }
+  if (event.key === "ArrowLeft" && currentImages.length > 1) {
+    event.preventDefault();
+    requestSelection(event);
+    await switchToImage(activeImageIndex - 1);
+    return;
+  }
+  if (event.key === "ArrowRight" && currentImages.length > 1) {
+    event.preventDefault();
+    requestSelection(event);
+    await switchToImage(activeImageIndex + 1);
   }
 });

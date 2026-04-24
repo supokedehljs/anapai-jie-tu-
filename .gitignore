@@ -1,6 +1,1 @@
 node_modules/
-*.log
-snapai-debug.log
-runninghub.config.json
-.DS_Store
-Thumbs.db

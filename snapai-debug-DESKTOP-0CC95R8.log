@@ -1,0 +1,1295 @@
+[2026-04-21T06:02:04.007Z] app ready
+[2026-04-21T06:05:07.951Z] app ready
+[2026-04-21T06:05:09.558Z] startCapture called
+[2026-04-21T06:05:09.924Z] renderer-error | capture:init: Cannot read properties of undefined (reading 'getSources')
+[2026-04-21T06:05:17.184Z] captureWindow closed
+[2026-04-21T06:07:34.708Z] app ready
+[2026-04-21T06:15:12.712Z] app ready
+[2026-04-21T06:15:15.543Z] startCapture called
+[2026-04-21T06:15:15.880Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:15:16.446Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:15:21.025Z] capture-complete received | dataUrlLength=7354
+[2026-04-21T06:15:21.026Z] openPinnedImage called | dataUrlLength=7354
+[2026-04-21T06:15:21.241Z] captureWindow closed
+[2026-04-21T06:15:21.554Z] pin did-finish-load, sending image
+[2026-04-21T06:15:21.555Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:20:52.260Z] pinWindow closed
+[2026-04-21T06:20:56.445Z] app ready
+[2026-04-21T06:20:57.940Z] startCapture called
+[2026-04-21T06:20:58.120Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:20:58.301Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:21:00.066Z] capture-complete received | dataUrlLength=47910
+[2026-04-21T06:21:00.067Z] openPinnedImage called | dataUrlLength=47910
+[2026-04-21T06:21:00.119Z] captureWindow closed
+[2026-04-21T06:21:00.328Z] pin did-finish-load, sending image
+[2026-04-21T06:21:00.365Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:21:05.622Z] pinWindow closed
+[2026-04-21T06:21:07.867Z] startCapture called
+[2026-04-21T06:21:07.970Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:21:08.125Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:21:11.044Z] capture-complete received | dataUrlLength=88746
+[2026-04-21T06:21:11.044Z] openPinnedImage called | dataUrlLength=88746
+[2026-04-21T06:21:11.090Z] captureWindow closed
+[2026-04-21T06:21:11.163Z] pin did-finish-load, sending image
+[2026-04-21T06:21:11.165Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:23:41.455Z] pinWindow closed
+[2026-04-21T06:23:44.808Z] app ready
+[2026-04-21T06:23:46.313Z] startCapture called
+[2026-04-21T06:23:46.468Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:23:46.658Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:23:48.867Z] capture-complete received | dataUrlLength=97690
+[2026-04-21T06:23:48.868Z] openPinnedImage called | dataUrlLength=97690
+[2026-04-21T06:23:48.934Z] captureWindow closed
+[2026-04-21T06:23:49.029Z] pin did-finish-load, sending image
+[2026-04-21T06:23:49.031Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:24:06.407Z] pinWindow closed
+[2026-04-21T06:24:08.959Z] startCapture called
+[2026-04-21T06:24:09.074Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:24:09.252Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:24:17.914Z] startCapture called
+[2026-04-21T06:24:17.915Z] captureWindow already exists, focusing
+[2026-04-21T06:24:23.237Z] capture-complete received | dataUrlLength=82518
+[2026-04-21T06:24:23.238Z] openPinnedImage called | dataUrlLength=82518
+[2026-04-21T06:24:23.296Z] captureWindow closed
+[2026-04-21T06:24:23.388Z] pin did-finish-load, sending image
+[2026-04-21T06:24:23.390Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:27:06.650Z] pinWindow closed
+[2026-04-21T06:27:09.888Z] app ready
+[2026-04-21T06:27:12.658Z] startCapture called
+[2026-04-21T06:27:12.813Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:27:12.999Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:27:15.369Z] capture-complete received | dataUrlLength=74838
+[2026-04-21T06:27:15.370Z] openPinnedImage called | dataUrlLength=74838
+[2026-04-21T06:27:15.422Z] captureWindow closed
+[2026-04-21T06:27:15.509Z] pin did-finish-load, sending image
+[2026-04-21T06:27:15.517Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:39:55.343Z] pinWindow closed
+[2026-04-21T06:51:34.570Z] app ready
+[2026-04-21T06:51:37.076Z] startCapture called
+[2026-04-21T06:51:38.824Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:51:39.084Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:51:44.148Z] captureWindow closed
+[2026-04-21T06:51:47.068Z] startCapture called
+[2026-04-21T06:51:47.450Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:51:47.599Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:51:51.785Z] capture-complete received | dataUrlLength=1142994
+[2026-04-21T06:51:51.786Z] openPinnedImage called | dataUrlLength=1142994
+[2026-04-21T06:51:51.835Z] captureWindow closed
+[2026-04-21T06:51:52.368Z] pin did-finish-load, sending image
+[2026-04-21T06:51:52.400Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:54:20.882Z] pinWindow closed
+[2026-04-21T06:54:26.766Z] app ready
+[2026-04-21T06:54:29.745Z] startCapture called
+[2026-04-21T06:54:29.891Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:54:30.073Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:54:31.908Z] captureWindow closed
+[2026-04-21T06:54:35.018Z] startCapture called
+[2026-04-21T06:54:35.138Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T06:54:35.297Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T06:54:39.541Z] capture-complete received | dataUrlLength=1232742
+[2026-04-21T06:54:39.542Z] openPinnedImage called | dataUrlLength=1232742
+[2026-04-21T06:54:39.602Z] captureWindow closed
+[2026-04-21T06:54:39.722Z] pin did-finish-load, sending image
+[2026-04-21T06:54:39.824Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:00:42.137Z] pinWindow closed
+[2026-04-21T07:00:49.781Z] app ready
+[2026-04-21T07:00:51.508Z] startCapture called
+[2026-04-21T07:00:51.677Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T07:00:51.857Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:00:56.605Z] capture-complete received | dataUrlLength=1643294
+[2026-04-21T07:00:56.606Z] openPinnedImage called | dataUrlLength=1643294
+[2026-04-21T07:00:56.656Z] captureWindow closed
+[2026-04-21T07:00:56.770Z] pin did-finish-load, sending image
+[2026-04-21T07:00:56.783Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:01:05.885Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/c45d5ec5b6c2cbed0662aa4594b94d388ae235d5c12d3c6cf57b1b0e56738a19.png","fileType":"input"}}
+[2026-04-21T07:01:41.201Z] pinWindow closed
+[2026-04-21T07:03:45.453Z] app ready
+[2026-04-21T07:03:50.771Z] startCapture called
+[2026-04-21T07:03:50.915Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T07:03:51.130Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:03:54.958Z] capture-complete received | dataUrlLength=1625846
+[2026-04-21T07:03:54.959Z] openPinnedImage called | dataUrlLength=1625846
+[2026-04-21T07:03:55.024Z] captureWindow closed
+[2026-04-21T07:03:55.104Z] pin did-finish-load, sending image
+[2026-04-21T07:03:55.123Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:04:00.226Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/1f949d1af9ad515057683f16ae4eb0c66bb573cf385dc814fe218aa54b3f9800.png","fileType":"input"}}
+[2026-04-21T07:04:04.623Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/1f949d1af9ad515057683f16ae4eb0c66bb573cf385dc814fe218aa54b3f9800.png","fileType":"input"}}
+[2026-04-21T07:04:09.657Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/1f949d1af9ad515057683f16ae4eb0c66bb573cf385dc814fe218aa54b3f9800.png","fileType":"input"}}
+[2026-04-21T07:04:13.609Z] pinWindow closed
+[2026-04-21T07:19:33.715Z] app ready
+[2026-04-21T07:19:36.419Z] startCapture called
+[2026-04-21T07:19:36.568Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T07:19:36.790Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:19:41.308Z] capture-complete received | dataUrlLength=1579078
+[2026-04-21T07:19:41.308Z] openPinnedImage called | dataUrlLength=1579078
+[2026-04-21T07:19:41.368Z] captureWindow closed
+[2026-04-21T07:19:41.507Z] pin did-finish-load, sending image
+[2026-04-21T07:19:41.518Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:19:47.608Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/85db371be83f19718b78282ca4c418c818ee93e798af6fdf724ee35b4c762b93.png","fileType":"input"}}
+[2026-04-21T07:24:07.662Z] pinWindow closed
+[2026-04-21T07:25:26.458Z] app ready
+[2026-04-21T07:25:28.871Z] startCapture called
+[2026-04-21T07:25:29.032Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T07:25:29.227Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:25:33.389Z] capture-complete received | dataUrlLength=1391290
+[2026-04-21T07:25:33.390Z] openPinnedImage called | dataUrlLength=1391290
+[2026-04-21T07:25:33.451Z] captureWindow closed
+[2026-04-21T07:25:33.540Z] pin did-finish-load, sending image
+[2026-04-21T07:25:33.547Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:25:36.035Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/46a4582ad2de1f87b5c9c5f7e6ee280f1854046eecfd544f914af7c3b3f75a64.png","fileType":"input"}}
+[2026-04-21T07:25:36.202Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.176.240.38&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNjExMzg1MTUsInRzIjoxNzc2NzU2MzM4NTE1LCJzaWduIjoiMDVhMGFhMTM1OTFhYzgyZDc1Y2E0YjQ1ZWQwOTc3MGYifQ%3D%3D&target=http://cdhn.runninghub.cn:15001","taskId":"2046490527704158210","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T07:25:36.256Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:38.813Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:41.419Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:44.012Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:46.578Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:49.151Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:51.727Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:54.289Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:56.861Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:25:59.443Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:02.000Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:04.568Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:07.177Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:09.741Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:12.311Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:14.874Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:17.450Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:20.062Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:22.614Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:25.211Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:27.773Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:30.337Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:32.897Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:35.492Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:38.057Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:40.612Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:43.269Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:45.871Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:48.436Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:26:51.001Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:26:53.584Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:26:56.139Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:26:58.702Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:01.286Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:03.917Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:06.539Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:09.100Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:11.663Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:14.235Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:16.808Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:19.485Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:22.051Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:24.614Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:27.241Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:29.854Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:32.431Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:35.098Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:37.683Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:40.333Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:42.927Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:45.512Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:48.260Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:50.829Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:53.394Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:55.960Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:27:58.552Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:01.110Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:03.681Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:06.242Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:08.829Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:11.410Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:13.998Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:16.577Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:19.129Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:21.713Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:24.288Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:26.861Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:29.432Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:31.984Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:34.656Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:37.222Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:39.782Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:42.351Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:44.928Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:47.512Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:50.136Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:52.690Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:55.259Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:28:57.819Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:00.386Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:02.946Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:05.510Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:08.179Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:10.741Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:13.320Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:15.917Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:18.482Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:21.059Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:23.620Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:26.185Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:28.815Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:31.419Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:33.979Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:36.558Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:39.120Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:41.684Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:44.510Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:47.069Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:49.655Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:52.222Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:54.803Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:29:57.368Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:00.251Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:02.823Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:05.457Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:08.042Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:10.626Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:13.187Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:15.749Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:18.316Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:20.879Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:23.447Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:26.005Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:28.572Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:31.153Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:33.712Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:36.292Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:38.864Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:41.435Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:30:44.056Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:38:11.046Z] pinWindow closed
+[2026-04-21T07:38:15.462Z] app ready
+[2026-04-21T07:38:21.900Z] startCapture called
+[2026-04-21T07:38:22.056Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T07:38:22.268Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:38:26.146Z] capture-complete received | dataUrlLength=1499522
+[2026-04-21T07:38:26.146Z] openPinnedImage called | dataUrlLength=1499522
+[2026-04-21T07:38:26.206Z] captureWindow closed
+[2026-04-21T07:38:26.307Z] pin did-finish-load, sending image
+[2026-04-21T07:38:26.319Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:38:28.956Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/dce73d2043f4c23a0a60bbb647b58e4c8625ca7e95966a6c52c84bda151de829.png","fileType":"input"}}
+[2026-04-21T07:38:29.171Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.218&c_port=80&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNjE5MTE1MDMsInRzIjoxNzc2NzU3MTExNTAzLCJzaWduIjoiYzM3MzZiOGUwNThiZTRiYjk1NWQ3ZDJhMmJiYjk1OTYifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskId":"2046493769859207169","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T07:38:29.234Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:31.855Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:34.426Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:36.993Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:39.590Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:42.295Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:44.867Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:47.502Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:50.073Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:52.649Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:55.225Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:38:57.796Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:00.776Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:03.349Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:05.917Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:08.480Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:11.051Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:13.766Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:16.326Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:18.888Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:21.482Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:24.076Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:26.979Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:39:29.583Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:40:20.183Z] pinWindow closed
+[2026-04-21T07:40:28.594Z] app ready
+[2026-04-21T07:40:37.234Z] startCapture called
+[2026-04-21T07:40:37.381Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T07:40:37.578Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:40:41.191Z] capture-complete received | dataUrlLength=2125682
+[2026-04-21T07:40:41.192Z] openPinnedImage called | dataUrlLength=2125682
+[2026-04-21T07:40:41.242Z] captureWindow closed
+[2026-04-21T07:40:41.348Z] pin did-finish-load, sending image
+[2026-04-21T07:40:41.355Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:40:44.561Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/e92cc441f4d1d4484d372aad13ecd25b91c2349022f1da8725fdbc76e5003400.png","fileType":"input"}}
+[2026-04-21T07:40:44.769Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=192.168.100.26&c_port=87&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNjIwNDcxMDQsInRzIjoxNzc2NzU3MjQ3MTA0LCJzaWduIjoiOTVmYzRhMDBjMTlhZTc1NmIxYThkYTdlZjY5MDA4ZmYifQ%3D%3D&target=http://myfj.runninghub.cn","taskId":"2046494338543988738","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T07:40:44.830Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:40:47.418Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:40:50.008Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:40:52.570Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:40:55.167Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:40:57.746Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:00.428Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:03.003Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:05.569Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:08.144Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:10.717Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:13.276Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:15.856Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:18.573Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:21.166Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:23.742Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:26.311Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:28.880Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:31.441Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:34.009Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:36.585Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:41:39.145Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:43:42.815Z] pinWindow closed
+[2026-04-21T07:43:47.958Z] app ready
+[2026-04-21T07:43:55.947Z] startCapture called
+[2026-04-21T07:43:56.098Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T07:43:56.305Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:43:59.752Z] capture-complete received | dataUrlLength=2215486
+[2026-04-21T07:43:59.753Z] openPinnedImage called | dataUrlLength=2215486
+[2026-04-21T07:43:59.805Z] captureWindow closed
+[2026-04-21T07:43:59.903Z] pin did-finish-load, sending image
+[2026-04-21T07:43:59.911Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T07:44:03.596Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/aedc994d54bb46040276796c11defa63b7175daf16a76fd20bbe9f3727419427.png","fileType":"input"}}
+[2026-04-21T07:44:03.860Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=192.168.100.83&c_port=81&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNjIyNDYxMTIsInRzIjoxNzc2NzU3NDQ2MTEyLCJzaWduIjoiZTY3MTlkN2ExMDI1YmYxNmZhNTI3OWRkNjllMzg5YWYifQ%3D%3D&target=http://myfj.runninghub.cn","taskId":"2046495173378183170","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T07:44:03.942Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:06.527Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:09.092Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:11.698Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:14.314Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:16.886Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:19.450Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:22.016Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:24.580Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:27.293Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:29.885Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:32.450Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:35.018Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:37.690Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:40.288Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:42.857Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:45.413Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:47.983Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:50.665Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:53.225Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:55.890Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:44:58.457Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:45:01.062Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:45:03.632Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:45:06.276Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T07:45:08.867Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T07:45:08.928Z] runninghub webhook detail response | {"code":1,"msg":"webhook event not exists","errorMessages":null,"data":null}
+[2026-04-21T08:10:51.229Z] pinWindow closed
+[2026-04-21T10:37:12.445Z] app ready
+[2026-04-21T10:37:26.523Z] app ready
+[2026-04-21T10:37:31.107Z] startCapture called
+[2026-04-21T10:37:44.634Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T10:37:45.472Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:37:50.436Z] capture-complete received | dataUrlLength=27330
+[2026-04-21T10:37:50.441Z] openPinnedImage called | dataUrlLength=27330
+[2026-04-21T10:37:50.753Z] captureWindow closed
+[2026-04-21T10:37:51.564Z] pin did-finish-load, sending image
+[2026-04-21T10:37:51.627Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:38:00.517Z] pinWindow closed
+[2026-04-21T10:47:32.483Z] app ready
+[2026-04-21T10:47:33.968Z] startCapture called
+[2026-04-21T10:47:34.125Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T10:47:34.310Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:47:36.844Z] capture-complete received | dataUrlLength=51162
+[2026-04-21T10:47:36.914Z] captureWindow closed
+[2026-04-21T10:47:36.844Z] openPinnedImage called | dataUrlLength=51162
+[2026-04-21T10:47:36.990Z] pin did-finish-load, sending image
+[2026-04-21T10:47:36.996Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:47:41.927Z] pinWindow closed
+[2026-04-21T10:47:48.949Z] startCapture called
+[2026-04-21T10:47:49.094Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T10:47:49.263Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:47:52.985Z] capture-complete received | dataUrlLength=1063690
+[2026-04-21T10:47:52.985Z] openPinnedImage called | dataUrlLength=1063690
+[2026-04-21T10:47:53.062Z] captureWindow closed
+[2026-04-21T10:47:53.172Z] pin did-finish-load, sending image
+[2026-04-21T10:47:53.177Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:47:56.805Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/9fcc6e2edbf6506c0c3b52b0852ae6ed86f0e10fb24b0a744ec6910443b8735e.png","fileType":"input"}}
+[2026-04-21T10:47:57.017Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzMyNzk2MDMsInRzIjoxNzc2NzY4NDc5NjAzLCJzaWduIjoiYzk2NTMzZTkzYzQ2MjQzZTQwNjMzZjY4ODhjZGQ5NzcifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskId":"2046541451113930753","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T10:47:57.090Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:47:59.658Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:02.216Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:04.794Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:07.356Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:09.923Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:12.478Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:15.067Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:17.647Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:20.214Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:22.779Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:25.357Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:27.927Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:30.505Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:33.072Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:35.634Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:38.194Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:40.770Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:48:43.343Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T10:48:43.397Z] runninghub webhook detail response | {"code":1,"msg":"webhook event not exists","errorMessages":null,"data":null}
+[2026-04-21T10:49:32.113Z] pinWindow closed
+[2026-04-21T10:49:41.106Z] startCapture called
+[2026-04-21T10:49:41.266Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T10:49:41.428Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:49:47.642Z] capture-complete received | dataUrlLength=2140154
+[2026-04-21T10:49:47.712Z] captureWindow closed
+[2026-04-21T10:49:47.642Z] openPinnedImage called | dataUrlLength=2140154
+[2026-04-21T10:49:47.828Z] pin did-finish-load, sending image
+[2026-04-21T10:49:47.838Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:49:50.916Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/b891db7098484d4dc569e624007d4f99be968e1f93af22bb6d0d219183be3473.png","fileType":"input"}}
+[2026-04-21T10:49:51.124Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzMzOTM3MTMsInRzIjoxNzc2NzY4NTkzNzEzLCJzaWduIjoiMTQ0MzM0Mzk2OGM0YmE5MzNiZjhlNTQ2NzRlODY1OGIifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskId":"2046541929939865602","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T10:49:51.195Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:49:53.766Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:49:56.355Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:49:58.937Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:50:01.514Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:50:04.094Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:50:06.739Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:50:09.315Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:50:11.888Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T10:50:11.974Z] runninghub webhook detail response | {"code":1,"msg":"webhook event not exists","errorMessages":null,"data":null}
+[2026-04-21T10:51:30.464Z] pinWindow closed
+[2026-04-21T10:53:05.404Z] startCapture called
+[2026-04-21T10:53:05.623Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T10:53:05.779Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:53:09.599Z] capture-complete received | dataUrlLength=1315218
+[2026-04-21T10:53:09.671Z] captureWindow closed
+[2026-04-21T10:53:09.599Z] openPinnedImage called | dataUrlLength=1315218
+[2026-04-21T10:53:09.782Z] pin did-finish-load, sending image
+[2026-04-21T10:53:09.792Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:53:11.929Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/123af2538f92a8fe9330391eb9f09a26847d479dfaa756d289f796351ebf036f.png","fileType":"input"}}
+[2026-04-21T10:53:12.106Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzM1OTQ2ODAsInRzIjoxNzc2NzY4Nzk0NjgwLCJzaWduIjoiOWFiZTU1MTlmMGFjMjRiOTgwNjU5ODA0YWFmMWMyMzIifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskId":"2046542772860755969","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T10:53:12.173Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:53:14.730Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:53:17.343Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:53:19.904Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:53:22.499Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:53:25.064Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T10:53:25.120Z] runninghub webhook detail response | {"code":1,"msg":"webhook event not exists","errorMessages":null,"data":null}
+[2026-04-21T10:54:03.455Z] pinWindow closed
+[2026-04-21T10:54:07.882Z] app ready
+[2026-04-21T10:54:10.856Z] startCapture called
+[2026-04-21T10:54:11.084Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T10:54:11.324Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:54:15.339Z] capture-complete received | dataUrlLength=1309458
+[2026-04-21T10:54:15.339Z] openPinnedImage called | dataUrlLength=1309458
+[2026-04-21T10:54:15.412Z] captureWindow closed
+[2026-04-21T10:54:15.523Z] pin did-finish-load, sending image
+[2026-04-21T10:54:15.529Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:54:17.457Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/991b47c380c4b905802ed9f8308c0d2e9a74335f0ea6deb25878ba7428ec77c2.png","fileType":"input"}}
+[2026-04-21T10:54:17.579Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzM2NjAyNDYsInRzIjoxNzc2NzY4ODYwMjQ2LCJzaWduIjoiOGQ0MTI4MmQwZGMzMjMwN2Q5ZTZmNjRlOTFlYTk2NzAifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskId":"2046543047835201537","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T10:54:17.579Z] runninghub create parsed | {"taskId":"2046543047835201537","wsUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzM2NjAyNDYsInRzIjoxNzc2NzY4ODYwMjQ2LCJzaWduIjoiOGQ0MTI4MmQwZGMzMjMwN2Q5ZTZmNjRlOTFlYTk2NzAifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskStatus":"RUNNING"}
+[2026-04-21T10:54:17.584Z] runninghub websocket connect | wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzM2NjAyNDYsInRzIjoxNzc2NzY4ODYwMjQ2LCJzaWduIjoiOGQ0MTI4MmQwZGMzMjMwN2Q5ZTZmNjRlOTFlYTk2NzAifQ%3D%3D&target=http://ln.runninghub.cn:11075
+[2026-04-21T10:54:17.683Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:54:18.086Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:19.426Z] runninghub websocket message | {"type": "execution_start", "data": {"prompt_id": "2046543047835201537", "timestamp": 1776768861949}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:20.266Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:54:20.869Z] runninghub websocket message | {"type": "execution_cached", "data": {"nodes": ["33", "23", "35", "1", "4", "53"], "prompt_id": "2046543047835201537", "timestamp": 1776768863397}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:21.076Z] runninghub websocket message | {"type": "executing", "data": {"node": "36", "display_node": "36", "prompt_id": "2046543047835201537"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:21.382Z] runninghub websocket message | {"type": "executing", "data": {"node": "37", "display_node": "37", "prompt_id": "2046543047835201537"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:21.652Z] runninghub websocket message | {"type": "executing", "data": {"node": "39", "display_node": "39", "prompt_id": "2046543047835201537"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:21.680Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 1, "prompt_id": "2046543047835201537", "node": "39"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:21.954Z] runninghub websocket message | {"type": "executing", "data": {"node": "38", "display_node": "38", "prompt_id": "2046543047835201537"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:22.280Z] runninghub websocket message | {"type": "executing", "data": {"node": "5", "display_node": "5", "prompt_id": "2046543047835201537"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:22.720Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:22.855Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:54:22.905Z] runninghub websocket message | {"type": "progress", "data": {"value": 2, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:23.093Z] runninghub websocket message | {"type": "progress", "data": {"value": 3, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:23.283Z] runninghub websocket message | {"type": "progress", "data": {"value": 4, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:23.472Z] runninghub websocket message | {"type": "progress", "data": {"value": 5, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:23.603Z] runninghub websocket message | {"type": "progress", "data": {"value": 6, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:23.732Z] runninghub websocket message | {"type": "progress", "data": {"value": 7, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:23.864Z] runninghub websocket message | {"type": "progress", "data": {"value": 8, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:23.996Z] runninghub websocket message | {"type": "progress", "data": {"value": 9, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:24.126Z] runninghub websocket message | {"type": "progress", "data": {"value": 10, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:24.275Z] runninghub websocket message | {"type": "progress", "data": {"value": 11, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:24.386Z] runninghub websocket message | {"type": "progress", "data": {"value": 12, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:24.517Z] runninghub websocket message | {"type": "progress", "data": {"value": 13, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:24.646Z] runninghub websocket message | {"type": "progress", "data": {"value": 14, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:24.779Z] runninghub websocket message | {"type": "progress", "data": {"value": 15, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:24.909Z] runninghub websocket message | {"type": "progress", "data": {"value": 16, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:25.043Z] runninghub websocket message | {"type": "progress", "data": {"value": 17, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:25.170Z] runninghub websocket message | {"type": "progress", "data": {"value": 18, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:25.303Z] runninghub websocket message | {"type": "progress", "data": {"value": 19, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:25.417Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:54:25.431Z] runninghub websocket message | {"type": "progress", "data": {"value": 20, "max": 20, "prompt_id": "2046543047835201537", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:25.727Z] runninghub websocket message | {"type": "executing", "data": {"node": "78", "display_node": "78", "prompt_id": "2046543047835201537"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:26.189Z] runninghub websocket message | {"type": "executing", "data": {"node": "72", "display_node": "72", "prompt_id": "2046543047835201537"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:27.988Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:54:29.886Z] runninghub websocket message | {"type": "executed", "data": {"node": "72", "display_node": "72", "output": {"images": [{"filename": "ComfyUI_00004_ppqil_1776768868.png", "subfolder": "", "type": "output", "size": 1386.37, "width": 1024, "height": 1024, "final_filename": true, "label": "Normal", "score": "0", "cos_url": "https://rh-images-1252422369.cos.ap-beijing.myqcloud.com//3b222f65180dc20596d921664b84a845/output/ComfyUI_00004_ppqil_1776768868.png"}]}, "prompt_id": "2046543047835201537"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:54:30.556Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T10:56:35.675Z] pinWindow closed
+[2026-04-21T10:56:39.543Z] app ready
+[2026-04-21T10:56:44.536Z] startCapture called
+[2026-04-21T10:56:44.715Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T10:56:44.925Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:56:50.078Z] capture-complete received | dataUrlLength=1318754
+[2026-04-21T10:56:50.078Z] openPinnedImage called | dataUrlLength=1318754
+[2026-04-21T10:56:50.151Z] captureWindow closed
+[2026-04-21T10:56:50.272Z] pin did-finish-load, sending image
+[2026-04-21T10:56:50.283Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T10:56:52.566Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/f98bbe10595817107a0815662703d1a110b12ff4faba15823055786c6e7fe991.png","fileType":"input"}}
+[2026-04-21T10:56:52.686Z] runninghub create parsed | {"taskId":"2046543698312962049","wsUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzM4MTUzMzQsInRzIjoxNzc2NzY5MDE1MzM0LCJzaWduIjoiM2U2ZGZjNzk1NDM3ZTRjYTZkN2UzNzYxZGNiNThhNzQifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskStatus":"RUNNING"}
+[2026-04-21T10:56:52.686Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzM4MTUzMzQsInRzIjoxNzc2NzY5MDE1MzM0LCJzaWduIjoiM2U2ZGZjNzk1NDM3ZTRjYTZkN2UzNzYxZGNiNThhNzQifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskId":"2046543698312962049","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T10:56:52.687Z] runninghub websocket connect | wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.92&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzM4MTUzMzQsInRzIjoxNzc2NzY5MDE1MzM0LCJzaWduIjoiM2U2ZGZjNzk1NDM3ZTRjYTZkN2UzNzYxZGNiNThhNzQifQ%3D%3D&target=http://ln.runninghub.cn:11075
+[2026-04-21T10:56:52.774Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:56:53.154Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:54.362Z] runninghub websocket message | {"type": "execution_start", "data": {"prompt_id": "2046543698312962049", "timestamp": 1776769016892}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:55.407Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:56:55.867Z] runninghub websocket message | {"type": "execution_cached", "data": {"nodes": ["33", "23", "35", "1", "4", "53"], "prompt_id": "2046543698312962049", "timestamp": 1776769018396}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:56.014Z] runninghub websocket message | {"type": "executing", "data": {"node": "36", "display_node": "36", "prompt_id": "2046543698312962049"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:56.334Z] runninghub websocket message | {"type": "executing", "data": {"node": "37", "display_node": "37", "prompt_id": "2046543698312962049"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:56.732Z] runninghub websocket message | {"type": "executing", "data": {"node": "39", "display_node": "39", "prompt_id": "2046543698312962049"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:56.760Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 1, "prompt_id": "2046543698312962049", "node": "39"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:57.122Z] runninghub websocket message | {"type": "executing", "data": {"node": "38", "display_node": "38", "prompt_id": "2046543698312962049"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:57.458Z] runninghub websocket message | {"type": "executing", "data": {"node": "5", "display_node": "5", "prompt_id": "2046543698312962049"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:57.900Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:57.993Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:56:58.115Z] runninghub websocket message | {"type": "progress", "data": {"value": 2, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:58.279Z] runninghub websocket message | {"type": "progress", "data": {"value": 3, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:58.468Z] runninghub websocket message | {"type": "progress", "data": {"value": 4, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:58.657Z] runninghub websocket message | {"type": "progress", "data": {"value": 5, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:58.789Z] runninghub websocket message | {"type": "progress", "data": {"value": 6, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.286Z] runninghub websocket message | {"type": "progress", "data": {"value": 7, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.461Z] runninghub websocket message | {"type": "progress", "data": {"value": 8, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.495Z] runninghub websocket message | {"type": "progress", "data": {"value": 9, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.498Z] runninghub websocket message | {"type": "progress", "data": {"value": 10, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.501Z] runninghub websocket message | {"type": "progress", "data": {"value": 11, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.590Z] runninghub websocket message | {"type": "progress", "data": {"value": 12, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.710Z] runninghub websocket message | {"type": "progress", "data": {"value": 13, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.841Z] runninghub websocket message | {"type": "progress", "data": {"value": 14, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:56:59.975Z] runninghub websocket message | {"type": "progress", "data": {"value": 15, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:00.130Z] runninghub websocket message | {"type": "progress", "data": {"value": 16, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:00.235Z] runninghub websocket message | {"type": "progress", "data": {"value": 17, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:00.366Z] runninghub websocket message | {"type": "progress", "data": {"value": 18, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:00.496Z] runninghub websocket message | {"type": "progress", "data": {"value": 19, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:00.608Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:57:00.630Z] runninghub websocket message | {"type": "progress", "data": {"value": 20, "max": 20, "prompt_id": "2046543698312962049", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:01.003Z] runninghub websocket message | {"type": "executing", "data": {"node": "78", "display_node": "78", "prompt_id": "2046543698312962049"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:01.472Z] runninghub websocket message | {"type": "executing", "data": {"node": "72", "display_node": "72", "prompt_id": "2046543698312962049"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:03.189Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:57:05.697Z] runninghub websocket message | {"type": "executed", "data": {"node": "72", "display_node": "72", "output": {"images": [{"filename": "ComfyUI_00005_hzian_1776769024.png", "subfolder": "", "type": "output", "size": 1285.45, "width": 1024, "height": 1024, "final_filename": true, "label": "Normal", "score": "0", "cos_url": "https://rh-images-1252422369.cos.ap-beijing.myqcloud.com//3b222f65180dc20596d921664b84a845/output/ComfyUI_00005_hzian_1776769024.png"}]}, "prompt_id": "2046543698312962049"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T10:57:05.758Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T10:57:08.335Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T10:57:58.766Z] pinWindow closed
+[2026-04-21T11:06:14.667Z] startCapture called
+[2026-04-21T11:06:14.819Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T11:06:14.977Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:06:18.393Z] capture-complete received | dataUrlLength=481074
+[2026-04-21T11:06:18.455Z] captureWindow closed
+[2026-04-21T11:06:18.393Z] openPinnedImage called | dataUrlLength=481074
+[2026-04-21T11:06:18.556Z] pin did-finish-load, sending image
+[2026-04-21T11:06:18.561Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:06:20.925Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/989fbaf915655b824e36543d92d72396bc9eceea85c3048f3a6b641efbf9faef.png","fileType":"input"}}
+[2026-04-21T11:06:21.090Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.176.240.69&c_port=85&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzQzODM3NTEsInRzIjoxNzc2NzY5NTgzNzUxLCJzaWduIjoiNWJmYjcyNzlmODljYTU4NjExMjU0NGE1YjU0OTMxODYifQ%3D%3D&target=http://cdhn.runninghub.cn:15001","taskId":"2046546082221133826","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T11:06:21.091Z] runninghub websocket connect | wss://www.runninghub.cn:443/ws/c_instance?c_host=10.176.240.69&c_port=85&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzQzODM3NTEsInRzIjoxNzc2NzY5NTgzNzUxLCJzaWduIjoiNWJmYjcyNzlmODljYTU4NjExMjU0NGE1YjU0OTMxODYifQ%3D%3D&target=http://cdhn.runninghub.cn:15001
+[2026-04-21T11:06:21.090Z] runninghub create parsed | {"taskId":"2046546082221133826","wsUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.176.240.69&c_port=85&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzQzODM3NTEsInRzIjoxNzc2NzY5NTgzNzUxLCJzaWduIjoiNWJmYjcyNzlmODljYTU4NjExMjU0NGE1YjU0OTMxODYifQ%3D%3D&target=http://cdhn.runninghub.cn:15001","taskStatus":"RUNNING"}
+[2026-04-21T11:06:21.177Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:21.506Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:21.507Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:21.936Z] runninghub websocket message | {"type": "execution_start", "data": {"prompt_id": "2046546082221133826", "timestamp": 1776769584582}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:23.881Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:26.478Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:29.061Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:31.628Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:31.821Z] runninghub websocket message | {"type": "execution_cached", "data": {"nodes": [], "prompt_id": "2046546082221133826", "timestamp": 1776769594452}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:32.106Z] runninghub websocket message | {"type": "executing", "data": {"node": "1", "display_node": "1", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:33.171Z] runninghub websocket message | {"type": "executing", "data": {"node": "53", "display_node": "53", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:34.203Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:36.254Z] runninghub websocket message | {"type": "executing", "data": {"node": "23", "display_node": "23", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:36.782Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:39.344Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:39.925Z] runninghub websocket message | {"type": "executing", "data": {"node": "35", "display_node": "35", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:41.922Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:44.510Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:46.562Z] runninghub websocket message | {"type": "executing", "data": {"node": "4", "display_node": "4", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:46.775Z] runninghub websocket message | {"type": "executing", "data": {"node": "36", "display_node": "36", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:47.088Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:47.138Z] runninghub websocket message | {"type": "executing", "data": {"node": "37", "display_node": "37", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:47.566Z] runninghub websocket message | {"type": "executing", "data": {"node": "39", "display_node": "39", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:47.566Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 1, "prompt_id": "2046546082221133826", "node": "39"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:48.339Z] runninghub websocket message | {"type": "executing", "data": {"node": "38", "display_node": "38", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:48.366Z] runninghub websocket message | {"type": "executing", "data": {"node": "33", "display_node": "33", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:48.736Z] runninghub websocket message | {"type": "executing", "data": {"node": "5", "display_node": "5", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:49.650Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:52.217Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:54.782Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:57.348Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:06:58.703Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:58.842Z] runninghub websocket message | {"type": "progress", "data": {"value": 2, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:59.039Z] runninghub websocket message | {"type": "progress", "data": {"value": 3, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:59.294Z] runninghub websocket message | {"type": "progress", "data": {"value": 4, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:59.427Z] runninghub websocket message | {"type": "progress", "data": {"value": 5, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:59.656Z] runninghub websocket message | {"type": "progress", "data": {"value": 6, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:59.717Z] runninghub websocket message | {"type": "progress", "data": {"value": 7, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:59.849Z] runninghub websocket message | {"type": "progress", "data": {"value": 8, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:06:59.929Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:07:00.320Z] runninghub websocket message | {"type": "progress", "data": {"value": 9, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:00.341Z] runninghub websocket message | {"type": "progress", "data": {"value": 10, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:00.350Z] runninghub websocket message | {"type": "progress", "data": {"value": 11, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:00.406Z] runninghub websocket message | {"type": "progress", "data": {"value": 12, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:00.672Z] runninghub websocket message | {"type": "progress", "data": {"value": 13, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:00.672Z] runninghub websocket message | {"type": "progress", "data": {"value": 14, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:00.790Z] runninghub websocket message | {"type": "progress", "data": {"value": 15, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:00.918Z] runninghub websocket message | {"type": "progress", "data": {"value": 16, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:01.053Z] runninghub websocket message | {"type": "progress", "data": {"value": 17, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:01.186Z] runninghub websocket message | {"type": "progress", "data": {"value": 18, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:01.322Z] runninghub websocket message | {"type": "progress", "data": {"value": 19, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:01.455Z] runninghub websocket message | {"type": "progress", "data": {"value": 20, "max": 20, "prompt_id": "2046546082221133826", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:02.069Z] runninghub websocket message | {"type": "executing", "data": {"node": "78", "display_node": "78", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:02.500Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:07:02.525Z] runninghub websocket message | {"type": "executing", "data": {"node": "72", "display_node": "72", "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:04.967Z] runninghub websocket message | {"type": "executed", "data": {"node": "72", "display_node": "72", "output": {"images": [{"filename": "ComfyUI_00001_tfqqs_1776769625.png", "subfolder": "", "type": "output", "size": 1336.08, "width": 1024, "height": 1024, "final_filename": true, "label": "Normal", "score": "0", "cos_url": "https://rh-images-1252422369.cos.ap-beijing.myqcloud.com//3b222f65180dc20596d921664b84a845/output/ComfyUI_00001_tfqqs_1776769625.png"}]}, "prompt_id": "2046546082221133826"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:07:05.057Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:07:07.643Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T11:11:42.768Z] pinWindow closed
+[2026-04-21T11:15:33.527Z] app ready
+[2026-04-21T11:15:41.312Z] startCapture called
+[2026-04-21T11:15:41.489Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T11:15:41.740Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:15:45.730Z] capture-complete received | dataUrlLength=510062
+[2026-04-21T11:15:45.730Z] openPinnedImage called | dataUrlLength=510062
+[2026-04-21T11:15:45.802Z] captureWindow closed
+[2026-04-21T11:15:45.905Z] pin did-finish-load, sending image
+[2026-04-21T11:15:45.910Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:15:54.621Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/51844cfaafd29941f18e3a61b94c93c5a1656f0cfad139040b19ca49761ef7a6.png","fileType":"input"}}
+[2026-04-21T11:15:54.812Z] runninghub create parsed | {"taskId":"2046548488594071553","wsUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=172.31.0.45&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzQ5NTc0NzYsInRzIjoxNzc2NzcwMTU3NDc2LCJzaWduIjoiYmY4ZGU4Mjk3NDRjZjU5ZDIwYzI3NWMwOTBjNjhkYzEifQ%3D%3D&target=http://222.211.217.9:9997","taskStatus":"RUNNING"}
+[2026-04-21T11:15:54.812Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=172.31.0.45&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzQ5NTc0NzYsInRzIjoxNzc2NzcwMTU3NDc2LCJzaWduIjoiYmY4ZGU4Mjk3NDRjZjU5ZDIwYzI3NWMwOTBjNjhkYzEifQ%3D%3D&target=http://222.211.217.9:9997","taskId":"2046548488594071553","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T11:15:54.813Z] runninghub websocket connect | wss://www.runninghub.cn:443/ws/c_instance?c_host=172.31.0.45&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzQ5NTc0NzYsInRzIjoxNzc2NzcwMTU3NDc2LCJzaWduIjoiYmY4ZGU4Mjk3NDRjZjU5ZDIwYzI3NWMwOTBjNjhkYzEifQ%3D%3D&target=http://222.211.217.9:9997
+[2026-04-21T11:15:54.899Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:15:55.235Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 0}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:15:55.676Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:15:55.677Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:15:56.052Z] runninghub websocket message | {"type": "execution_start", "data": {"prompt_id": "2046548488594071553", "timestamp": 1776770158722}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:15:57.519Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:00.147Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:01.740Z] runninghub websocket message | {"type": "execution_cached", "data": {"nodes": [], "prompt_id": "2046548488594071553", "timestamp": 1776770164384}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:02.730Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:03.573Z] runninghub websocket message | {"type": "executing", "data": {"node": "1", "display_node": "1", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:05.307Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:07.729Z] runninghub websocket message | {"type": "executing", "data": {"node": "53", "display_node": "53", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:07.874Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:10.451Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:11.488Z] runninghub websocket message | {"type": "executing", "data": {"node": "23", "display_node": "23", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:13.037Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:15.602Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:18.176Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:20.129Z] runninghub websocket message | {"type": "executing", "data": {"node": "35", "display_node": "35", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:20.798Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:23.423Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:23.426Z] runninghub websocket message | {"type": "executing", "data": {"node": "4", "display_node": "4", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:25.998Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:26.866Z] runninghub websocket message | {"type": "executing", "data": {"node": "36", "display_node": "36", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:28.629Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:28.857Z] runninghub websocket message | {"type": "executing", "data": {"node": "37", "display_node": "37", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:31.187Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:32.644Z] runninghub websocket message | {"type": "executing", "data": {"node": "39", "display_node": "39", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:32.677Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 1, "prompt_id": "2046548488594071553", "node": "39"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:33.778Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:36.314Z] runninghub websocket message | {"type": "executing", "data": {"node": "38", "display_node": "38", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:36.341Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:38.656Z] runninghub websocket message | {"type": "executing", "data": {"node": "33", "display_node": "33", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:38.912Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:41.225Z] runninghub websocket message | {"type": "executing", "data": {"node": "5", "display_node": "5", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:41.488Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:44.062Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:46.627Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:49.211Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:51.810Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:53.826Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:54.252Z] runninghub websocket message | {"type": "progress", "data": {"value": 2, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:54.381Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:54.597Z] runninghub websocket message | {"type": "progress", "data": {"value": 3, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:54.825Z] runninghub websocket message | {"type": "progress", "data": {"value": 4, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:55.240Z] runninghub websocket message | {"type": "progress", "data": {"value": 5, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:55.361Z] runninghub websocket message | {"type": "progress", "data": {"value": 6, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:55.491Z] runninghub websocket message | {"type": "progress", "data": {"value": 7, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:55.619Z] runninghub websocket message | {"type": "progress", "data": {"value": 8, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:55.747Z] runninghub websocket message | {"type": "progress", "data": {"value": 9, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:55.884Z] runninghub websocket message | {"type": "progress", "data": {"value": 10, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:56.004Z] runninghub websocket message | {"type": "progress", "data": {"value": 11, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:56.147Z] runninghub websocket message | {"type": "progress", "data": {"value": 12, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:56.261Z] runninghub websocket message | {"type": "progress", "data": {"value": 13, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:56.465Z] runninghub websocket message | {"type": "progress", "data": {"value": 14, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:56.654Z] runninghub websocket message | {"type": "progress", "data": {"value": 15, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:56.781Z] runninghub websocket message | {"type": "progress", "data": {"value": 16, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:56.964Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:57.013Z] runninghub websocket message | {"type": "progress", "data": {"value": 17, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:57.264Z] runninghub websocket message | {"type": "progress", "data": {"value": 18, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:57.391Z] runninghub websocket message | {"type": "progress", "data": {"value": 19, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:57.642Z] runninghub websocket message | {"type": "progress", "data": {"value": 20, "max": 20, "prompt_id": "2046548488594071553", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:58.683Z] runninghub websocket message | {"type": "executing", "data": {"node": "78", "display_node": "78", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:16:59.566Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:16:59.658Z] runninghub websocket message | {"type": "executing", "data": {"node": "72", "display_node": "72", "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:17:02.134Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:17:02.253Z] runninghub websocket message | {"type": "executed", "data": {"node": "72", "display_node": "72", "output": {"images": [{"filename": "ComfyUI_00001_jfgmz_1776770222.png", "subfolder": "", "type": "output", "size": 1333.35, "width": 1024, "height": 1024, "final_filename": true, "label": "Normal", "score": "0", "cos_url": "https://rh-images-1252422369.cos.ap-beijing.myqcloud.com//3b222f65180dc20596d921664b84a845/output/ComfyUI_00001_jfgmz_1776770222.png"}]}, "prompt_id": "2046548488594071553"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:17:04.705Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T11:22:44.513Z] startCapture called
+[2026-04-21T11:22:44.636Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T11:22:44.798Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:22:48.368Z] openPinnedImage called | dataUrlLength=837522
+[2026-04-21T11:22:48.368Z] capture-complete received | dataUrlLength=837522
+[2026-04-21T11:22:48.410Z] captureWindow closed
+[2026-04-21T11:27:48.555Z] app ready
+[2026-04-21T11:27:53.782Z] startCapture called
+[2026-04-21T11:27:53.962Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T11:27:54.203Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:27:57.576Z] capture-complete received | dataUrlLength=252950
+[2026-04-21T11:27:57.576Z] openPinnedImage called | dataUrlLength=252950
+[2026-04-21T11:27:57.642Z] captureWindow closed
+[2026-04-21T11:27:57.728Z] pin did-finish-load, sending image
+[2026-04-21T11:27:57.741Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:27:59.129Z] workflow selector console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:28:08.257Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/c6fa05e2e8d925f1b3d6957ded4eeb7ed06c812a69e2018581d868ef0e9cfcbf.png","fileType":"input"}}
+[2026-04-21T11:28:08.458Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=192.168.100.104&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzU2OTExNDcsInRzIjoxNzc2NzcwODkxMTQ3LCJzaWduIjoiOGY1NWRjN2NjMTFkNTA0YjRhZDNiZjZiMzNjZTdlYzcifQ%3D%3D&target=http://myfj.runninghub.cn","taskId":"2046551565862572034","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T11:28:08.458Z] runninghub create parsed | {"taskId":"2046551565862572034","wsUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=192.168.100.104&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzU2OTExNDcsInRzIjoxNzc2NzcwODkxMTQ3LCJzaWduIjoiOGY1NWRjN2NjMTFkNTA0YjRhZDNiZjZiMzNjZTdlYzcifQ%3D%3D&target=http://myfj.runninghub.cn","taskStatus":"RUNNING"}
+[2026-04-21T11:28:08.459Z] runninghub websocket connect | wss://www.runninghub.cn:443/ws/c_instance?c_host=192.168.100.104&c_port=83&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzU2OTExNDcsInRzIjoxNzc2NzcwODkxMTQ3LCJzaWduIjoiOGY1NWRjN2NjMTFkNTA0YjRhZDNiZjZiMzNjZTdlYzcifQ%3D%3D&target=http://myfj.runninghub.cn
+[2026-04-21T11:28:08.542Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:08.648Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:08.649Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:09.106Z] runninghub websocket message | {"type": "execution_start", "data": {"prompt_id": "2046551565862572034", "timestamp": 1776770891798}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:11.233Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:12.709Z] workflow selector console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:28:13.810Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:16.377Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:17.273Z] runninghub websocket message | {"type": "execution_cached", "data": {"nodes": [], "prompt_id": "2046551565862572034", "timestamp": 1776770899970}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:17.411Z] runninghub websocket message | {"type": "executing", "data": {"node": "1", "display_node": "1", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:18.309Z] runninghub websocket message | {"type": "executing", "data": {"node": "53", "display_node": "53", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:18.932Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:19.575Z] runninghub websocket message | {"type": "executing", "data": {"node": "23", "display_node": "23", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:21.492Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:23.587Z] runninghub websocket message | {"type": "executing", "data": {"node": "35", "display_node": "35", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:24.083Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:26.649Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:27.810Z] runninghub websocket message | {"type": "executing", "data": {"node": "4", "display_node": "4", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:28.291Z] runninghub websocket message | {"type": "executing", "data": {"node": "36", "display_node": "36", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:28.634Z] runninghub websocket message | {"type": "executing", "data": {"node": "37", "display_node": "37", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:29.122Z] runninghub websocket message | {"type": "executing", "data": {"node": "39", "display_node": "39", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:29.172Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 1, "prompt_id": "2046551565862572034", "node": "39"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:29.225Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:29.494Z] runninghub websocket message | {"type": "executing", "data": {"node": "38", "display_node": "38", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:29.824Z] runninghub websocket message | {"type": "executing", "data": {"node": "33", "display_node": "33", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:30.165Z] runninghub websocket message | {"type": "executing", "data": {"node": "5", "display_node": "5", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:31.800Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:34.375Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:37.016Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:39.667Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:41.766Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:41.921Z] runninghub websocket message | {"type": "progress", "data": {"value": 2, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:42.081Z] runninghub websocket message | {"type": "progress", "data": {"value": 3, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:42.251Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:42.252Z] runninghub websocket message | {"type": "progress", "data": {"value": 4, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:42.419Z] runninghub websocket message | {"type": "progress", "data": {"value": 5, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:42.542Z] runninghub websocket message | {"type": "progress", "data": {"value": 6, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:42.660Z] runninghub websocket message | {"type": "progress", "data": {"value": 7, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:42.797Z] runninghub websocket message | {"type": "progress", "data": {"value": 8, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:42.887Z] runninghub websocket message | {"type": "progress", "data": {"value": 9, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.008Z] runninghub websocket message | {"type": "progress", "data": {"value": 10, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.123Z] runninghub websocket message | {"type": "progress", "data": {"value": 11, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.243Z] runninghub websocket message | {"type": "progress", "data": {"value": 12, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.354Z] runninghub websocket message | {"type": "progress", "data": {"value": 13, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.470Z] runninghub websocket message | {"type": "progress", "data": {"value": 14, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.643Z] runninghub websocket message | {"type": "progress", "data": {"value": 15, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.699Z] runninghub websocket message | {"type": "progress", "data": {"value": 16, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.821Z] runninghub websocket message | {"type": "progress", "data": {"value": 17, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:43.933Z] runninghub websocket message | {"type": "progress", "data": {"value": 18, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:44.051Z] runninghub websocket message | {"type": "progress", "data": {"value": 19, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:44.166Z] runninghub websocket message | {"type": "progress", "data": {"value": 20, "max": 20, "prompt_id": "2046551565862572034", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:44.667Z] runninghub websocket message | {"type": "executing", "data": {"node": "78", "display_node": "78", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:44.825Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:45.721Z] runninghub websocket message | {"type": "executing", "data": {"node": "72", "display_node": "72", "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:47.396Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:28:48.162Z] runninghub websocket message | {"type": "executed", "data": {"node": "72", "display_node": "72", "output": {"images": [{"filename": "ComfyUI_00001_ucrmz_1776770928.png", "subfolder": "", "type": "output", "size": 1187.31, "width": 1024, "height": 1024, "final_filename": true, "label": "Normal", "score": "0", "cos_url": "https://rh-images-1252422369.cos.ap-beijing.myqcloud.com//3b222f65180dc20596d921664b84a845/output/ComfyUI_00001_ucrmz_1776770928.png"}]}, "prompt_id": "2046551565862572034"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:28:49.973Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T11:33:51.194Z] workflow selector console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:33:53.409Z] workflow selector console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:35:14.770Z] pinWindow closed
+[2026-04-21T11:36:05.144Z] app ready
+[2026-04-21T11:36:06.985Z] startCapture called
+[2026-04-21T11:36:07.130Z] get-screen-image-data-url | 2560x1440
+[2026-04-21T11:36:07.326Z] capture console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:36:10.064Z] capture-complete received | dataUrlLength=19534
+[2026-04-21T11:36:10.064Z] openPinnedImage called | dataUrlLength=19534
+[2026-04-21T11:36:10.137Z] captureWindow closed
+[2026-04-21T11:36:10.214Z] pin did-finish-load, sending image
+[2026-04-21T11:36:10.219Z] pin console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:36:12.762Z] workflow selector console | %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+[2026-04-21T11:36:15.064Z] runninghub upload response | {"code":0,"msg":"success","data":{"fileName":"api/feae60478680634f666924b176476227d5ebf0b7f9f4b5c7a30778bbafc5fad6.png","fileType":"input"}}
+[2026-04-21T11:36:15.305Z] runninghub create response | {"code":0,"msg":"success","errorMessages":null,"data":{"netWssUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.105&c_port=84&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzYxNzgwMTEsInRzIjoxNzc2NzcxMzc4MDExLCJzaWduIjoiYjlmYjBjNmVlOGUyMWZkM2VkZDdmNzk4NjcxMTI3YTQifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskId":"2046553607599427585","clientId":"5865076c7d6e9282f8934fe73c277f9c","taskStatus":"RUNNING","promptTips":null}}
+[2026-04-21T11:36:15.305Z] runninghub create parsed | {"taskId":"2046553607599427585","wsUrl":"wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.105&c_port=84&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzYxNzgwMTEsInRzIjoxNzc2NzcxMzc4MDExLCJzaWduIjoiYjlmYjBjNmVlOGUyMWZkM2VkZDdmNzk4NjcxMTI3YTQifQ%3D%3D&target=http://ln.runninghub.cn:11075","taskStatus":"RUNNING"}
+[2026-04-21T11:36:15.306Z] runninghub websocket connect | wss://www.runninghub.cn:443/ws/c_instance?c_host=10.2.24.105&c_port=84&clientId=5865076c7d6e9282f8934fe73c277f9c&workflowId=2046084739047628802&Rh-Comfy-Auth=eyJ1c2VySWQiOiIzYjIyMmY2NTE4MGRjMjA1OTZkOTIxNjY0Yjg0YTg0NSIsInNpZ25FeHBpcmUiOjE3NzczNzYxNzgwMTEsInRzIjoxNzc2NzcxMzc4MDExLCJzaWduIjoiYjlmYjBjNmVlOGUyMWZkM2VkZDdmNzk4NjcxMTI3YTQifQ%3D%3D&target=http://ln.runninghub.cn:11075
+[2026-04-21T11:36:15.471Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:15.881Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:15.882Z] runninghub websocket message | {"type": "status", "data": {"status": {"exec_info": {"queue_remaining": 1}}}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:16.847Z] runninghub websocket message | {"type": "execution_start", "data": {"prompt_id": "2046553607599427585", "timestamp": 1776771379425}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:18.076Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:20.643Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:23.218Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:25.787Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:26.074Z] runninghub websocket message | {"type": "execution_cached", "data": {"nodes": [], "prompt_id": "2046553607599427585", "timestamp": 1776771388643}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:26.210Z] runninghub websocket message | {"type": "executing", "data": {"node": "1", "display_node": "1", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:27.056Z] runninghub websocket message | {"type": "executing", "data": {"node": "53", "display_node": "53", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:28.120Z] runninghub websocket message | {"type": "executing", "data": {"node": "23", "display_node": "23", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:28.356Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:30.943Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:32.572Z] runninghub websocket message | {"type": "executing", "data": {"node": "35", "display_node": "35", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:33.532Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:36.102Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:38.680Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:41.241Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:42.040Z] runninghub websocket message | {"type": "executing", "data": {"node": "4", "display_node": "4", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:42.436Z] runninghub websocket message | {"type": "executing", "data": {"node": "36", "display_node": "36", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:42.751Z] runninghub websocket message | {"type": "executing", "data": {"node": "37", "display_node": "37", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:43.046Z] runninghub websocket message | {"type": "executing", "data": {"node": "39", "display_node": "39", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:43.082Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 1, "prompt_id": "2046553607599427585", "node": "39"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:43.392Z] runninghub websocket message | {"type": "executing", "data": {"node": "38", "display_node": "38", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:43.689Z] runninghub websocket message | {"type": "executing", "data": {"node": "33", "display_node": "33", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:43.827Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:44.022Z] runninghub websocket message | {"type": "executing", "data": {"node": "5", "display_node": "5", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:36:46.394Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:48.958Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:51.521Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:54.079Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:56.649Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:36:59.227Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:37:01.802Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:37:02.126Z] runninghub websocket message | {"type": "progress", "data": {"value": 1, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:02.314Z] runninghub websocket message | {"type": "progress", "data": {"value": 2, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:02.499Z] runninghub websocket message | {"type": "progress", "data": {"value": 3, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:02.684Z] runninghub websocket message | {"type": "progress", "data": {"value": 4, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:02.892Z] runninghub websocket message | {"type": "progress", "data": {"value": 5, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:03.022Z] runninghub websocket message | {"type": "progress", "data": {"value": 6, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:03.156Z] runninghub websocket message | {"type": "progress", "data": {"value": 7, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:03.290Z] runninghub websocket message | {"type": "progress", "data": {"value": 8, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:03.421Z] runninghub websocket message | {"type": "progress", "data": {"value": 9, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:03.555Z] runninghub websocket message | {"type": "progress", "data": {"value": 10, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:03.694Z] runninghub websocket message | {"type": "progress", "data": {"value": 11, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:03.813Z] runninghub websocket message | {"type": "progress", "data": {"value": 12, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:03.938Z] runninghub websocket message | {"type": "progress", "data": {"value": 13, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:04.064Z] runninghub websocket message | {"type": "progress", "data": {"value": 14, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:04.208Z] runninghub websocket message | {"type": "progress", "data": {"value": 15, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:04.323Z] runninghub websocket message | {"type": "progress", "data": {"value": 16, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:04.372Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:37:04.459Z] runninghub websocket message | {"type": "progress", "data": {"value": 17, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:04.597Z] runninghub websocket message | {"type": "progress", "data": {"value": 18, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:04.740Z] runninghub websocket message | {"type": "progress", "data": {"value": 19, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:04.868Z] runninghub websocket message | {"type": "progress", "data": {"value": 20, "max": 20, "prompt_id": "2046553607599427585", "node": "5"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:05.193Z] runninghub websocket message | {"type": "executing", "data": {"node": "78", "display_node": "78", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:06.091Z] runninghub websocket message | {"type": "executing", "data": {"node": "72", "display_node": "72", "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:06.943Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:37:09.498Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"RUNNING"}
+[2026-04-21T11:37:09.707Z] runninghub websocket message | {"type": "executed", "data": {"node": "72", "display_node": "72", "output": {"images": [{"filename": "ComfyUI_00001_gjstd_1776771428.png", "subfolder": "", "type": "output", "size": 1321.93, "width": 1024, "height": 1024, "final_filename": true, "label": "Normal", "score": "0", "cos_url": "https://rh-images-1252422369.cos.ap-beijing.myqcloud.com//3b222f65180dc20596d921664b84a845/output/ComfyUI_00001_gjstd_1776771428.png"}]}, "prompt_id": "2046553607599427585"}, "sid": "5865076c7d6e9282f8934fe73c277f9c"}
+[2026-04-21T11:37:12.082Z] runninghub status response | {"code":0,"msg":"success","errorMessages":null,"data":"SUCCESS"}
+[2026-04-21T11:37:23.118Z] pinWindow closed

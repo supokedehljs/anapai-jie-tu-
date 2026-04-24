@@ -77,6 +77,43 @@ function getPrimaryPinnedWindowEntry() {
   return entries[entries.length - 1] || null;
 }
 
+function normalizePinnedImageList(images = []) {
+  return images.filter((item) => typeof item === "string" && item.trim());
+}
+
+function buildPinImagesPayload(entry) {
+  const images = normalizePinnedImageList(entry && entry.images ? entry.images : []);
+  const fallbackImages =
+    images.length || !entry || typeof entry.dataUrl !== "string" || !entry.dataUrl
+      ? images
+      : [entry.dataUrl];
+  const maxIndex = Math.max(0, fallbackImages.length - 1);
+  const activeIndex = Math.min(Math.max(Number(entry && entry.activeImageIndex) || 0, 0), maxIndex);
+  return {
+    images: fallbackImages,
+    activeIndex,
+  };
+}
+
+function syncPinImages(entry) {
+  if (!entry || !entry.window || entry.window.isDestroyed()) return;
+  const payload = buildPinImagesPayload(entry);
+  entry.images = payload.images;
+  entry.activeImageIndex = payload.activeIndex;
+  entry.dataUrl = payload.images[payload.activeIndex] || "";
+  entry.window.webContents.send("set-image", payload);
+}
+
+function appendImageToPinEntry(entry, dataUrl, options = {}) {
+  if (!entry || typeof dataUrl !== "string" || !dataUrl.trim()) return;
+  const payload = buildPinImagesPayload(entry);
+  const nextImages = [...payload.images, dataUrl];
+  entry.images = nextImages;
+  entry.activeImageIndex =
+    options.activateAppended === false ? payload.activeIndex : nextImages.length - 1;
+  syncPinImages(entry);
+}
+
 function syncPinnedSelectionStyles() {
   getPinnedWindowEntries().forEach((entry) => {
     entry.window.webContents.send("pin-selection-state", {
@@ -1553,11 +1590,8 @@ function buildPinContextMenu(pinEntry) {
             const result = await runRunningHubGeneration(entry.dataUrl, (msg) =>
               sendPinStatus(`RunningHub: ${msg}`, [entry])
             );
-            entry.dataUrl = result.resultImageDataUrl;
+            appendImageToPinEntry(entry, result.resultImageDataUrl);
             workflowNames.push(result.workflowName);
-            if (entry.window && !entry.window.isDestroyed()) {
-              entry.window.webContents.send("set-image", result.resultImageDataUrl);
-            }
           }
           sendPinStatus(`RunningHub 生图完成（${workflowNames.join("、")})`, targetEntries);
         } catch (error) {
@@ -1667,6 +1701,8 @@ function openPinnedImage(dataUrl, selectionRect) {
   const pinEntry = {
     id: pinId,
     dataUrl,
+    images: dataUrl ? [dataUrl] : [],
+    activeImageIndex: 0,
     window: pinWindow,
   };
   pinnedImageWindows.set(pinId, pinEntry);
@@ -1692,7 +1728,7 @@ function openPinnedImage(dataUrl, selectionRect) {
   });
   pinWindow.webContents.once("did-finish-load", () => {
     logDebug("pin did-finish-load, sending image");
-    pinWindow.webContents.send("set-image", dataUrl);
+    syncPinImages(pinEntry);
     pinWindow.webContents.send("pin-click-through-state", config.defaultClickThrough);
     pinWindow.webContents.send("pin-window-meta", { id: pinId });
     syncPinnedSelectionStyles();
@@ -1978,11 +2014,8 @@ ipcMain.handle("run-selected-workflow", async () => {
       const result = await runRunningHubGeneration(entry.dataUrl, (msg) =>
         sendPinStatus(`RunningHub: ${msg}`, [entry])
       );
-      entry.dataUrl = result.resultImageDataUrl;
+      appendImageToPinEntry(entry, result.resultImageDataUrl);
       workflowNames.push(result.workflowName);
-      if (entry.window && !entry.window.isDestroyed()) {
-        entry.window.webContents.send("set-image", result.resultImageDataUrl);
-      }
     }
     sendPinStatus(`RunningHub 生图完成（共 ${selectedEntries.length} 张）`, selectedEntries);
     return { ok: true, workflowName: workflowNames.join("、"), processedCount: selectedEntries.length };
@@ -2009,6 +2042,16 @@ ipcMain.handle("pin-set-size", (event, payload = {}) => {
   const height = Math.max(80, Math.floor(Number(payload.height) || 0));
   if (!Number.isFinite(width) || !Number.isFinite(height)) return false;
   pinEntry.window.setContentSize(width, height);
+  return true;
+});
+ipcMain.handle("pin-switch-image", (event, payload = {}) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;
+  const images = normalizePinnedImageList(pinEntry.images || []);
+  if (!images.length) return false;
+  const nextIndex = Math.max(0, Math.min(images.length - 1, Math.floor(Number(payload.index) || 0)));
+  pinEntry.activeImageIndex = nextIndex;
+  syncPinImages(pinEntry);
   return true;
 });
 ipcMain.on("pin-start-drag", (event, payload = {}) => {

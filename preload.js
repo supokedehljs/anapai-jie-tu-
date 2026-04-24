@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld("api", {
     });
   },
   onSetImage(callback) {
-    ipcRenderer.on("set-image", (_event, dataUrl) => callback(dataUrl));
+    ipcRenderer.on("set-image", (_event, payload) => callback(payload));
   },
   closeCapture() {
     ipcRenderer.send("close-capture");
@@ -76,6 +76,9 @@ contextBridge.exposeInMainWorld("api", {
   },
   setPinSize(width, height) {
     return ipcRenderer.invoke("pin-set-size", { width, height });
+  },
+  switchPinImage(index) {
+    return ipcRenderer.invoke("pin-switch-image", { index });
   },
   startPinDrag(position) {
     ipcRenderer.send("pin-start-drag", position);
