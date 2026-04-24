@@ -77,6 +77,9 @@ contextBridge.exposeInMainWorld("api", {
   setPinSize(width, height) {
     return ipcRenderer.invoke("pin-set-size", { width, height });
   },
+  fitPinToImage(width, height) {
+    return ipcRenderer.invoke("pin-fit-to-image", { width, height });
+  },
   switchPinImage(index) {
     return ipcRenderer.invoke("pin-switch-image", { index });
   },

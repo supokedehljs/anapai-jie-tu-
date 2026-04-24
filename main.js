@@ -2065,6 +2065,38 @@ ipcMain.handle("pin-set-size", (event, payload = {}) => {
   pinEntry.window.setContentSize(width, height);
   return true;
 });
+ipcMain.handle("pin-fit-to-image", (event, payload = {}) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;
+  const imageWidth = Math.max(1, Number(payload.width) || 0);
+  const imageHeight = Math.max(1, Number(payload.height) || 0);
+  if (!Number.isFinite(imageWidth) || !Number.isFinite(imageHeight)) return false;
+
+  const bounds = pinEntry.window.getBounds();
+  const currentWidth = Math.max(120, bounds.width);
+  const currentHeight = Math.max(80, bounds.height);
+  const currentArea = currentWidth * currentHeight;
+  const imageRatio = imageWidth / imageHeight;
+  let nextWidth = Math.max(120, Math.round(Math.sqrt(currentArea * imageRatio)));
+  let nextHeight = Math.max(80, Math.round(nextWidth / imageRatio));
+
+  if (nextHeight < 80) {
+    nextHeight = 80;
+    nextWidth = Math.max(120, Math.round(nextHeight * imageRatio));
+  }
+  if (nextWidth < 120) {
+    nextWidth = 120;
+    nextHeight = Math.max(80, Math.round(nextWidth / imageRatio));
+  }
+
+  pinEntry.window.setBounds({
+    x: Math.round(bounds.x + (bounds.width - nextWidth) / 2),
+    y: Math.round(bounds.y + (bounds.height - nextHeight) / 2),
+    width: nextWidth,
+    height: nextHeight,
+  });
+  return true;
+});
 ipcMain.handle("pin-switch-image", (event, payload = {}) => {
   const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
   if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;

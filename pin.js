@@ -8,9 +8,9 @@ const tabsBar = document.getElementById("tabsBar");
 let currentDataUrl = "";
 let currentImages = [];
 let activeImageIndex = 0;
-let zoom = 1;
-let baseImageWidth = 0;
-let baseImageHeight = 0;
+let naturalImageWidth = 0;
+let naturalImageHeight = 0;
+let imageLoadToken = 0;
 let dragState = null;
 let pinWindowId = "";
 let isSelected = false;
@@ -28,21 +28,42 @@ function requestSelection(event) {
   window.api.selectPin({ additive: shouldUseAdditiveSelection(event) });
 }
 
-function getScaledSize(nextZoom = zoom) {
-  const width = Math.max(120, Math.round(baseImageWidth * nextZoom));
-  const height = Math.max(80, Math.round(baseImageHeight * nextZoom));
-  return { width, height };
+function resetFrameToStage() {
+  frame.style.left = "0px";
+  frame.style.top = "0px";
+  frame.style.width = "100%";
+  frame.style.height = "100%";
 }
 
-async function applyZoom() {
-  if (!baseImageWidth || !baseImageHeight) return;
-  const { width, height } = getScaledSize();
-  await window.api.setPinSize(width, height);
+async function fitWindowToCurrentImage() {
+  if (!naturalImageWidth || !naturalImageHeight) return;
+  await window.api.fitPinToImage(naturalImageWidth, naturalImageHeight);
+  requestAnimationFrame(resetFrameToStage);
 }
 
-async function setZoom(nextZoom) {
-  zoom = Math.max(0.2, Math.min(6, Number(nextZoom.toFixed(2))));
-  await applyZoom();
+async function updateDisplayedImage(dataUrl) {
+  const token = ++imageLoadToken;
+  img.src = dataUrl;
+
+  try {
+    if (typeof img.decode === "function") {
+      await img.decode();
+    }
+  } catch (_error) {
+  }
+
+  if (token !== imageLoadToken || dataUrl !== currentDataUrl) return;
+  naturalImageWidth = img.naturalWidth || img.width || 0;
+  naturalImageHeight = img.naturalHeight || img.height || 0;
+  await fitWindowToCurrentImage();
+}
+
+async function resizePinByScale(scaleFactor) {
+  const rect = stage.getBoundingClientRect();
+  const nextWidth = Math.max(120, Math.round(rect.width * scaleFactor));
+  const nextHeight = Math.max(80, Math.round(rect.height * scaleFactor));
+  await window.api.setPinSize(nextWidth, nextHeight);
+  requestAnimationFrame(resetFrameToStage);
 }
 
 function updateTabSelection() {
@@ -58,13 +79,11 @@ function updateTabSelection() {
 async function switchToImage(index, options = {}) {
   const nextIndex = Math.max(0, Math.min(currentImages.length - 1, Number(index) || 0));
   if (!currentImages.length || !currentImages[nextIndex]) return;
+  const nextDataUrl = currentImages[nextIndex];
   activeImageIndex = nextIndex;
-  currentDataUrl = currentImages[nextIndex];
-  zoom = 1;
-  baseImageWidth = 0;
-  baseImageHeight = 0;
+  currentDataUrl = nextDataUrl;
   updateTabSelection();
-  img.src = currentDataUrl;
+  updateDisplayedImage(nextDataUrl);
   if (!options.skipSync) {
     await window.api.switchPinImage(nextIndex);
   }
@@ -195,8 +214,8 @@ frame.addEventListener(
   "wheel",
   async (event) => {
     event.preventDefault();
-    const step = event.deltaY < 0 ? 0.1 : -0.1;
-    await setZoom(zoom + step);
+    const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;
+    await resizePinByScale(scaleFactor);
   },
   { passive: false }
 );
@@ -207,11 +226,18 @@ frame.addEventListener("pointerup", endDrag);
 frame.addEventListener("pointercancel", endDrag);
 
 img.addEventListener("load", async () => {
-  baseImageWidth = img.naturalWidth || img.width || 0;
-  baseImageHeight = img.naturalHeight || img.height || 0;
-  zoom = 1;
-  await applyZoom();
+  if (img.src !== currentDataUrl) return;
+  naturalImageWidth = img.naturalWidth || img.width || 0;
+  naturalImageHeight = img.naturalHeight || img.height || 0;
+  await fitWindowToCurrentImage();
 });
+
+if (typeof ResizeObserver === "function") {
+  const resizeObserver = new ResizeObserver(() => resetFrameToStage());
+  resizeObserver.observe(stage);
+} else {
+  window.addEventListener("resize", resetFrameToStage);
+}
 
 window.api.onRunningHubStatus((message) => {
   if (!message) return;
