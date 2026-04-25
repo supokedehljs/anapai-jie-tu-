@@ -5,10 +5,10 @@
   "imageNodeId": "36",
   "imageFieldName": "image",
   "outputNodeId": "8",
+  "duckDecodeEnabled": false,
+  "duckDecodePassword": "",
   "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
   "generationDurationsMs": [
-    60774,
-    51139,
     48378,
     34838,
     51279,
@@ -16,6 +16,8 @@
     28359,
     70240,
     86710,
-    44745
+    44745,
+    40024,
+    38702
   ]
 }

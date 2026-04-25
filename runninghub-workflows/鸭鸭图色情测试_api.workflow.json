@@ -1,0 +1,14 @@
+{
+  "fileName": "鸭鸭图色情测试_api.json",
+  "displayName": "鸭鸭图色情测试_api",
+  "workflowId": "2048103351329497089",
+  "imageNodeId": "36",
+  "imageFieldName": "image",
+  "outputNodeId": "72",
+  "duckDecodeEnabled": true,
+  "duckDecodePassword": "",
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
+  "generationDurationsMs": [
+    46922
+  ]
+}

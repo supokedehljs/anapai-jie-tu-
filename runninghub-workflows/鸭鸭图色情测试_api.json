@@ -1,0 +1,263 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "waiNSFWIllustrious_v150.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Checkpoint加载器(简易)"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": "ng_deepnegative_v1_75t,(badhandv4:1.2),EasyNegative,(worst quality:2),worst quality,low quality,logo,text,watermark,signature,",
+      "clip": [
+        "53",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器"
+    }
+  },
+  "5": {
+    "inputs": {
+      "seed": 371270238585604,
+      "steps": 20,
+      "cfg": 7,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 0.8000000000000002,
+      "model": [
+        "53",
+        0
+      ],
+      "positive": [
+        "38",
+        0
+      ],
+      "negative": [
+        "38",
+        1
+      ],
+      "latent_image": [
+        "33",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "23": {
+    "inputs": {
+      "text": "naked, Breast, Yoneyama Mai, masterpiece, amazing quality, 1girl, solo, long hair, looking at viewer, bangs, simple background, jewelry, green eyes, collarbone, upper body, white hair, earrings, pointy ears, head tilt, elf, A naked girl without clothes, Stomach, thigh, Nipple, Nipple ring, elf, frieren",
+      "clip": [
+        "53",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器"
+    }
+  },
+  "33": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空Latent"
+    }
+  },
+  "34": {
+    "inputs": {
+      "images": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "预览图像"
+    }
+  },
+  "35": {
+    "inputs": {
+      "control_net_name": "controlnet-scribble-sdxl-1.0-anime-xinsir.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet加载器"
+    }
+  },
+  "36": {
+    "inputs": {
+      "image": "pasted/b863d2550818f263c26b6cfd1242f87b4910dab2253b9db9b7a6b1bbe78cb534.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "加载图像"
+    }
+  },
+  "38": {
+    "inputs": {
+      "strength": 0.7600000000000001,
+      "start_percent": 0,
+      "end_percent": 0.6000000000000001,
+      "positive": [
+        "23",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "control_net": [
+        "35",
+        0
+      ],
+      "image": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "ControlNet应用（旧版高级）"
+    }
+  },
+  "39": {
+    "inputs": {
+      "preprocessor": "PyraCannyPreprocessor",
+      "resolution": 512,
+      "image": [
+        "36",
+        0
+      ]
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": {
+      "title": "Aux集成预处理器"
+    }
+  },
+  "53": {
+    "inputs": {
+      "lora_name": "Yoneyama Mai-米山舞-插画_v1_米山舞_V1.safetensors",
+      "strength_model": 0.6300000000000001,
+      "strength_clip": 0.7100000000000002,
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "LoRA加载器"
+    }
+  },
+  "72": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "保存图像"
+    }
+  },
+  "74": {
+    "inputs": {
+      "password": "",
+      "title": "",
+      "fps": 16,
+      "compress": 2,
+      "combine_video": true,
+      "教学视频合集": null,
+      "本地编码/解码工具下载": null,
+      "在线解码工具": null,
+      "交流群": null,
+      "text_display": null,
+      "images": [
+        "79",
+        0
+      ]
+    },
+    "class_type": "DuckHideNode",
+    "_meta": {
+      "title": "鸭鸭图 SuperSecureMediaProtection媒体内容保护 编码V1.2"
+    }
+  },
+  "79": {
+    "inputs": {
+      "samples": [
+        "80",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "80": {
+    "inputs": {
+      "seed": 87162150813602,
+      "steps": 20,
+      "cfg": 7,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 0.5000000000000001,
+      "model": [
+        "53",
+        0
+      ],
+      "positive": [
+        "38",
+        0
+      ],
+      "negative": [
+        "38",
+        1
+      ],
+      "latent_image": [
+        "81",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "81": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "scale_by": 1.5,
+      "samples": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "LatentUpscaleBy",
+    "_meta": {
+      "title": "Latent按系数缩放"
+    }
+  }
+}

@@ -14,6 +14,8 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const zlib = require("zlib");
+const crypto = require("crypto");
 
 let tray = null;
 let captureWindow = null;
@@ -136,10 +138,12 @@ function appendImagesToPinEntry(entry, dataUrls = [], options = {}) {
   const validDataUrls = dedupeImageDataUrls(dataUrls);
   if (!entry || !validDataUrls.length) return;
   const payload = buildPinImagesPayload(entry);
-  const nextImages = [...payload.images, ...validDataUrls];
+  const previousLength = payload.images.length;
+  const nextImages = dedupeImageDataUrls([...payload.images, ...validDataUrls]);
+  if (nextImages.length <= previousLength) return;
   entry.images = nextImages;
   entry.activeImageIndex =
-    options.activateAppended === false ? payload.activeIndex : nextImages.length - validDataUrls.length;
+    options.activateAppended === false ? payload.activeIndex : previousLength;
   syncPinImages(entry);
 }
 
@@ -209,6 +213,8 @@ function getDefaultWorkflowConfig(fileName = "") {
     imageNodeId: "36",
     imageFieldName: "image",
     outputNodeId: "",
+    duckDecodeEnabled: false,
+    duckDecodePassword: "",
     imagePlaceholder: WORKFLOW_IMAGE_PLACEHOLDER,
   };
 }
@@ -515,6 +521,11 @@ function readWorkflowConfig(fileName, workflowJson = null) {
     imageNodeId: String(parsed.imageNodeId || defaults.imageNodeId),
     imageFieldName: String(parsed.imageFieldName || defaults.imageFieldName),
     outputNodeId: String(parsed.outputNodeId || defaults.outputNodeId),
+    duckDecodeEnabled:
+      typeof parsed.duckDecodeEnabled === "boolean"
+        ? parsed.duckDecodeEnabled
+        : String(parsed.duckDecodeEnabled || "").toLowerCase() === "true" || defaults.duckDecodeEnabled,
+    duckDecodePassword: String(parsed.duckDecodePassword || defaults.duckDecodePassword || ""),
     imagePlaceholder: String(parsed.imagePlaceholder || derived.imagePlaceholder || defaults.imagePlaceholder),
   };
 }
@@ -610,6 +621,7 @@ function getWorkflowSummaries() {
       imageNodeId: workflow.imageNodeId,
       imageFieldName: workflow.imageFieldName,
       outputNodeId: workflow.outputNodeId,
+      duckDecodeEnabled: Boolean(workflow.duckDecodeEnabled),
       selected: config.selectedWorkflowFile === fileName,
       thumbnailDataUrl: thumbnailPath ? fileToDataUrl(thumbnailPath) : "",
       ...timingStats,
@@ -642,6 +654,8 @@ function readWorkflow(fileName) {
     imageNodeId: String(workflowConfig.imageNodeId || "36"),
     imageFieldName: String(workflowConfig.imageFieldName || "image"),
     outputNodeId: String(workflowConfig.outputNodeId || ""),
+    duckDecodeEnabled: Boolean(workflowConfig.duckDecodeEnabled),
+    duckDecodePassword: String(workflowConfig.duckDecodePassword || ""),
     imagePlaceholder: String(
       workflowConfig.imagePlaceholder || parsed.imagePlaceholder || WORKFLOW_IMAGE_PLACEHOLDER
     ),
@@ -692,6 +706,8 @@ async function importWorkflowFromJson(metadata = {}) {
     imageNodeId: String(metadata.imageNodeId || "36"),
     imageFieldName: String(metadata.imageFieldName || "image"),
     outputNodeId: String(metadata.outputNodeId || ""),
+    duckDecodeEnabled: Boolean(metadata.duckDecodeEnabled),
+    duckDecodePassword: String(metadata.duckDecodePassword || ""),
     imagePlaceholder: String(metadata.imagePlaceholder || WORKFLOW_IMAGE_PLACEHOLDER),
   });
 
@@ -1644,6 +1660,191 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
   }
 }
 
+function getImageDataUrlBuffer(dataUrl = "") {
+  const match = String(dataUrl || "").match(/^data:([^;,]+);base64,(.+)$/s);
+  if (!match) throw new Error("图片数据格式不是 base64 data URL");
+  return { mimeType: match[1], buffer: Buffer.from(match[2], "base64") };
+}
+
+function paethPredictor(a, b, c) {
+  const p = a + b - c;
+  const pa = Math.abs(p - a);
+  const pb = Math.abs(p - b);
+  const pc = Math.abs(p - c);
+  if (pa <= pb && pa <= pc) return a;
+  return pb <= pc ? b : c;
+}
+
+function parsePngRgbPixels(buffer) {
+  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  if (!Buffer.isBuffer(buffer) || buffer.length < 33 || !buffer.subarray(0, 8).equals(signature)) {
+    throw new Error("鸭鸭解码只支持 PNG 鸭鸭图");
+  }
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  let interlace = 0;
+  const idatChunks = [];
+  while (offset + 12 <= buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString("ascii", offset + 4, offset + 8);
+    const dataStart = offset + 8;
+    const dataEnd = dataStart + length;
+    if (dataEnd + 4 > buffer.length) break;
+    const chunkData = buffer.subarray(dataStart, dataEnd);
+    if (type === "IHDR") {
+      width = chunkData.readUInt32BE(0);
+      height = chunkData.readUInt32BE(4);
+      bitDepth = chunkData[8];
+      colorType = chunkData[9];
+      interlace = chunkData[12];
+    } else if (type === "IDAT") {
+      idatChunks.push(chunkData);
+    } else if (type === "IEND") {
+      break;
+    }
+    offset = dataEnd + 4;
+  }
+  if (!width || !height || bitDepth !== 8 || ![2, 6].includes(colorType) || interlace !== 0) {
+    throw new Error("鸭鸭解码仅支持 8 位 RGB/RGBA 非隔行 PNG");
+  }
+  const channels = colorType === 6 ? 4 : 3;
+  const stride = width * channels;
+  const inflated = zlib.inflateSync(Buffer.concat(idatChunks));
+  const raw = Buffer.alloc(height * stride);
+  let src = 0;
+  for (let y = 0; y < height; y += 1) {
+    const filter = inflated[src];
+    src += 1;
+    const rowStart = y * stride;
+    for (let x = 0; x < stride; x += 1) {
+      const left = x >= channels ? raw[rowStart + x - channels] : 0;
+      const up = y > 0 ? raw[rowStart + x - stride] : 0;
+      const upLeft = y > 0 && x >= channels ? raw[rowStart + x - stride - channels] : 0;
+      const value = inflated[src + x];
+      let decoded = value;
+      if (filter === 1) decoded = value + left;
+      else if (filter === 2) decoded = value + up;
+      else if (filter === 3) decoded = value + Math.floor((left + up) / 2);
+      else if (filter === 4) decoded = value + paethPredictor(left, up, upLeft);
+      else if (filter !== 0) throw new Error(`不支持的 PNG 滤镜类型: ${filter}`);
+      raw[rowStart + x] = decoded & 255;
+    }
+    src += stride;
+  }
+  const rgb = Buffer.alloc(width * height * 3);
+  for (let i = 0, j = 0; i < raw.length; i += channels) {
+    rgb[j] = raw[i];
+    rgb[j + 1] = raw[i + 1];
+    rgb[j + 2] = raw[i + 2];
+    j += 3;
+  }
+  return { width, height, channels: 3, rgb };
+}
+
+function extractDuckPayloadWithBits(pixels, k) {
+  const { width, height, channels, rgb } = pixels;
+  const skipW = Math.floor(width * 0.4);
+  const skipH = Math.floor(height * 0.08);
+  const bits = [];
+  const mask = (1 << k) - 1;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (skipW > 0 && skipH > 0 && y < skipH && x < skipW) continue;
+      const base = (y * width + x) * channels;
+      for (let c = 0; c < channels; c += 1) {
+        const value = rgb[base + c] & mask;
+        for (let bit = k - 1; bit >= 0; bit -= 1) {
+          bits.push((value >> bit) & 1);
+        }
+      }
+    }
+  }
+  if (bits.length < 32) throw new Error("鸭鸭图像数据不足");
+  let payloadLength = 0;
+  for (let i = 0; i < 32; i += 1) payloadLength = (payloadLength << 1) | bits[i];
+  const totalBits = 32 + payloadLength * 8;
+  if (payloadLength <= 0 || totalBits > bits.length) throw new Error("鸭鸭载荷长度异常");
+  const payload = Buffer.alloc(payloadLength);
+  for (let i = 0; i < payloadLength; i += 1) {
+    let value = 0;
+    for (let bit = 0; bit < 8; bit += 1) value = (value << 1) | bits[32 + i * 8 + bit];
+    payload[i] = value;
+  }
+  return payload;
+}
+
+function parseDuckPayloadHeader(header, password = "") {
+  let index = 0;
+  if (!Buffer.isBuffer(header) || header.length < 1) throw new Error("鸭鸭文件头损坏");
+  const hasPassword = header[index] === 1;
+  index += 1;
+  let passwordHash = Buffer.alloc(0);
+  let salt = Buffer.alloc(0);
+  if (hasPassword) {
+    if (header.length < index + 48) throw new Error("鸭鸭文件头损坏");
+    passwordHash = header.subarray(index, index + 32);
+    index += 32;
+    salt = header.subarray(index, index + 16);
+    index += 16;
+  }
+  if (header.length < index + 1) throw new Error("鸭鸭文件头损坏");
+  const extLength = header[index];
+  index += 1;
+  if (header.length < index + extLength + 4) throw new Error("鸭鸭文件头损坏");
+  const ext = header.toString("utf8", index, index + extLength).replace(/^\.+/, "");
+  index += extLength;
+  const dataLength = header.readUInt32BE(index);
+  index += 4;
+  let data = header.subarray(index);
+  if (data.length !== dataLength) throw new Error("鸭鸭数据长度不匹配");
+  if (hasPassword) {
+    if (!password) throw new Error("鸭鸭图需要密码");
+    const checkHash = crypto.createHash("sha256").update(password + salt.toString("hex"), "utf8").digest();
+    if (!checkHash.equals(passwordHash)) throw new Error("鸭鸭图密码错误");
+    const keyMaterial = Buffer.from(password + salt.toString("hex"), "utf8");
+    const stream = Buffer.alloc(data.length);
+    let filled = 0;
+    let counter = 0;
+    while (filled < stream.length) {
+      const chunk = crypto.createHash("sha256").update(keyMaterial).update(String(counter), "utf8").digest();
+      chunk.copy(stream, filled, 0, Math.min(chunk.length, stream.length - filled));
+      filled += chunk.length;
+      counter += 1;
+    }
+    data = Buffer.from(data.map((value, i) => value ^ stream[i]));
+  }
+  return { data, ext: ext || "bin" };
+}
+
+function duckDecodeImageDataUrl(dataUrl, password = "") {
+  const { buffer } = getImageDataUrlBuffer(dataUrl);
+  const pixels = parsePngRgbPixels(buffer);
+  let lastError = null;
+  for (const k of [2, 6, 8]) {
+    try {
+      const header = extractDuckPayloadWithBits(pixels, k);
+      const { data, ext } = parseDuckPayloadHeader(header, password);
+      const mimeMap = {
+        png: "image/png",
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        webp: "image/webp",
+        gif: "image/gif",
+        bmp: "image/bmp",
+      };
+      const mimeType = mimeMap[String(ext || "").toLowerCase()];
+      if (!mimeType) throw new Error(`鸭鸭图解码出的载荷不是图片: ${ext}`);
+      return `data:${mimeType};base64,${data.toString("base64")}`;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("鸭鸭图解码失败");
+}
+
 async function imageUrlToDataUrl(imageUrl) {
   logDebug("runninghub download image ref", String(imageUrl || "").slice(0, 1000));
   if (!looksLikeImageRef(imageUrl)) {
@@ -1725,6 +1926,23 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
       const detail = downloadErrors.map((item, index) => `${index + 1}. ${item.error}`).join("\n");
       throw new Error(`结果图链接已返回，但全部下载失败${detail ? `：\n${detail}` : ""}`);
     }
+    let finalResultImageDataUrls = dedupedResultImageDataUrls;
+    if (workflow.duckDecodeEnabled) {
+      if (onProgress) onProgress("正在执行鸭鸭图片解码...");
+      finalResultImageDataUrls = dedupeImageDataUrls(dedupedResultImageDataUrls.map((item, index) => {
+        try {
+          return duckDecodeImageDataUrl(item, workflow.duckDecodePassword || "");
+        } catch (error) {
+          logRunningHubFailure("duck_decode.failed", {
+            taskId,
+            workflowName: workflow.name,
+            index,
+            error: error && error.message ? error.message : String(error),
+          });
+          throw new Error(`鸭鸭图片解码失败（第 ${index + 1} 张）：${error && error.message ? error.message : String(error)}`);
+        }
+      }));
+    }
     if (onProgress) onProgress("结果已下载，正在替换贴图...");
     const durationMs = Date.now() - startedAt;
     recordWorkflowGenerationDuration(workflowFile, durationMs);
@@ -1734,8 +1952,8 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
       imageUrl,
       taskResult,
       taskId,
-      resultImageDataUrl: dedupedResultImageDataUrls[0] || "",
-      resultImageDataUrls: dedupedResultImageDataUrls,
+      resultImageDataUrl: finalResultImageDataUrls[0] || "",
+      resultImageDataUrls: finalResultImageDataUrls,
       durationMs,
     };
   } catch (error) {
@@ -1768,7 +1986,7 @@ function formatUserFacingRunningHubError(error, context = {}) {
   let title = `${workflowName} · 运行失败`;
   let reason = rawMessage;
 
-  if (/结果图链接已返回|全部下载失败|下载结果图片失败|download|结果不是可下载图片|未获取到结果图|未拿到生图结果|未获取到结果/i.test(rawMessage)) {
+  if (/鸭鸭|解码|结果图链接已返回|全部下载失败|下载结果图片失败|download|结果不是可下载图片|未获取到结果图|未拿到生图结果|未获取到结果/i.test(rawMessage)) {
     title = "结果图片获取失败";
     reason = rawMessage;
   } else if (/concurrent|concurrency|parallel|simultaneous|同时|并发|会员|super|limit|限制|too many/i.test(rawMessage)) {
@@ -2059,7 +2277,7 @@ async function runRunningHubForEntries(targetEntries = []) {
       }
       const sourceDataUrl = entry.dataUrl;
       const result = await runRunningHubGeneration(sourceDataUrl);
-      replacePinImagesWithGenerationResult(entry, sourceDataUrl, result.resultImageDataUrls || [result.resultImageDataUrl]);
+      appendImagesToPinEntry(entry, result.resultImageDataUrls || [result.resultImageDataUrl]);
       workflowNames.push(result.workflowName);
     }
     sendPinProgress({
@@ -2544,6 +2762,8 @@ ipcMain.handle("get-workflow-config", (_event, fileName) => {
         imageNodeId: workflow.imageNodeId,
         imageFieldName: workflow.imageFieldName,
         outputNodeId: workflow.outputNodeId,
+        duckDecodeEnabled: Boolean(workflow.duckDecodeEnabled),
+        duckDecodePassword: workflow.duckDecodePassword,
         imagePlaceholder: workflow.imagePlaceholder,
         thumbnailPath: getWorkflowThumbnailPath(fileName),
       },
@@ -2574,6 +2794,8 @@ ipcMain.handle("save-workflow-config", (_event, payload = {}) => {
       imageNodeId: String(payload.imageNodeId || "36").trim() || "36",
       imageFieldName: String(payload.imageFieldName || "image").trim() || "image",
       outputNodeId: String(payload.outputNodeId || "").trim(),
+      duckDecodeEnabled: Boolean(payload.duckDecodeEnabled),
+      duckDecodePassword: String(payload.duckDecodePassword || ""),
       imagePlaceholder:
         String(payload.imagePlaceholder || WORKFLOW_IMAGE_PLACEHOLDER).trim() ||
         WORKFLOW_IMAGE_PLACEHOLDER,
@@ -2664,7 +2886,7 @@ ipcMain.handle("run-selected-workflow", async () => {
       }
       const sourceDataUrl = entry.dataUrl;
       const result = await runRunningHubGeneration(sourceDataUrl);
-      replacePinImagesWithGenerationResult(entry, sourceDataUrl, result.resultImageDataUrls || [result.resultImageDataUrl]);
+      appendImagesToPinEntry(entry, result.resultImageDataUrls || [result.resultImageDataUrl]);
       workflowNames.push(result.workflowName);
     }
     sendPinProgress({

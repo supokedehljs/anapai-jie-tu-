@@ -188,6 +188,10 @@
         background: rgba(255,255,255,.06); color: #eef3fb; padding: 9px 10px; font-size: 13px; outline: none;
       }
       input:focus { border-color: rgba(74,136,255,.86); box-shadow: 0 0 0 3px rgba(61,133,255,.16); }
+      input[type="checkbox"] { width: auto; accent-color: #4f8cff; }
+      .checkboxField { flex-direction: row; align-items: center; gap: 8px; }
+      .checkboxField .fieldLabel { cursor: pointer; }
+      .fieldHint { font-size: 11px; line-height: 1.45; color: rgba(232,238,249,.56); }
       input[readonly] { color: rgba(238,243,251,.78); }
       .filePickerRow { display: flex; gap: 10px; }
       .filePickerRow input { flex: 1; }
@@ -283,6 +287,18 @@
             <label class="field">
               <div class="fieldLabel">出图节点 ID</div>
               <input id="outputNodeId" type="text" placeholder="可留空" />
+            </label>
+          </div>
+          <div class="formSection">
+            <div class="sectionTitle">结果处理</div>
+            <label class="field full checkboxField">
+              <input id="duckDecodeEnabled" type="checkbox" />
+              <span class="fieldLabel">鸭鸭 解码</span>
+            </label>
+            <label class="field full">
+              <div class="fieldLabel">鸭鸭解码密码</div>
+              <input id="duckDecodePassword" type="text" placeholder="没有密码可留空" />
+              <div class="fieldHint">勾选后，云端返回的结果图会先按鸭鸭图格式解码，再显示到置顶贴图。</div>
             </label>
           </div>
           <div class="formSection">
