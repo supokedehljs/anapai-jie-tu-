@@ -14,6 +14,51 @@ let imageLoadToken = 0;
 let dragState = null;
 let pinWindowId = "";
 let isSelected = false;
+let runningCountdownTimer = null;
+let runningCountdownPayload = null;
+
+function formatRemainingTime(milliseconds) {
+  const totalSeconds = Math.max(0, Math.ceil((Number(milliseconds) || 0) / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (minutes <= 0) return `${seconds}秒`;
+  return `${minutes}分${String(seconds).padStart(2, "0")}秒`;
+}
+
+function stopRunningCountdown(delay = 0) {
+  if (runningCountdownTimer) {
+    clearInterval(runningCountdownTimer);
+    runningCountdownTimer = null;
+  }
+  runningCountdownPayload = null;
+  if (delay > 0) {
+    setTimeout(() => {
+      document.body.classList.remove("show-running-status");
+    }, delay);
+  }
+}
+
+function renderRunningCountdown() {
+  if (!runningCountdownPayload) return;
+  const startedAt = Number(runningCountdownPayload.startedAt) || Date.now();
+  const estimatedDurationMs = Math.max(1000, Number(runningCountdownPayload.estimatedDurationMs) || 180000);
+  const remainingMs = Math.max(0, estimatedDurationMs - (Date.now() - startedAt));
+  const workflowName = runningCountdownPayload.workflowName || "当前工作流";
+  const prefix = runningCountdownPayload.prefix ? `${runningCountdownPayload.prefix} · ` : "";
+  runningStatus.textContent = `${prefix}${workflowName} · 预计 ${formatRemainingTime(remainingMs)}`;
+  document.body.classList.add("show-running-status");
+}
+
+function startRunningCountdown(payload = {}) {
+  if (runningCountdownTimer) clearInterval(runningCountdownTimer);
+  runningCountdownPayload = {
+    ...payload,
+    startedAt: Number(payload.startedAt) || Date.now(),
+    estimatedDurationMs: Number(payload.estimatedDurationMs) || 180000,
+  };
+  renderRunningCountdown();
+  runningCountdownTimer = setInterval(renderRunningCountdown, 1000);
+}
 
 function applySelectionState(nextSelected) {
   isSelected = Boolean(nextSelected);
@@ -241,12 +286,34 @@ if (typeof ResizeObserver === "function") {
 
 window.api.onRunningHubStatus((message) => {
   if (!message) return;
+  stopRunningCountdown();
   runningStatus.textContent = message;
   document.body.classList.add("show-running-status");
   if (message.includes("生图完成") || message.includes("失败")) {
     setTimeout(() => {
       document.body.classList.remove("show-running-status");
     }, 4000);
+  }
+});
+
+window.api.onRunningHubProgress((payload) => {
+  if (!payload || typeof payload !== "object") return;
+  if (payload.state === "running") {
+    startRunningCountdown(payload);
+    return;
+  }
+  if (payload.state === "done") {
+    stopRunningCountdown();
+    runningStatus.textContent = `${payload.workflowName || "工作流"} · 已完成`;
+    document.body.classList.add("show-running-status");
+    stopRunningCountdown(3500);
+    return;
+  }
+  if (payload.state === "error") {
+    stopRunningCountdown();
+    runningStatus.textContent = `${payload.workflowName || "工作流"} · 失败`;
+    document.body.classList.add("show-running-status");
+    stopRunningCountdown(4500);
   }
 });
 

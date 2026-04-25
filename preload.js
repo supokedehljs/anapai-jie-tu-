@@ -66,6 +66,15 @@ contextBridge.exposeInMainWorld("api", {
   runSelectedWorkflow() {
     return ipcRenderer.invoke("run-selected-workflow");
   },
+  getWorkflowInputContext() {
+    return ipcRenderer.invoke("get-workflow-input-context");
+  },
+  getClipboardImageDataUrl() {
+    return ipcRenderer.invoke("get-clipboard-image-data-url");
+  },
+  runWorkflowWithImage(dataUrl) {
+    return ipcRenderer.invoke("run-workflow-with-image", dataUrl);
+  },
   closeWorkflowSelector() {
     ipcRenderer.send("workflow-selector-close");
   },
@@ -77,6 +86,11 @@ contextBridge.exposeInMainWorld("api", {
   onWorkflowEditRequest(callback) {
     ipcRenderer.on("workflow-edit-request", (_event, fileName) =>
       callback(String(fileName || ""))
+    );
+  },
+  onWorkflowInputContext(callback) {
+    ipcRenderer.on("workflow-input-context", (_event, payload) =>
+      callback(payload && typeof payload === "object" ? payload : {})
     );
   },
   setPinClickThrough(enable) {
@@ -124,6 +138,11 @@ contextBridge.exposeInMainWorld("api", {
   onRunningHubStatus(callback) {
     ipcRenderer.on("runninghub-status", (_event, message) =>
       callback(String(message || ""))
+    );
+  },
+  onRunningHubProgress(callback) {
+    ipcRenderer.on("runninghub-progress", (_event, payload) =>
+      callback(payload && typeof payload === "object" ? payload : {})
     );
   },
   getSettings() {

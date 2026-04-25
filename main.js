@@ -125,12 +125,19 @@ function syncPinnedSelectionStyles() {
   });
 }
 
+function sendWorkflowInputContext() {
+  if (workflowWindow && !workflowWindow.isDestroyed()) {
+    workflowWindow.webContents.send("workflow-input-context", getWorkflowInputContext());
+  }
+}
+
 function setSelectedPinnedImages(ids = []) {
   const validIds = new Set(
     ids.filter((id) => typeof id === "string" && pinnedImageWindows.has(id))
   );
   selectedPinnedImageIds = validIds;
   syncPinnedSelectionStyles();
+  sendWorkflowInputContext();
 }
 
 function togglePinnedImageSelection(id, additive = false) {
@@ -160,6 +167,7 @@ function deletePinnedWindowEntry(id) {
     lastFocusedPinWindowId = null;
   }
   syncPinnedSelectionStyles();
+  sendWorkflowInputContext();
 }
 
 function getDefaultWorkflowConfig(fileName = "") {
@@ -524,6 +532,20 @@ function getWorkflowTimingStats(fileName) {
   return {
     generationSampleCount: durations.length,
     averageGenerationDurationMs: average,
+  };
+}
+
+function getSelectedWorkflowTimingInfo() {
+  const config = getRunningHubConfig();
+  const workflowFile = config.selectedWorkflowFile;
+  if (!workflowFile) {
+    return { workflowName: "当前工作流", estimatedDurationMs: 180000 };
+  }
+  const workflow = readWorkflow(workflowFile);
+  const timingStats = getWorkflowTimingStats(workflowFile);
+  return {
+    workflowName: workflow.name || path.basename(workflowFile, path.extname(workflowFile)),
+    estimatedDurationMs: timingStats.averageGenerationDurationMs || 180000,
   };
 }
 
@@ -1557,6 +1579,25 @@ function sendPinStatus(message, targetEntries = []) {
   });
 }
 
+function sendPinProgress(payload = {}, targetEntries = []) {
+  const entries = Array.isArray(targetEntries) && targetEntries.length
+    ? targetEntries.filter((entry) => entry && entry.window && !entry.window.isDestroyed())
+    : getPinnedWindowEntries();
+  entries.forEach((entry) => {
+    entry.window.webContents.send("runninghub-progress", payload && typeof payload === "object" ? payload : {});
+  });
+}
+
+function getWorkflowInputContext() {
+  const selectedEntries = getSelectedPinnedWindowEntries();
+  const entry = selectedEntries[0] || null;
+  return {
+    hasSelectedPin: Boolean(entry && entry.dataUrl),
+    selectedPinCount: selectedEntries.length,
+    imageDataUrl: entry && entry.dataUrl ? entry.dataUrl : "",
+  };
+}
+
 function sendWorkflowSelectionData() {
   if (workflowWindow && !workflowWindow.isDestroyed()) {
     workflowWindow.webContents.send("workflow-selection-data", getWorkflowSummaries());
@@ -1602,6 +1643,7 @@ function showWorkflowWindow(options = {}) {
     resizable: true,
     skipTaskbar: false,
     autoHideMenuBar: true,
+    parent: parentWindow,
     modal: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -1617,6 +1659,7 @@ function showWorkflowWindow(options = {}) {
   });
   workflowWindow.webContents.once("did-finish-load", () => {
     sendWorkflowSelectionData();
+    sendWorkflowInputContext();
     if (options.editFileName) {
       sendWorkflowEditRequest(options.editFileName);
     }
@@ -1751,25 +1794,41 @@ async function runRunningHubForEntries(targetEntries = []) {
     ? targetEntries.filter((entry) => entry && entry.dataUrl)
     : [];
   if (!entries.length || runningHubUploading) return;
+  const timingInfo = getSelectedWorkflowTimingInfo();
   runningHubUploading = true;
-  sendPinStatus("RunningHub: 准备开始...", entries);
+  sendPinProgress({
+    state: "running",
+    workflowName: timingInfo.workflowName,
+    estimatedDurationMs: timingInfo.estimatedDurationMs,
+    startedAt: Date.now(),
+  }, entries);
   try {
     const workflowNames = [];
     for (let index = 0; index < entries.length; index += 1) {
       const entry = entries[index];
-      sendPinStatus(
-        `RunningHub: 正在处理第 ${index + 1}/${entries.length} 张图片...`,
-        [entry]
-      );
-      const result = await runRunningHubGeneration(entry.dataUrl, (msg) =>
-        sendPinStatus(`RunningHub: ${msg}`, [entry])
-      );
+      if (entries.length > 1) {
+        sendPinProgress({
+          state: "running",
+          workflowName: timingInfo.workflowName,
+          estimatedDurationMs: timingInfo.estimatedDurationMs,
+          startedAt: Date.now(),
+          prefix: `第 ${index + 1}/${entries.length} 张`,
+        }, [entry]);
+      }
+      const result = await runRunningHubGeneration(entry.dataUrl);
       appendImageToPinEntry(entry, result.resultImageDataUrl);
       workflowNames.push(result.workflowName);
     }
-    sendPinStatus(`RunningHub 生图完成（${workflowNames.join("、")})`, entries);
+    sendPinProgress({
+      state: "done",
+      workflowName: workflowNames.join("、") || timingInfo.workflowName,
+    }, entries);
   } catch (error) {
-    sendPinStatus(`RunningHub 失败: ${error.message || error}`, entries);
+    sendPinProgress({
+      state: "error",
+      workflowName: timingInfo.workflowName,
+      message: error.message || String(error),
+    }, entries);
   } finally {
     runningHubUploading = false;
   }
@@ -2013,15 +2072,26 @@ function openPinnedImage(dataUrl, selectionRect) {
   pinWindow.on("focus", () => {
     lastFocusedPinWindowId = pinId;
   });
+  pinWindow.on("close", () => {
+    if (!workflowWindow || workflowWindow.isDestroyed()) return;
+    try {
+      const parentWindow = workflowWindow.getParentWindow();
+      if (parentWindow && parentWindow.id === pinWindow.id) {
+        const bounds = workflowWindow.getBounds();
+        workflowWindow.setParentWindow(null);
+        workflowWindow.setBounds(bounds);
+        workflowWindow.show();
+      }
+    } catch (error) {
+      logDebug("detach workflow parent failed", error && error.message ? error.message : String(error));
+    }
+  });
   pinWindow.on("closed", () => {
     logDebug("pinWindow closed", pinId);
     pinDragState = null;
     deletePinnedWindowEntry(pinId);
     if (!getPinnedWindowEntries().length) {
       pinnedWindowsHidden = false;
-      if (workflowWindow && !workflowWindow.isDestroyed()) {
-        workflowWindow.close();
-      }
     }
     refreshTrayMenu();
   });
@@ -2170,6 +2240,32 @@ ipcMain.on("pin-open-workflow-selector", () => {
 ipcMain.handle("get-workflow-summaries", () => {
   return getWorkflowSummaries();
 });
+ipcMain.handle("get-workflow-input-context", () => {
+  return getWorkflowInputContext();
+});
+ipcMain.handle("get-clipboard-image-data-url", () => {
+  const image = clipboard.readImage();
+  if (!image || image.isEmpty()) {
+    return { ok: false, error: "剪贴板里没有图片" };
+  }
+  return { ok: true, dataUrl: image.toDataURL() };
+});
+ipcMain.handle("run-workflow-with-image", async (_event, dataUrl) => {
+  const imageDataUrl = String(dataUrl || "");
+  if (!imageDataUrl.startsWith("data:image/")) {
+    return { ok: false, error: "请先放入一张图片" };
+  }
+  if (runningHubUploading) {
+    return { ok: false, error: "RunningHub 正在处理，请稍后再试" };
+  }
+  try {
+    const pinEntry = openPinnedImage(imageDataUrl, null);
+    runRunningHubForEntries([pinEntry]);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error && error.message ? error.message : String(error) };
+  }
+});
 ipcMain.handle("get-workflow-config", (_event, fileName) => {
   if (!fileName || typeof fileName !== "string") {
     return { ok: false, error: "无效的工作流文件名" };
@@ -2285,24 +2381,43 @@ ipcMain.handle("run-selected-workflow", async () => {
     return { ok: false, error: "请先选中至少一张置顶截图" };
   }
 
+  const timingInfo = getSelectedWorkflowTimingInfo();
   runningHubUploading = true;
-  sendPinStatus("RunningHub: 准备开始...", selectedEntries);
+  sendPinProgress({
+    state: "running",
+    workflowName: timingInfo.workflowName,
+    estimatedDurationMs: timingInfo.estimatedDurationMs,
+    startedAt: Date.now(),
+  }, selectedEntries);
   try {
     const workflowNames = [];
     for (let index = 0; index < selectedEntries.length; index += 1) {
       const entry = selectedEntries[index];
-      sendPinStatus(`RunningHub: 正在运行第 ${index + 1}/${selectedEntries.length} 张...`, [entry]);
-      const result = await runRunningHubGeneration(entry.dataUrl, (msg) =>
-        sendPinStatus(`RunningHub: ${msg}`, [entry])
-      );
+      if (selectedEntries.length > 1) {
+        sendPinProgress({
+          state: "running",
+          workflowName: timingInfo.workflowName,
+          estimatedDurationMs: timingInfo.estimatedDurationMs,
+          startedAt: Date.now(),
+          prefix: `第 ${index + 1}/${selectedEntries.length} 张`,
+        }, [entry]);
+      }
+      const result = await runRunningHubGeneration(entry.dataUrl);
       appendImageToPinEntry(entry, result.resultImageDataUrl);
       workflowNames.push(result.workflowName);
     }
-    sendPinStatus(`RunningHub 生图完成（共 ${selectedEntries.length} 张）`, selectedEntries);
+    sendPinProgress({
+      state: "done",
+      workflowName: workflowNames.join("、") || timingInfo.workflowName,
+    }, selectedEntries);
     return { ok: true, workflowName: workflowNames.join("、"), processedCount: selectedEntries.length };
   } catch (error) {
     const message = error && error.message ? error.message : String(error);
-    sendPinStatus(`RunningHub 失败: ${message}`, selectedEntries);
+    sendPinProgress({
+      state: "error",
+      workflowName: timingInfo.workflowName,
+      message,
+    }, selectedEntries);
     return { ok: false, error: message };
   } finally {
     runningHubUploading = false;

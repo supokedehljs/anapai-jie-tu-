@@ -55,8 +55,29 @@
       }
       #cancelWorkflowBtn { background: rgba(255,255,255,.08); color: #eef3fb; }
       #content {
-        flex: 1; min-height: 0; padding: 8px 22px 22px; display: flex; flex-direction: column; gap: 12px;
+        flex: 1; min-height: 0; padding: 8px 22px 22px; display: flex; gap: 16px;
       }
+      #leftPanel {
+        width: 188px; min-width: 188px; align-self: flex-start; display: flex; flex-direction: column; gap: 8px;
+        padding: 10px; border-radius: 16px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08);
+      }
+      #leftPanelTitle { font-size: 13px; font-weight: 700; color: rgba(246,248,252,.94); }
+      #inputImageBox {
+        width: 100%; aspect-ratio: 1 / 1; min-height: 0; border-radius: 14px; border: 1px dashed rgba(255,255,255,.18);
+        background: rgba(255,255,255,.035); display: flex; align-items: center; justify-content: center; overflow: hidden;
+        position: relative;
+      }
+      #inputImageBox[data-dragging="true"] { border-color: rgba(74,136,255,.86); background: rgba(74,136,255,.12); }
+      #inputImagePreview { width: 100%; height: 100%; object-fit: contain; display: none; }
+      #inputImageBox[data-has-image="true"] #inputImagePreview { display: block; }
+      #inputImageBox[data-has-image="true"] #inputImagePlaceholder { display: none; }
+      #inputImagePlaceholder { padding: 12px; text-align: center; color: rgba(232,238,249,.66); font-size: 11px; line-height: 1.55; }
+      #inputImageActions { display: flex; flex-direction: column; gap: 6px; }
+      #inputImageActions button { padding: 7px 8px; font-size: 11px; }
+      #pasteImageBtn { background: rgba(255,255,255,.1); color: #eef3fb; }
+      #clearInputImageBtn { background: rgba(255,92,92,.16); color: #ffd7d7; }
+      #inputImageHint { min-height: 16px; font-size: 10px; line-height: 1.45; color: rgba(232,238,249,.56); }
+      #workflowArea { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
       #tips { display: none; }
       #grid {
         flex: 1; min-height: 0; overflow: auto; display: grid;
@@ -186,10 +207,24 @@
         </div>
       </div>
       <div id="content">
-        <div id="tips"></div>
-        <div id="empty">当前还没有工作流。点击右下角 + 导入新的 JSON。</div>
-        <div id="grid"></div>
-        <div id="status"></div>
+        <aside id="leftPanel">
+          <div id="leftPanelTitle">处理图片</div>
+          <div id="inputImageBox" data-has-image="false" data-dragging="false">
+            <img id="inputImagePreview" alt="当前处理图片" />
+            <div id="inputImagePlaceholder">选择置顶贴图后会显示在这里。<br />也可以拖入图片，或从剪贴板粘贴。</div>
+          </div>
+          <div id="inputImageActions">
+            <button id="pasteImageBtn" type="button">从剪贴板放入图片</button>
+            <button id="clearInputImageBtn" type="button">取消当前图片</button>
+          </div>
+          <div id="inputImageHint">没有选中置顶图时，可在这里临时放入图片。</div>
+        </aside>
+        <section id="workflowArea">
+          <div id="tips"></div>
+          <div id="empty">当前还没有工作流。点击右下角 + 导入新的 JSON。</div>
+          <div id="grid"></div>
+          <div id="status"></div>
+        </section>
       </div>
     </div>
     <button id="uploadBtn" title="上传工作流" aria-label="上传工作流">+</button>
