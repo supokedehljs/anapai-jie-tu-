@@ -2051,12 +2051,16 @@ function openPinnedImage(dataUrl, selectionRect) {
     forward: true,
   });
   if (hasSelectionRect) {
-    pinWindow.setBounds({
+    const nextBounds = {
       x: Math.round(selectionRect.left),
       y: Math.round(selectionRect.top),
       width: Math.max(120, Math.round(selectionRect.width)),
       height: Math.max(80, Math.round(selectionRect.height)),
-    });
+    };
+    pinWindow.setBounds(nextBounds);
+    pinEntry.preciseBounds = { ...nextBounds };
+  } else {
+    pinEntry.preciseBounds = { ...pinWindow.getBounds() };
   }
   pinWindow.loadFile(path.join(__dirname, "pin.html"));
   pinWindow.webContents.on("console-message", (_e, _level, msg) => {
@@ -2438,6 +2442,8 @@ ipcMain.handle("pin-set-size", (event, payload = {}) => {
   const height = Math.max(80, Math.floor(Number(payload.height) || 0));
   if (!Number.isFinite(width) || !Number.isFinite(height)) return false;
   pinEntry.window.setContentSize(width, height);
+  const bounds = pinEntry.window.getBounds();
+  pinEntry.preciseBounds = { ...bounds };
   return true;
 });
 ipcMain.handle("pin-scale-at", (event, payload = {}) => {
@@ -2445,19 +2451,29 @@ ipcMain.handle("pin-scale-at", (event, payload = {}) => {
   if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;
   const scale = Number(payload.scaleFactor) || 1;
   if (!Number.isFinite(scale) || scale <= 0) return false;
-  const bounds = pinEntry.window.getBounds();
-  const nextWidth = Math.max(120, Math.round(bounds.width * scale));
-  const nextHeight = Math.max(80, Math.round(bounds.height * scale));
-  const anchorX = Math.min(Math.max(Number(payload.anchorX) || bounds.width / 2, 0), bounds.width);
-  const anchorY = Math.min(Math.max(Number(payload.anchorY) || bounds.height / 2, 0), bounds.height);
-  const ratioX = bounds.width > 0 ? anchorX / bounds.width : 0.5;
-  const ratioY = bounds.height > 0 ? anchorY / bounds.height : 0.5;
-  pinEntry.window.setBounds({
-    x: Math.round(bounds.x + anchorX - nextWidth * ratioX),
-    y: Math.round(bounds.y + anchorY - nextHeight * ratioY),
+  const windowBounds = pinEntry.window.getBounds();
+  const preciseBounds = pinEntry.preciseBounds || { ...windowBounds };
+  const ratioX = Math.min(1, Math.max(0, Number(payload.anchorRatioX)));
+  const ratioY = Math.min(1, Math.max(0, Number(payload.anchorRatioY)));
+  const safeRatioX = Number.isFinite(ratioX) ? ratioX : 0.5;
+  const safeRatioY = Number.isFinite(ratioY) ? ratioY : 0.5;
+  const anchorScreenX = preciseBounds.x + preciseBounds.width * safeRatioX;
+  const anchorScreenY = preciseBounds.y + preciseBounds.height * safeRatioY;
+  const nextWidth = Math.max(120, preciseBounds.width * scale);
+  const nextHeight = Math.max(80, preciseBounds.height * scale);
+  const nextBounds = {
+    x: anchorScreenX - nextWidth * safeRatioX,
+    y: anchorScreenY - nextHeight * safeRatioY,
     width: nextWidth,
     height: nextHeight,
-  });
+  };
+  pinEntry.preciseBounds = nextBounds;
+  pinEntry.window.setBounds({
+    x: Math.round(nextBounds.x),
+    y: Math.round(nextBounds.y),
+    width: Math.round(nextBounds.width),
+    height: Math.round(nextBounds.height),
+  }, false);
   return true;
 });
 ipcMain.handle("pin-set-opacity", (event, opacity) => {
@@ -2491,12 +2507,14 @@ ipcMain.handle("pin-fit-to-image", (event, payload = {}) => {
     nextHeight = Math.max(80, Math.round(nextWidth / imageRatio));
   }
 
-  pinEntry.window.setBounds({
+  const nextBounds = {
     x: Math.round(bounds.x + (bounds.width - nextWidth) / 2),
     y: Math.round(bounds.y + (bounds.height - nextHeight) / 2),
     width: nextWidth,
     height: nextHeight,
-  });
+  };
+  pinEntry.preciseBounds = { ...nextBounds };
+  pinEntry.window.setBounds(nextBounds);
   return true;
 });
 ipcMain.handle("pin-switch-image", (event, payload = {}) => {
@@ -2532,7 +2550,7 @@ ipcMain.on("pin-start-drag", (event, payload = {}) => {
   if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return;
   pinDragState = {
     pinId: pinEntry.id,
-    startBounds: pinEntry.window.getBounds(),
+    startBounds: pinEntry.preciseBounds || pinEntry.window.getBounds(),
     startX: Number(payload.screenX) || 0,
     startY: Number(payload.screenY) || 0,
   };
@@ -2545,11 +2563,13 @@ ipcMain.on("pin-drag", (_event, payload = {}) => {
   const currentY = Number(payload.screenY) || 0;
   const deltaX = currentX - pinDragState.startX;
   const deltaY = currentY - pinDragState.startY;
-  pinEntry.window.setBounds({
+  const nextBounds = {
     ...pinDragState.startBounds,
     x: Math.round(pinDragState.startBounds.x + deltaX),
     y: Math.round(pinDragState.startBounds.y + deltaY),
-  });
+  };
+  pinEntry.preciseBounds = { ...nextBounds };
+  pinEntry.window.setBounds(nextBounds);
 });
 ipcMain.on("pin-end-drag", () => {
   pinDragState = null;

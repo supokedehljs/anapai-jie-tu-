@@ -22,6 +22,32 @@ let scaleAnchorPoint = { x: 0.5, y: 0.5 };
 let scaleAnchorPinned = false;
 let lastPointerPosition = null;
 let ctrlFileDragStarted = false;
+let pendingScaleFactor = 1;
+let pendingScaleOptions = null;
+let scaleFrameRequest = 0;
+let scaleInFlight = false;
+
+function scheduleScaleOperation(scaleFactor, options = {}) {
+  pendingScaleFactor *= scaleFactor;
+  pendingScaleOptions = { ...options };
+  if (scaleFrameRequest || scaleInFlight) return;
+  scaleFrameRequest = requestAnimationFrame(async () => {
+    scaleFrameRequest = 0;
+    const factor = pendingScaleFactor;
+    const nextOptions = pendingScaleOptions || {};
+    pendingScaleFactor = 1;
+    pendingScaleOptions = null;
+    scaleInFlight = true;
+    try {
+      await resizePinByScale(factor, nextOptions);
+    } finally {
+      scaleInFlight = false;
+      if (Math.abs(pendingScaleFactor - 1) > 0.0001) {
+        scheduleScaleOperation(1, pendingScaleOptions || nextOptions);
+      }
+    }
+  });
+}
 
 function updateScaleAnchorVisual() {
   const rect = stage.getBoundingClientRect();
@@ -144,18 +170,15 @@ async function resizePinByScale(scaleFactor, options = {}) {
   if (shouldUseAnchor) {
     await window.api.scalePinAt({
       scaleFactor,
-      anchorX: scaleAnchorPoint.x * rect.width,
-      anchorY: scaleAnchorPoint.y * rect.height,
+      anchorRatioX: scaleAnchorPoint.x,
+      anchorRatioY: scaleAnchorPoint.y,
     });
   } else {
     const nextWidth = Math.max(120, Math.round(rect.width * scaleFactor));
     const nextHeight = Math.max(80, Math.round(rect.height * scaleFactor));
     await window.api.setPinSize(nextWidth, nextHeight);
   }
-  requestAnimationFrame(() => {
-    resetFrameToStage();
-    updateScaleAnchorVisual();
-  });
+  requestAnimationFrame(updateScaleAnchorVisual);
 }
 
 function updateTabSelection() {
@@ -329,11 +352,11 @@ frame.addEventListener(
     if (event.altKey) {
       const direction = event.deltaY < 0 ? 1 : -1;
       const scaleFactor = 1 + direction * 0.025;
-      await resizePinByScale(scaleFactor, { useAnchor: true });
+      scheduleScaleOperation(scaleFactor, { useAnchor: true });
       return;
     }
     const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;
-    await resizePinByScale(scaleFactor);
+    scheduleScaleOperation(scaleFactor);
   },
   { passive: false }
 );
