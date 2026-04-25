@@ -17,6 +17,7 @@ const fs = require("fs");
 
 let tray = null;
 let captureWindow = null;
+let pendingCapturePayload = null;
 let workflowWindow = null;
 let settingsWindow = null;
 let pinDragState = null;
@@ -1745,6 +1746,35 @@ function showSettingsWindow() {
   });
 }
 
+async function runRunningHubForEntries(targetEntries = []) {
+  const entries = Array.isArray(targetEntries)
+    ? targetEntries.filter((entry) => entry && entry.dataUrl)
+    : [];
+  if (!entries.length || runningHubUploading) return;
+  runningHubUploading = true;
+  sendPinStatus("RunningHub: 准备开始...", entries);
+  try {
+    const workflowNames = [];
+    for (let index = 0; index < entries.length; index += 1) {
+      const entry = entries[index];
+      sendPinStatus(
+        `RunningHub: 正在处理第 ${index + 1}/${entries.length} 张图片...`,
+        [entry]
+      );
+      const result = await runRunningHubGeneration(entry.dataUrl, (msg) =>
+        sendPinStatus(`RunningHub: ${msg}`, [entry])
+      );
+      appendImageToPinEntry(entry, result.resultImageDataUrl);
+      workflowNames.push(result.workflowName);
+    }
+    sendPinStatus(`RunningHub 生图完成（${workflowNames.join("、")})`, entries);
+  } catch (error) {
+    sendPinStatus(`RunningHub 失败: ${error.message || error}`, entries);
+  } finally {
+    runningHubUploading = false;
+  }
+}
+
 function buildPinContextMenu(pinEntry) {
   const currentConfig = getRunningHubConfig();
   const currentWorkflowFile = currentConfig.selectedWorkflowFile;
@@ -1767,28 +1797,7 @@ function buildPinContextMenu(pinEntry) {
         targetEntries.length > 0 &&
         targetEntries.every((entry) => Boolean(entry.dataUrl)),
       click: async () => {
-        runningHubUploading = true;
-        sendPinStatus("RunningHub: 准备开始...", targetEntries);
-        try {
-          const workflowNames = [];
-          for (let index = 0; index < targetEntries.length; index += 1) {
-            const entry = targetEntries[index];
-            sendPinStatus(
-              `RunningHub: 正在处理第 ${index + 1}/${targetEntries.length} 张图片...`,
-              [entry]
-            );
-            const result = await runRunningHubGeneration(entry.dataUrl, (msg) =>
-              sendPinStatus(`RunningHub: ${msg}`, [entry])
-            );
-            appendImageToPinEntry(entry, result.resultImageDataUrl);
-            workflowNames.push(result.workflowName);
-          }
-          sendPinStatus(`RunningHub 生图完成（${workflowNames.join("、")})`, targetEntries);
-        } catch (error) {
-          sendPinStatus(`RunningHub 失败: ${error.message || error}`, targetEntries);
-        } finally {
-          runningHubUploading = false;
-        }
+        runRunningHubForEntries(targetEntries);
       },
     },
     {
@@ -1813,6 +1822,35 @@ function buildPinContextMenu(pinEntry) {
   ]);
 }
 
+async function captureScreenImageDataUrl(payload = {}) {
+  const displayId = Number(payload.displayId);
+  const width = Number.isFinite(payload.width) ? payload.width : 1920;
+  const height = Number.isFinite(payload.height) ? payload.height : 1080;
+  logDebug("get-screen-image-data-url", `${displayId || "auto"}:${width}x${height}`);
+
+  const sources = await desktopCapturer.getSources({
+    types: ["screen"],
+    thumbnailSize: { width, height },
+  });
+
+  if (!sources.length) {
+    throw new Error("未获取到可用屏幕源");
+  }
+
+  const matchedSource = Number.isFinite(displayId)
+    ? sources.find((item) => String(item.display_id || "") === String(displayId))
+    : null;
+  const sourceWithImage =
+    matchedSource || sources.find((item) => !item.thumbnail.isEmpty()) || sources[0];
+  const dataUrl = sourceWithImage.thumbnail.toDataURL();
+
+  if (!dataUrl || dataUrl === "data:image/png;base64,") {
+    throw new Error("屏幕截图数据为空");
+  }
+
+  return dataUrl;
+}
+
 function startCapture() {
   logDebug("startCapture called");
   if (captureWindow) {
@@ -1826,6 +1864,13 @@ function startCapture() {
   const displayBounds = targetDisplay && targetDisplay.bounds
     ? targetDisplay.bounds
     : screen.getPrimaryDisplay().bounds;
+  const scaleFactor = targetDisplay && targetDisplay.scaleFactor ? targetDisplay.scaleFactor : 1;
+  const displayInfo = {
+    id: targetDisplay && targetDisplay.id,
+    scaleFactor,
+    bounds: displayBounds,
+    workArea: targetDisplay && targetDisplay.workArea,
+  };
 
   captureWindow = new BrowserWindow({
     x: Math.round(displayBounds.x),
@@ -1834,6 +1879,7 @@ function startCapture() {
     height: Math.max(1, Math.round(displayBounds.height)),
     frame: false,
     transparent: true,
+    show: false,
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
@@ -1849,6 +1895,17 @@ function startCapture() {
   captureWindow.setAlwaysOnTop(true, "screen-saver");
   captureWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   captureWindow.setBounds(displayBounds);
+
+  const pageReady = new Promise((resolve) => {
+    captureWindow.webContents.once("did-finish-load", resolve);
+  });
+  const captureScale = Math.min(scaleFactor, 1.5);
+  const imageReady = captureScreenImageDataUrl({
+    displayId: displayInfo.id,
+    width: Math.floor(displayBounds.width * captureScale),
+    height: Math.floor(displayBounds.height * captureScale),
+  });
+
   captureWindow.loadFile(path.join(__dirname, "capture.html"));
   captureWindow.webContents.on("console-message", (_e, _level, msg) => {
     logDebug("capture console", msg);
@@ -1856,7 +1913,24 @@ function startCapture() {
   captureWindow.on("closed", () => {
     logDebug("captureWindow closed");
     captureWindow = null;
+    pendingCapturePayload = null;
   });
+
+  Promise.all([pageReady, imageReady])
+    .then(([, fullImage]) => {
+      if (!captureWindow || captureWindow.isDestroyed()) return;
+      pendingCapturePayload = { fullImage, displayInfo };
+      captureWindow.webContents.send("capture-ready-data", pendingCapturePayload);
+      captureWindow.showInactive();
+      captureWindow.focus();
+    })
+    .catch((error) => {
+      logDebug("startCapture failed", error && error.message ? error.message : String(error));
+      if (captureWindow && !captureWindow.isDestroyed()) {
+        captureWindow.close();
+      }
+      dialog.showErrorBox("截图失败", `获取屏幕图像失败：${error.message || error}`);
+    });
 }
 
 function openPinnedImage(dataUrl, selectionRect) {
@@ -1955,6 +2029,7 @@ function openPinnedImage(dataUrl, selectionRect) {
   pinWindow.show();
   pinWindow.focus();
   refreshTrayMenu();
+  return pinEntry;
 }
 
 ipcMain.on("close-capture", () => {
@@ -1968,6 +2043,7 @@ ipcMain.on("capture-complete", (_event, payload) => {
     payload && typeof payload === "object" ? payload.dataUrl : payload;
   const selectionRect =
     payload && typeof payload === "object" ? payload.selectionRect : null;
+  const runImmediately = Boolean(payload && typeof payload === "object" && payload.runImmediately);
   logDebug("capture-complete received", `dataUrlLength=${dataUrl ? dataUrl.length : 0}`);
   if (captureWindow && !captureWindow.isDestroyed()) {
     captureWindow.close();
@@ -1978,7 +2054,10 @@ ipcMain.on("capture-complete", (_event, payload) => {
     return;
   }
   try {
-    openPinnedImage(dataUrl, selectionRect);
+    const pinEntry = openPinnedImage(dataUrl, selectionRect);
+    if (runImmediately && pinEntry) {
+      setImmediate(() => runRunningHubForEntries([pinEntry]));
+    }
   } catch (error) {
     logDebug("openPinnedImage failed", error && error.stack ? error.stack : String(error));
     dialog.showErrorBox("截图失败", `打开置顶窗口失败：${error.message || error}`);
@@ -1999,6 +2078,15 @@ ipcMain.handle("save-image", async (_event, dataUrl) => {
   const pngBuffer = image.toPNG();
   fs.writeFileSync(targetPath, pngBuffer);
   return { ok: true, filePath: targetPath };
+});
+
+ipcMain.handle("copy-image-to-clipboard", async (_event, dataUrl) => {
+  const image = nativeImage.createFromDataURL(String(dataUrl || ""));
+  if (image.isEmpty()) {
+    throw new Error("未收到有效图片数据");
+  }
+  clipboard.writeImage(image);
+  return { ok: true };
 });
 
 ipcMain.handle("choose-directory", async () => {
@@ -2067,32 +2155,7 @@ ipcMain.handle("get-capture-display-info", () => {
   };
 });
 ipcMain.handle("get-screen-image-data-url", async (_event, payload = {}) => {
-  const displayId = Number(payload.displayId);
-  const width = Number.isFinite(payload.width) ? payload.width : 1920;
-  const height = Number.isFinite(payload.height) ? payload.height : 1080;
-  logDebug("get-screen-image-data-url", `${displayId || "auto"}:${width}x${height}`);
-
-  const sources = await desktopCapturer.getSources({
-    types: ["screen"],
-    thumbnailSize: { width, height },
-  });
-
-  if (!sources.length) {
-    throw new Error("未获取到可用屏幕源");
-  }
-
-  const matchedSource = Number.isFinite(displayId)
-    ? sources.find((item) => String(item.display_id || "") === String(displayId))
-    : null;
-  const sourceWithImage =
-    matchedSource || sources.find((item) => !item.thumbnail.isEmpty()) || sources[0];
-  const dataUrl = sourceWithImage.thumbnail.toDataURL();
-
-  if (!dataUrl || dataUrl === "data:image/png;base64,") {
-    throw new Error("屏幕截图数据为空");
-  }
-
-  return dataUrl;
+  return captureScreenImageDataUrl(payload);
 });
 
 ipcMain.on("pin-recapture", () => startCapture());

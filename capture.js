@@ -2,7 +2,10 @@ const bg = document.getElementById("bg");
 const selection = document.getElementById("selection");
 const selectionImage = document.getElementById("selectionImage");
 const toolbar = document.getElementById("toolbar");
-const btnConfirm = document.getElementById("confirm");
+const btnCancel = document.getElementById("cancelBtn");
+const btnCopy = document.getElementById("copyBtn");
+const btnPin = document.getElementById("pinBtn");
+const btnRun = document.getElementById("runBtn");
 const sizeLabel = document.getElementById("sizeLabel");
 
 let fullImage = "";
@@ -15,6 +18,7 @@ let startX = 0;
 let startY = 0;
 let pendingRect = null;
 let selectionFrameId = 0;
+let completing = false;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -53,7 +57,7 @@ function updateToolbarPosition(nextRect) {
     return;
   }
 
-  const toolbarWidth = toolbar.offsetWidth || 170;
+  const toolbarWidth = toolbar.offsetWidth || 260;
   const toolbarHeight = toolbar.offsetHeight || 44;
   const labelWidth = sizeLabel.offsetWidth || 90;
   const topGap = 10;
@@ -133,6 +137,41 @@ function cancelCapture() {
   window.api.closeCapture();
 }
 
+function getSelectionRectOnScreen() {
+  return {
+    left: Math.round(rect.left + window.screenX),
+    top: Math.round(rect.top + window.screenY),
+    width: Math.max(1, Math.round(rect.width)),
+    height: Math.max(1, Math.round(rect.height)),
+  };
+}
+
+async function completeCapture(mode) {
+  if (completing) return;
+  try {
+    const dataUrl = cropImage();
+    if (!dataUrl) {
+      alert("请先拖拽选中一个区域");
+      return;
+    }
+    completing = true;
+    if (mode === "copy") {
+      await window.api.copyImageToClipboard(dataUrl);
+      window.api.closeCapture();
+      return;
+    }
+    window.api.captureComplete({
+      dataUrl,
+      selectionRect: getSelectionRectOnScreen(),
+      runImmediately: mode === "run",
+    });
+  } catch (error) {
+    completing = false;
+    window.api.reportError(`capture:${mode}`, error.message || String(error));
+    alert(`截图失败：${error.message || error}`);
+  }
+}
+
 function updateRectByResize(direction, pointerX, pointerY) {
   const base = actionOriginRect;
   let left = base.left;
@@ -165,17 +204,13 @@ function pointerInsideRect(pointerX, pointerY, nextRect) {
   return nextRect && pointerX >= nextRect.left && pointerX <= nextRect.left + nextRect.width && pointerY >= nextRect.top && pointerY <= nextRect.top + nextRect.height;
 }
 
-async function init() {
+async function initWithCaptureData(payload = {}) {
   try {
-    document.body.style.visibility = "hidden";
-    displayInfo = await window.api.getCaptureDisplayInfo();
-    const captureWidth = Math.floor(window.innerWidth * (displayInfo?.scaleFactor || window.devicePixelRatio || 1));
-    const captureHeight = Math.floor(window.innerHeight * (displayInfo?.scaleFactor || window.devicePixelRatio || 1));
-    fullImage = await window.api.getScreenImageDataUrl({
-      displayId: displayInfo?.id,
-      width: captureWidth,
-      height: captureHeight,
-    });
+    displayInfo = payload.displayInfo || null;
+    fullImage = String(payload.fullImage || "");
+    if (!fullImage) {
+      throw new Error("未收到屏幕图像，请重新截图");
+    }
     sourceImage = await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
@@ -183,7 +218,7 @@ async function init() {
       img.src = fullImage;
     });
     bg.style.backgroundImage = `url(${fullImage})`;
-    document.body.style.visibility = "visible";
+    document.body.dataset.ready = "true";
   } catch (error) {
     window.api.reportError("capture:init", error.message || String(error));
     alert(`初始化截图失败：${error.message || error}`);
@@ -192,6 +227,7 @@ async function init() {
 }
 
 window.addEventListener("pointerdown", (event) => {
+  if (!sourceImage) return;
   if (event.button === 2) {
     event.preventDefault();
     cancelCapture();
@@ -254,34 +290,29 @@ window.addEventListener("keydown", (event) => {
     cancelCapture();
     return;
   }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && isValidRect(rect)) {
+    event.preventDefault();
+    completeCapture("copy");
+    return;
+  }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "t" && isValidRect(rect)) {
+    event.preventDefault();
+    completeCapture("pin");
+    return;
+  }
   if ((event.key === "Enter" || event.key === "NumpadEnter") && isValidRect(rect)) {
     event.preventDefault();
-    btnConfirm.click();
+    completeCapture("pin");
   }
 });
 
-btnConfirm.addEventListener("click", async () => {
-  try {
-    const dataUrl = cropImage();
-    if (!dataUrl) {
-      alert("请先拖拽选中一个区域再点击完成");
-      return;
-    }
-    const selectionRect = {
-      left: Math.round(rect.left + window.screenX),
-      top: Math.round(rect.top + window.screenY),
-      width: Math.max(1, Math.round(rect.width)),
-      height: Math.max(1, Math.round(rect.height)),
-    };
-    window.api.captureComplete({ dataUrl, selectionRect });
-  } catch (error) {
-    window.api.reportError("capture:confirm", error.message || String(error));
-    alert(`截图失败：${error.message || error}`);
-  }
-});
+btnCancel.addEventListener("click", cancelCapture);
+btnCopy.addEventListener("click", () => completeCapture("copy"));
+btnPin.addEventListener("click", () => completeCapture("pin"));
+btnRun.addEventListener("click", () => completeCapture("run"));
 
 window.addEventListener("resize", () => {
   scheduleSelectionRender(rect);
 });
 
-init();
+window.api.onCaptureReadyData((payload) => initWithCaptureData(payload));

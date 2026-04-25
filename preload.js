@@ -7,6 +7,11 @@ contextBridge.exposeInMainWorld("api", {
   getCaptureDisplayInfo() {
     return ipcRenderer.invoke("get-capture-display-info");
   },
+  onCaptureReadyData(callback) {
+    ipcRenderer.on("capture-ready-data", (_event, payload) =>
+      callback(payload && typeof payload === "object" ? payload : {})
+    );
+  },
   onSetImage(callback) {
     ipcRenderer.on("set-image", (_event, payload) => callback(payload));
   },
@@ -18,6 +23,9 @@ contextBridge.exposeInMainWorld("api", {
   },
   saveImage(dataUrl) {
     return ipcRenderer.invoke("save-image", dataUrl);
+  },
+  copyImageToClipboard(dataUrl) {
+    return ipcRenderer.invoke("copy-image-to-clipboard", dataUrl);
   },
   chooseDirectory() {
     return ipcRenderer.invoke("choose-directory");
