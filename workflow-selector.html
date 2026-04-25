@@ -35,11 +35,12 @@
       button:disabled { cursor: not-allowed; filter: none; transform: none; opacity: .55; }
       #runBtn {
         min-width: 64px;
-        background: linear-gradient(135deg, #3d85ff, #6b5cff); color: #fff;
+        background: transparent; color: rgba(246,248,252,.9);
+        border: 1px solid rgba(255,255,255,.16);
       }
       #closeBtn {
-        width: 30px; height: 30px; padding: 0; border-radius: 999px;
-        background: linear-gradient(135deg, #ff5f6d, #ff3b30); color: #fff; font-size: 15px; line-height: 1;
+        width: 30px; height: 30px; padding: 0; border-radius: 0;
+        background: transparent; color: rgba(246,248,252,.82); font-size: 18px; line-height: 1;
       }
       #uploadBtn {
         position: fixed; right: 18px; bottom: 18px; width: 36px; height: 36px; padding: 0;
@@ -124,6 +125,21 @@
         position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 999px;
         background: rgba(59,128,255,.92); color: #fff; font-size: 11px; font-weight: 700;
       }
+      .workflowLinkBtn {
+        position: absolute; left: 10px; top: 10px; width: 28px; height: 28px; padding: 0;
+        display: inline-flex; align-items: center; justify-content: center; border-radius: 999px;
+        background: rgba(20,24,30,.62); color: rgba(246,248,252,.92); border: 1px solid rgba(255,255,255,.16);
+        z-index: 5;
+      }
+      .workflowLinkBtn:hover { background: rgba(255,255,255,.18); transform: translateY(-1px); }
+      .linkIcon { position: relative; width: 16px; height: 12px; display: block; }
+      .linkIcon::before,
+      .linkIcon::after {
+        content: ""; position: absolute; top: 3px; width: 9px; height: 5px; border: 2px solid currentColor;
+        border-radius: 999px; transform: rotate(-32deg);
+      }
+      .linkIcon::before { left: 0; }
+      .linkIcon::after { right: 0; }
       #cardMenu {
         position: fixed; display: none; min-width: 150px; padding: 6px; border-radius: 12px;
         background: rgba(18,23,32,.98); border: 1px solid rgba(255,255,255,.12);

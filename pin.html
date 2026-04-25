@@ -208,6 +208,10 @@
         left: 8px;
         right: 8px;
         bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
         padding: 8px 10px;
         border-radius: 10px;
         background: rgba(20, 24, 30, 0.76);
@@ -218,11 +222,67 @@
         pointer-events: none;
         white-space: nowrap;
         overflow: hidden;
-        text-overflow: ellipsis;
         z-index: 7;
+      }
+      #runningStatusLeft {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #runningStatusRight {
+        flex: 0 0 auto;
+        color: rgba(247, 249, 252, .78);
       }
       body.show-running-status #runningStatus {
         opacity: 1;
+      }
+      #errorStatus {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        display: none;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: start;
+        padding: 9px 10px;
+        border-radius: 11px;
+        background: rgba(155, 24, 32, .92);
+        border: 1px solid rgba(255, 102, 112, .65);
+        box-shadow: 0 12px 30px rgba(0,0,0,.28);
+        z-index: 9;
+      }
+      body.show-error-status #errorStatus {
+        display: grid;
+      }
+      #errorStatusTitle {
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 3px;
+      }
+      #errorStatusMessage {
+        font-size: 11px;
+        line-height: 1.45;
+        color: rgba(255,255,255,.9);
+        white-space: normal;
+        word-break: break-word;
+        max-height: 86px;
+        overflow: auto;
+      }
+      #errorStatusClose {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border: none;
+        border-radius: 999px;
+        background: rgba(255,255,255,.18);
+        color: #fff;
+        cursor: pointer;
+        line-height: 1;
+      }
+      #errorStatusClose:hover {
+        background: rgba(255,255,255,.28);
       }
     </style>
   </head>
@@ -239,7 +299,17 @@
       <div id="toolbar">
         <button id="saveBtn">保存</button>
       </div>
-      <div id="runningStatus"></div>
+      <div id="runningStatus">
+        <div id="runningStatusLeft"></div>
+        <div id="runningStatusRight"></div>
+      </div>
+      <div id="errorStatus">
+        <div>
+          <div id="errorStatusTitle"></div>
+          <div id="errorStatusMessage"></div>
+        </div>
+        <button id="errorStatusClose" type="button" aria-label="关闭错误信息">×</button>
+      </div>
     </div>
     <script src="./pin.js"></script>
   </body>

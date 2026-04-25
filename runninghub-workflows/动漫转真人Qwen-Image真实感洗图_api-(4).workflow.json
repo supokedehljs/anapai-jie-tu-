@@ -8,6 +8,9 @@
   "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
   "generationDurationsMs": [
     226087,
-    219069
+    219069,
+    191774,
+    126273,
+    121967
   ]
 }

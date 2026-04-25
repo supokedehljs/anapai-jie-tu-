@@ -3,6 +3,11 @@ const stage = document.getElementById("stage");
 const frame = document.getElementById("frame");
 const saveBtn = document.getElementById("saveBtn");
 const runningStatus = document.getElementById("runningStatus");
+const runningStatusLeft = document.getElementById("runningStatusLeft");
+const runningStatusRight = document.getElementById("runningStatusRight");
+const errorStatusTitle = document.getElementById("errorStatusTitle");
+const errorStatusMessage = document.getElementById("errorStatusMessage");
+const errorStatusClose = document.getElementById("errorStatusClose");
 const tabsBar = document.getElementById("tabsBar");
 const scaleAnchor = document.getElementById("scaleAnchor");
 
@@ -78,6 +83,24 @@ function setScaleAnchorFromEvent(event, options = {}) {
   updateScaleAnchorVisual();
 }
 
+function setRunningStatus(left = "", right = "") {
+  runningStatusLeft.textContent = left;
+  runningStatusRight.textContent = right;
+  document.body.classList.toggle("show-running-status", Boolean(left || right));
+}
+
+function showPersistentError(payload = {}) {
+  stopRunningCountdown();
+  setRunningStatus("", "");
+  errorStatusTitle.textContent = payload.title || "运行失败";
+  errorStatusMessage.textContent = payload.message || "发生未知错误";
+  document.body.classList.add("show-error-status");
+}
+
+function clearPersistentError() {
+  document.body.classList.remove("show-error-status");
+}
+
 function formatRemainingTime(milliseconds) {
   const totalSeconds = Math.max(0, Math.ceil((Number(milliseconds) || 0) / 1000));
   const minutes = Math.floor(totalSeconds / 60);
@@ -94,7 +117,7 @@ function stopRunningCountdown(delay = 0) {
   runningCountdownPayload = null;
   if (delay > 0) {
     setTimeout(() => {
-      document.body.classList.remove("show-running-status");
+      setRunningStatus("", "");
     }, delay);
   }
 }
@@ -106,8 +129,7 @@ function renderRunningCountdown() {
   const remainingMs = Math.max(0, estimatedDurationMs - (Date.now() - startedAt));
   const workflowName = runningCountdownPayload.workflowName || "当前工作流";
   const prefix = runningCountdownPayload.prefix ? `${runningCountdownPayload.prefix} · ` : "";
-  runningStatus.textContent = `${prefix}${workflowName} · 预计 ${formatRemainingTime(remainingMs)}`;
-  document.body.classList.add("show-running-status");
+  setRunningStatus(`${prefix}${workflowName}`, `预计 ${formatRemainingTime(remainingMs)}`);
 }
 
 function startRunningCountdown(payload = {}) {
@@ -318,10 +340,9 @@ saveBtn.addEventListener("click", async () => {
     if (!result || result.ok !== true) {
       throw new Error((result && result.error) || "保存失败");
     }
-    runningStatus.textContent = `已保存到：${result.filePath || "默认位置"}`;
-    document.body.classList.add("show-running-status");
+    setRunningStatus(`已保存到：${result.filePath || "默认位置"}`, "");
     setTimeout(() => {
-      document.body.classList.remove("show-running-status");
+      setRunningStatus("", "");
     }, 3000);
   } catch (error) {
     window.api.reportError("pin:save", error.message || String(error));
@@ -365,6 +386,7 @@ frame.addEventListener("pointerdown", startDrag);
 frame.addEventListener("pointermove", moveDrag);
 frame.addEventListener("pointerup", endDrag);
 frame.addEventListener("pointercancel", endDrag);
+errorStatusClose.addEventListener("click", clearPersistentError);
 window.addEventListener("pointermove", (event) => {
   lastPointerPosition = { x: event.clientX, y: event.clientY };
   if (event.altKey && !altAdjusting) {
@@ -392,12 +414,14 @@ if (typeof ResizeObserver === "function") {
 window.api.onRunningHubStatus((message) => {
   if (!message) return;
   stopRunningCountdown();
-  runningStatus.textContent = message;
-  document.body.classList.add("show-running-status");
-  if (message.includes("生图完成") || message.includes("失败")) {
+  setRunningStatus(message, "");
+  if (message.includes("生图完成")) {
     setTimeout(() => {
-      document.body.classList.remove("show-running-status");
+      setRunningStatus("", "");
     }, 4000);
+  }
+  if (message.includes("失败")) {
+    showPersistentError({ title: "运行失败", message });
   }
 });
 
@@ -409,16 +433,16 @@ window.api.onRunningHubProgress((payload) => {
   }
   if (payload.state === "done") {
     stopRunningCountdown();
-    runningStatus.textContent = `${payload.workflowName || "工作流"} · 已完成`;
-    document.body.classList.add("show-running-status");
+    setRunningStatus(payload.workflowName || "工作流", "已完成");
     stopRunningCountdown(3500);
     return;
   }
   if (payload.state === "error") {
     stopRunningCountdown();
-    runningStatus.textContent = `${payload.workflowName || "工作流"} · 失败`;
-    document.body.classList.add("show-running-status");
-    stopRunningCountdown(4500);
+    showPersistentError({
+      title: payload.title || `${payload.workflowName || "工作流"} · 失败`,
+      message: payload.message || "运行失败，但没有返回详细原因。",
+    });
   }
 });
 

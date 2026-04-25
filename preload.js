@@ -63,6 +63,9 @@ contextBridge.exposeInMainWorld("api", {
   deleteWorkflow(fileName) {
     return ipcRenderer.invoke("delete-workflow", fileName);
   },
+  openWorkflowLink(fileName) {
+    return ipcRenderer.invoke("open-workflow-link", fileName);
+  },
   runSelectedWorkflow() {
     return ipcRenderer.invoke("run-selected-workflow");
   },

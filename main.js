@@ -36,7 +36,7 @@ const runningHubConfigPath = path.join(appDataRoot, "runninghub.config.json");
 const runningHubWorkflowDir = isPackagedApp
   ? path.join(appDataRoot, "runninghub-workflows")
   : bundledWorkflowDir;
-let runningHubUploading = false;
+let runningHubActiveCount = 0;
 const WORKFLOW_IMAGE_PLACEHOLDER = "{{RUNNINGHUB_IMAGE_URL}}";
 
 function generatePinnedImageId() {
@@ -526,12 +526,9 @@ function getWorkflowTimingStats(fileName) {
   const durations = Array.isArray(config.generationDurationsMs)
     ? config.generationDurationsMs.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0).slice(-10)
     : [];
-  const average = durations.length
-    ? Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length)
-    : 0;
   return {
     generationSampleCount: durations.length,
-    averageGenerationDurationMs: average,
+    estimatedGenerationDurationMs: durations[0] || 0,
   };
 }
 
@@ -545,7 +542,7 @@ function getSelectedWorkflowTimingInfo() {
   const timingStats = getWorkflowTimingStats(workflowFile);
   return {
     workflowName: workflow.name || path.basename(workflowFile, path.extname(workflowFile)),
-    estimatedDurationMs: timingStats.averageGenerationDurationMs || 180000,
+    estimatedDurationMs: timingStats.estimatedGenerationDurationMs || 180000,
   };
 }
 
@@ -563,6 +560,11 @@ function recordWorkflowGenerationDuration(fileName, durationMs) {
   });
 }
 
+function buildWorkflowWebUrl(workflowId = "") {
+  const id = String(workflowId || "").trim();
+  return id ? `https://www.runninghub.cn/workflow/${encodeURIComponent(id)}` : "";
+}
+
 function getWorkflowSummaries() {
   const config = getRunningHubConfig();
   return getWorkflowFiles().map((fileName) => {
@@ -573,6 +575,7 @@ function getWorkflowSummaries() {
       fileName,
       name: workflow.name,
       workflowId: workflow.workflowId,
+      workflowUrl: buildWorkflowWebUrl(workflow.workflowId),
       imageNodeId: workflow.imageNodeId,
       imageFieldName: workflow.imageFieldName,
       outputNodeId: workflow.outputNodeId,
@@ -1566,8 +1569,64 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
       taskId,
       error: error && error.message ? error.message : String(error),
     });
+    if (error && typeof error === "object") {
+      error.runningHubContext = {
+        workflowName: workflow.name,
+        workflowFile,
+        workflowId: workflow.workflowId,
+        taskId,
+      };
+    }
     throw error;
   }
+}
+
+function formatUserFacingRunningHubError(error, context = {}) {
+  const rawMessage = error && error.message ? String(error.message) : String(error || "未知错误");
+  const lower = rawMessage.toLowerCase();
+  const workflowName = context.workflowName || "工作流";
+  let title = `${workflowName} · 运行失败`;
+  let reason = rawMessage;
+
+  if (/concurrent|concurrency|parallel|simultaneous|同时|并发|会员|super|limit|限制|too many/i.test(rawMessage)) {
+    title = "云端并行任务受限";
+    reason = "RunningHub 云端可能限制了同时运行多个任务。请等待当前任务完成，或确认账号是否支持并行/超级会员能力。";
+    if (!/同时|并发|会员|限制/.test(rawMessage)) reason += `\n原始信息：${rawMessage}`;
+  } else if (/api[_ -]?key|apikey|401|403|unauthorized|forbidden/i.test(rawMessage)) {
+    title = "API 配置错误";
+    reason = "API Key 无效、未填写，或没有权限访问 RunningHub。请检查设置里的 API Key。";
+  } else if (/fetch failed|network|econn|enotfound|etimedout|timeout|timed out|networkerror/i.test(lower)) {
+    title = "网络连接错误";
+    reason = "本地网络无法连接到 RunningHub，可能是网络断开、代理异常或服务暂时不可达。";
+  } else if (/上传失败|upload|上传成功但未返回|图片地址/i.test(rawMessage)) {
+    title = "图片上传失败";
+    reason = rawMessage;
+  } else if (/创建任务失败|create|taskid|未拿到 taskid/i.test(lower)) {
+    title = "云端创建任务失败";
+    reason = "RunningHub 没有成功创建生图任务。请检查工作流 ID、输入节点配置和 API 权限。";
+    if (!/http/i.test(rawMessage)) reason += `\n原始信息：${rawMessage}`;
+  } else if (/任务执行失败|execution|failed|节点|exception/i.test(rawMessage)) {
+    title = "云端工作流执行失败";
+    reason = rawMessage;
+  } else if (/超时|timeout|长时间/i.test(rawMessage)) {
+    title = "云端处理超时";
+    reason = "任务等待时间过长，可能是 RunningHub 排队、工作流执行太慢，或结果接口没有返回图片。";
+  } else if (/下载结果图片失败|download|结果不是可下载图片|未获取到结果图|未拿到生图结果|未获取到结果/i.test(rawMessage)) {
+    title = "结果图片获取失败";
+    reason = rawMessage;
+  } else if (/工作流|workflow|json|node|节点|配置/i.test(rawMessage)) {
+    title = "本地工作流配置错误";
+    reason = rawMessage;
+  }
+
+  const details = [];
+  if (context.taskId) details.push(`任务 ID：${context.taskId}`);
+  if (context.workflowName) details.push(`工作流：${context.workflowName}`);
+  return {
+    title,
+    message: details.length ? `${reason}\n${details.join("\n")}` : reason,
+    rawMessage,
+  };
 }
 
 function sendPinStatus(message, targetEntries = []) {
@@ -1793,9 +1852,9 @@ async function runRunningHubForEntries(targetEntries = []) {
   const entries = Array.isArray(targetEntries)
     ? targetEntries.filter((entry) => entry && entry.dataUrl)
     : [];
-  if (!entries.length || runningHubUploading) return;
+  if (!entries.length) return;
   const timingInfo = getSelectedWorkflowTimingInfo();
-  runningHubUploading = true;
+  runningHubActiveCount += 1;
   sendPinProgress({
     state: "running",
     workflowName: timingInfo.workflowName,
@@ -1824,13 +1883,19 @@ async function runRunningHubForEntries(targetEntries = []) {
       workflowName: workflowNames.join("、") || timingInfo.workflowName,
     }, entries);
   } catch (error) {
+    const userError = formatUserFacingRunningHubError(error, {
+      ...((error && error.runningHubContext) || {}),
+      workflowName: (error && error.runningHubContext && error.runningHubContext.workflowName) || timingInfo.workflowName,
+    });
     sendPinProgress({
       state: "error",
       workflowName: timingInfo.workflowName,
-      message: error.message || String(error),
+      title: userError.title,
+      message: userError.message,
+      rawMessage: userError.rawMessage,
     }, entries);
   } finally {
-    runningHubUploading = false;
+    runningHubActiveCount = Math.max(0, runningHubActiveCount - 1);
   }
 }
 
@@ -1848,11 +1913,10 @@ function buildPinContextMenu(pinEntry) {
 
   return Menu.buildFromTemplate([
     {
-      label: runningHubUploading
+      label: runningHubActiveCount > 0
         ? "RunningHub 正在处理..."
         : `上传到 RunningHub 生图${targetCount > 1 ? `（${targetCount} 张）` : ""}`,
       enabled:
-        !runningHubUploading &&
         targetEntries.length > 0 &&
         targetEntries.every((entry) => Boolean(entry.dataUrl)),
       click: async () => {
@@ -1866,7 +1930,7 @@ function buildPinContextMenu(pinEntry) {
     },
     {
       label: "编辑当前工作流配置",
-      enabled: !runningHubUploading && Boolean(currentWorkflowFile),
+      enabled: Boolean(currentWorkflowFile),
       click: () => showWorkflowWindow({ editFileName: currentWorkflowFile }),
     },
     { type: "separator" },
@@ -2259,13 +2323,24 @@ ipcMain.handle("run-workflow-with-image", async (_event, dataUrl) => {
   if (!imageDataUrl.startsWith("data:image/")) {
     return { ok: false, error: "请先放入一张图片" };
   }
-  if (runningHubUploading) {
-    return { ok: false, error: "RunningHub 正在处理，请稍后再试" };
-  }
   try {
     const pinEntry = openPinnedImage(imageDataUrl, null);
+    if (pinEntry && pinEntry.window && !pinEntry.window.isDestroyed() && pinEntry.window.webContents.isLoading()) {
+      await new Promise((resolve) => pinEntry.window.webContents.once("did-finish-load", resolve));
+    }
     runRunningHubForEntries([pinEntry]);
     return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error && error.message ? error.message : String(error) };
+  }
+});
+ipcMain.handle("open-workflow-link", async (_event, fileName) => {
+  try {
+    const workflow = readWorkflow(String(fileName || ""));
+    const url = buildWorkflowWebUrl(workflow.workflowId);
+    if (!url) return { ok: false, error: "这个工作流还没有配置网页工作流 ID" };
+    await shell.openExternal(url);
+    return { ok: true, url };
   } catch (error) {
     return { ok: false, error: error && error.message ? error.message : String(error) };
   }
@@ -2377,16 +2452,13 @@ ipcMain.handle("delete-workflow", (_event, fileName) => {
   }
 });
 ipcMain.handle("run-selected-workflow", async () => {
-  if (runningHubUploading) {
-    return { ok: false, error: "RunningHub 正在处理，请稍后再试" };
-  }
   const selectedEntries = getSelectedPinnedWindowEntries();
   if (!selectedEntries.length) {
     return { ok: false, error: "请先选中至少一张置顶截图" };
   }
 
   const timingInfo = getSelectedWorkflowTimingInfo();
-  runningHubUploading = true;
+  runningHubActiveCount += 1;
   sendPinProgress({
     state: "running",
     workflowName: timingInfo.workflowName,
@@ -2416,15 +2488,20 @@ ipcMain.handle("run-selected-workflow", async () => {
     }, selectedEntries);
     return { ok: true, workflowName: workflowNames.join("、"), processedCount: selectedEntries.length };
   } catch (error) {
-    const message = error && error.message ? error.message : String(error);
+    const userError = formatUserFacingRunningHubError(error, {
+      ...((error && error.runningHubContext) || {}),
+      workflowName: (error && error.runningHubContext && error.runningHubContext.workflowName) || timingInfo.workflowName,
+    });
     sendPinProgress({
       state: "error",
       workflowName: timingInfo.workflowName,
-      message,
+      title: userError.title,
+      message: userError.message,
+      rawMessage: userError.rawMessage,
     }, selectedEntries);
-    return { ok: false, error: message };
+    return { ok: false, error: userError.message };
   } finally {
-    runningHubUploading = false;
+    runningHubActiveCount = Math.max(0, runningHubActiveCount - 1);
   }
 });
 ipcMain.handle("pin-set-click-through", (event, enable) => {
@@ -2459,8 +2536,12 @@ ipcMain.handle("pin-scale-at", (event, payload = {}) => {
   const safeRatioY = Number.isFinite(ratioY) ? ratioY : 0.5;
   const anchorScreenX = preciseBounds.x + preciseBounds.width * safeRatioX;
   const anchorScreenY = preciseBounds.y + preciseBounds.height * safeRatioY;
-  const nextWidth = Math.max(120, preciseBounds.width * scale);
-  const nextHeight = Math.max(80, preciseBounds.height * scale);
+  const minWidth = 120;
+  const minHeight = 80;
+  const minScale = Math.max(minWidth / Math.max(1, preciseBounds.width), minHeight / Math.max(1, preciseBounds.height));
+  const safeScale = Math.max(scale, minScale);
+  const nextWidth = preciseBounds.width * safeScale;
+  const nextHeight = preciseBounds.height * safeScale;
   const nextBounds = {
     x: anchorScreenX - nextWidth * safeRatioX,
     y: anchorScreenY - nextHeight * safeRatioY,
