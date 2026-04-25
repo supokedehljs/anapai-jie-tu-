@@ -5,5 +5,8 @@
   "imageNodeId": "78",
   "imageFieldName": "image",
   "outputNodeId": "295",
-  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
+  "generationDurationsMs": [
+    226087
+  ]
 }

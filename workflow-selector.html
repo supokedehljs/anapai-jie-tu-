@@ -10,40 +10,75 @@
         margin: 0; width: 100%; height: 100%; overflow: hidden;
         font-family: "Microsoft YaHei", sans-serif; color: #f6f8fc; background: transparent;
       }
-      body { display: flex; }
+      body { display: flex; background: transparent; }
       #app {
-        flex: 1; display: flex; flex-direction: column; margin: 14px; border-radius: 22px; overflow: hidden;
+        flex: 1; display: flex; flex-direction: column; margin: 0; border-radius: 20px; overflow: hidden;
         background: linear-gradient(180deg, rgba(16,20,28,.96), rgba(10,13,18,.94));
         box-shadow: 0 24px 80px rgba(0,0,0,.42); border: 1px solid rgba(255,255,255,.08);
       }
       #topbar {
-        display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 12px; gap: 16px;
+        display: flex; align-items: flex-start; justify-content: space-between; padding: 18px 22px 10px; gap: 16px;
         -webkit-app-region: drag;
       }
-      #titleWrap { display: flex; flex-direction: column; gap: 4px; }
-      #title { font-size: 20px; font-weight: 700; letter-spacing: .5px; }
-      #subtitle { font-size: 13px; color: rgba(232,238,249,.7); }
-      #actions { display: flex; gap: 10px; -webkit-app-region: no-drag; }
+      #titleWrap { display: flex; flex-direction: column; gap: 6px; }
+      #title { font-size: 20px; font-weight: 700; letter-spacing: .4px; }
+      #subtitle {
+        display: block; font-size: 12px; color: rgba(232,238,249,.72); line-height: 1.65;
+        max-width: 640px;
+      }
+      #actions { display: flex; gap: 8px; -webkit-app-region: no-drag; }
       button {
-        border: none; border-radius: 12px; padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+        border: none; border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
         transition: transform .15s ease, filter .15s ease, background .15s ease;
       }
       button:hover { filter: brightness(1.06); transform: translateY(-1px); }
       button:disabled { cursor: not-allowed; filter: none; transform: none; opacity: .55; }
-      #runBtn { background: linear-gradient(135deg, #3d85ff, #6b5cff); color: #fff; }
-      #uploadBtn, .pickerBtn { background: rgba(255,255,255,.12); color: #eef3fb; }
-      #closeBtn, #cancelWorkflowBtn { background: rgba(255,255,255,.08); color: #eef3fb; }
-      #content { flex: 1; min-height: 0; padding: 10px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
-      #tips { font-size: 13px; color: rgba(232,238,249,.74); }
+      #runBtn {
+        min-width: 64px;
+        background: linear-gradient(135deg, #3d85ff, #6b5cff); color: #fff;
+      }
+      #closeBtn {
+        width: 30px; height: 30px; padding: 0; border-radius: 999px;
+        background: linear-gradient(135deg, #ff5f6d, #ff3b30); color: #fff; font-size: 15px; line-height: 1;
+      }
+      #uploadBtn {
+        position: fixed; right: 18px; bottom: 18px; width: 36px; height: 36px; padding: 0;
+        display: inline-flex; align-items: center; justify-content: center; border-radius: 999px;
+        background: rgba(255,255,255,.12); color: rgba(245,248,255,.94); font-size: 20px; font-weight: 400;
+        border: 1px solid rgba(255,255,255,.12);
+        box-shadow: 0 8px 20px rgba(0,0,0,.18); z-index: 40;
+      }
+      .pickerBtn {
+        background: rgba(255,255,255,.12); color: #eef3fb;
+        min-width: 88px;
+        padding: 8px 10px;
+      }
+      #cancelWorkflowBtn { background: rgba(255,255,255,.08); color: #eef3fb; }
+      #content {
+        flex: 1; min-height: 0; padding: 8px 22px 22px; display: flex; flex-direction: column; gap: 12px;
+      }
+      #tips { display: none; }
       #grid {
         flex: 1; min-height: 0; overflow: auto; display: grid;
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; align-content: start; padding-right: 6px;
       }
       .card {
-        position: relative; display: block; padding: 0; border-radius: 18px;
+        position: relative; display: flex; flex-direction: column; padding: 0; border-radius: 18px;
         background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); cursor: pointer;
         transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease;
         overflow: hidden;
+      }
+      .cardInfo {
+        display: flex; flex-direction: column; gap: 4px; padding: 10px 12px 12px;
+        background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025));
+      }
+      .cardName {
+        color: rgba(246,248,252,.96); font-size: 13px; font-weight: 700; line-height: 1.35;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .cardTime {
+        min-height: 16px; color: rgba(232,238,249,.58); font-size: 11px; line-height: 1.35;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       }
       .card:hover {
         transform: translateY(-2px); border-color: rgba(97,146,255,.56); background: rgba(255,255,255,.07);
@@ -92,25 +127,28 @@
       }
       #modal[data-open="true"] { display: flex; }
       .modalPanel {
-        width: min(680px, calc(100vw - 48px)); max-height: calc(100vh - 48px); overflow: auto; border-radius: 20px;
+        width: min(620px, calc(100vw - 48px)); max-height: calc(100vh - 48px); overflow: auto; border-radius: 18px;
         background: linear-gradient(180deg, rgba(16,20,28,.98), rgba(10,13,18,.98)); border: 1px solid rgba(255,255,255,.1);
-        box-shadow: 0 28px 80px rgba(0,0,0,.45); padding: 22px; box-sizing: border-box;
+        box-shadow: 0 28px 80px rgba(0,0,0,.45); padding: 18px; box-sizing: border-box;
       }
-      .modalHeader { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
-      .modalTitle { font-size: 20px; font-weight: 700; }
-      .modalHint { display: none; }
-      #workflowForm { display: flex; flex-direction: column; gap: 18px; }
+      .modalHeader { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+      .modalTitle { font-size: 18px; font-weight: 700; }
+      .modalHint {
+        display: block; font-size: 12px; line-height: 1.55; color: rgba(232,238,249,.68);
+      }
+      #workflowForm { display: flex; flex-direction: column; gap: 12px; }
       .formSection {
-        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 16px; border-radius: 18px;
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 12px; border-radius: 16px;
         background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08);
       }
+      .formSection.compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .sectionTitle { grid-column: 1 / -1; font-size: 13px; font-weight: 700; color: rgba(242,246,255,.9); }
-      .field { display: flex; flex-direction: column; gap: 8px; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
       .field.full, .formSection > .full { grid-column: 1 / -1; }
-      .fieldLabel { font-size: 13px; color: rgba(242,246,255,.86); }
+      .fieldLabel { font-size: 12px; color: rgba(242,246,255,.86); }
       input {
-        width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
-        background: rgba(255,255,255,.06); color: #eef3fb; padding: 12px 13px; font-size: 14px; outline: none;
+        width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.1); border-radius: 10px;
+        background: rgba(255,255,255,.06); color: #eef3fb; padding: 9px 10px; font-size: 13px; outline: none;
       }
       input:focus { border-color: rgba(74,136,255,.86); box-shadow: 0 0 0 3px rgba(61,133,255,.16); }
       input[readonly] { color: rgba(238,243,251,.78); }
@@ -118,10 +156,10 @@
       .filePickerRow input { flex: 1; }
       .pickerBtn { min-width: 112px; }
       .thumbnailPreview {
-        margin-top: 2px; min-height: 180px; border-radius: 16px; border: 1px solid rgba(255,255,255,.08);
+        margin-top: 0; min-height: 96px; max-height: 150px; border-radius: 14px; border: 1px solid rgba(255,255,255,.08);
         background: rgba(255,255,255,.04); overflow: hidden; display: flex; align-items: center; justify-content: center;
       }
-      .thumbnailPreview img { width: 100%; max-height: 280px; object-fit: cover; display: none; }
+      .thumbnailPreview img { width: 100%; max-height: 150px; object-fit: cover; display: none; }
       .thumbnailPreview[data-has-image="true"] img { display: block; }
       .thumbnailPreview[data-has-image="true"] .thumbnailPreviewPlaceholder { display: none; }
       .modalActions { display: flex; justify-content: flex-end; gap: 10px; }
@@ -140,21 +178,21 @@
       <div id="topbar">
         <div id="titleWrap">
           <div id="title">选择工作流</div>
-          <div id="subtitle">选择、上传并管理你的 JSON 工作流</div>
+          <div id="subtitle">这里会显示你已导入的工作流缩略图。左键选中，右键管理；确认后可直接点击右上角运行。</div>
         </div>
         <div id="actions">
-          <button id="uploadBtn">上传工作流</button>
-          <button id="runBtn" disabled>运行当前工作流</button>
-          <button id="closeBtn">关闭</button>
+          <button id="runBtn" disabled>运行</button>
+          <button id="closeBtn" aria-label="关闭">✕</button>
         </div>
       </div>
       <div id="content">
-        <div id="tips">这里展示 `runninghub-workflows` 目录中的所有 JSON 工作流。每张卡片只显示缩略图；左键选择，右键可编辑配置或删除工作流。</div>
-        <div id="empty">当前还没有工作流。点击右上角“上传工作流”导入新的 JSON。</div>
+        <div id="tips"></div>
+        <div id="empty">当前还没有工作流。点击右下角 + 导入新的 JSON。</div>
         <div id="grid"></div>
         <div id="status"></div>
       </div>
     </div>
+    <button id="uploadBtn" title="上传工作流" aria-label="上传工作流">+</button>
     <div id="cardMenu" data-open="false">
       <button class="menuItem" type="button" data-menu-action="edit">编辑配置</button>
       <button class="menuItem danger" type="button" data-menu-action="delete">删除工作流</button>
@@ -163,7 +201,7 @@
       <div class="modalPanel">
         <div class="modalHeader">
           <div id="modalTitle" class="modalTitle">上传新的工作流</div>
-          <div id="modalHint" class="modalHint"></div>
+          <div id="modalHint" class="modalHint">请填写工作流基础信息。JSON 文件用于导入工作流本体，缩略图是可选项，只用于界面展示。</div>
         </div>
         <form id="workflowForm">
           <div class="formSection" data-mode="import">
@@ -171,16 +209,13 @@
             <label class="field full">
               <div class="fieldLabel">工作流 JSON 文件</div>
               <div class="filePickerRow">
-                <input id="workflowJsonPath" type="text" placeholder="请选择工作流 JSON 文件" readonly />
+                <input id="workflowJsonPath" type="text" placeholder="请选择工作流 JSON 文件，名称会自动沿用文件名" readonly />
                 <button id="chooseWorkflowJsonBtn" type="button" class="pickerBtn">选择 JSON</button>
               </div>
             </label>
-            <label class="field full">
-              <div class="fieldLabel">JSON 保存名称</div>
-              <input id="workflowFileName" type="text" placeholder="例如：my-img2img-workflow" />
-            </label>
+            <input id="workflowFileName" type="hidden" />
           </div>
-          <div class="formSection">
+          <div class="formSection compact">
             <div class="sectionTitle">运行参数</div>
             <label class="field full">
               <div class="fieldLabel">网页工作流 ID</div>
@@ -194,7 +229,7 @@
               <div class="fieldLabel">输入图像字段名</div>
               <input id="imageFieldName" type="text" placeholder="image" value="image" />
             </label>
-            <label class="field full">
+            <label class="field">
               <div class="fieldLabel">出图节点 ID</div>
               <input id="outputNodeId" type="text" placeholder="可留空" />
             </label>

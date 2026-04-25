@@ -512,11 +512,40 @@ function getWorkflowThumbnailPath(fileName) {
   return candidates.find((candidate) => fs.existsSync(candidate)) || "";
 }
 
+function getWorkflowTimingStats(fileName) {
+  const config = readWorkflowConfig(fileName);
+  const durations = Array.isArray(config.generationDurationsMs)
+    ? config.generationDurationsMs.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0).slice(-10)
+    : [];
+  const average = durations.length
+    ? Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length)
+    : 0;
+  return {
+    generationSampleCount: durations.length,
+    averageGenerationDurationMs: average,
+  };
+}
+
+function recordWorkflowGenerationDuration(fileName, durationMs) {
+  const normalizedFileName = String(fileName || "").trim();
+  const value = Math.round(Number(durationMs) || 0);
+  if (!normalizedFileName || value <= 0) return;
+  const current = readWorkflowConfig(normalizedFileName);
+  const durations = Array.isArray(current.generationDurationsMs)
+    ? current.generationDurationsMs.map((item) => Number(item)).filter((item) => Number.isFinite(item) && item > 0)
+    : [];
+  saveWorkflowConfig(normalizedFileName, {
+    ...current,
+    generationDurationsMs: [...durations, value].slice(-10),
+  });
+}
+
 function getWorkflowSummaries() {
   const config = getRunningHubConfig();
   return getWorkflowFiles().map((fileName) => {
     const workflow = readWorkflow(fileName);
     const thumbnailPath = getWorkflowThumbnailPath(fileName);
+    const timingStats = getWorkflowTimingStats(fileName);
     return {
       fileName,
       name: workflow.name,
@@ -526,6 +555,7 @@ function getWorkflowSummaries() {
       outputNodeId: workflow.outputNodeId,
       selected: config.selectedWorkflowFile === fileName,
       thumbnailDataUrl: thumbnailPath ? fileToDataUrl(thumbnailPath) : "",
+      ...timingStats,
     };
   });
 }
@@ -1467,6 +1497,7 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
     throw new Error("请先在右键菜单中选择一个工作流");
   }
   const workflow = readWorkflow(workflowFile);
+  const startedAt = Date.now();
   let taskId = "";
   try {
     if (onProgress) onProgress(`开始上传截图（工作流：${workflow.name}）...`);
@@ -1497,7 +1528,10 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
     if (onProgress) onProgress("已拿到结果图链接，正在下载结果...");
     const resultImageDataUrl = await imageUrlToDataUrl(resultImageUrl);
     if (onProgress) onProgress("结果已下载，正在替换贴图...");
-    return { workflowName: workflow.name, imageUrl, taskResult, taskId, resultImageDataUrl };
+    const durationMs = Date.now() - startedAt;
+    recordWorkflowGenerationDuration(workflowFile, durationMs);
+    sendWorkflowSelectionData();
+    return { workflowName: workflow.name, imageUrl, taskResult, taskId, resultImageDataUrl, durationMs };
   } catch (error) {
     logRunningHubFailure("runGeneration.catch", {
       workflowFile,
@@ -1563,11 +1597,10 @@ function showWorkflowWindow(options = {}) {
     transparent: true,
     hasShadow: true,
     backgroundColor: "#00000000",
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     resizable: true,
-    skipTaskbar: true,
+    skipTaskbar: false,
     autoHideMenuBar: true,
-    parent: parentWindow,
     modal: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -1576,8 +1609,6 @@ function showWorkflowWindow(options = {}) {
     },
   });
 
-  workflowWindow.setAlwaysOnTop(true, "screen-saver");
-  workflowWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   workflowWindow.setMenuBarVisibility(false);
   workflowWindow.loadFile(path.join(__dirname, "workflow-selector.html"));
   workflowWindow.webContents.on("console-message", (_e, _level, msg) => {
@@ -1685,12 +1716,14 @@ function showSettingsWindow() {
   }
 
   settingsWindow = new BrowserWindow({
-    width: 1120,
-    height: 780,
-    minWidth: 980,
-    minHeight: 680,
-    title: "SnapAI 设置",
-    backgroundColor: "#0b1016",
+    width: 1080,
+    height: 760,
+    minWidth: 860,
+    minHeight: 620,
+    frame: false,
+    transparent: true,
+    hasShadow: true,
+    backgroundColor: "#00000000",
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
