@@ -1,0 +1,9 @@
+{
+  "fileName": "史上最强-小红书动漫转写实真人（FireRed_OmniRealism）_api.json",
+  "displayName": "史上最强-小红书动漫转写实真人（FireRed_OmniRealism）_api",
+  "workflowId": "2047878918161571841",
+  "imageNodeId": "33",
+  "imageFieldName": "image",
+  "outputNodeId": "96",
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
+}

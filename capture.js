@@ -1,17 +1,24 @@
 const bg = document.getElementById("bg");
 const selection = document.getElementById("selection");
-const btnConfirm = document.getElementById("confirm");
-const btnCancel = document.getElementById("cancel");
+const selectionImage = document.getElementById("selectionImage");
 const toolbar = document.getElementById("toolbar");
+const btnConfirm = document.getElementById("confirm");
+const sizeLabel = document.getElementById("sizeLabel");
 
 let fullImage = "";
 let sourceImage = null;
-let isSelecting = false;
+let displayInfo = null;
+let rect = null;
+let action = null;
+let actionOriginRect = null;
 let startX = 0;
 let startY = 0;
-let rect = null;
 let pendingRect = null;
 let selectionFrameId = 0;
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
 
 function normalizeRect(x1, y1, x2, y2) {
   const left = Math.min(x1, x2);
@@ -21,19 +28,78 @@ function normalizeRect(x1, y1, x2, y2) {
   return { left, top, width, height };
 }
 
-function renderSelectionBox(r) {
-  selection.style.display = "block";
-  selection.style.left = `${r.left}px`;
-  selection.style.top = `${r.top}px`;
-  selection.style.width = `${r.width}px`;
-  selection.style.height = `${r.height}px`;
-  selection.style.backgroundImage = `url(${fullImage})`;
-  selection.style.backgroundSize = `${window.innerWidth}px ${window.innerHeight}px`;
-  selection.style.backgroundPosition = `-${r.left}px -${r.top}px`;
+function normalizeBoundsRect(inputRect) {
+  if (!inputRect) return null;
+  const left = clamp(Math.round(inputRect.left || 0), 0, window.innerWidth);
+  const top = clamp(Math.round(inputRect.top || 0), 0, window.innerHeight);
+  const right = clamp(Math.round((inputRect.left || 0) + (inputRect.width || 0)), 0, window.innerWidth);
+  const bottom = clamp(Math.round((inputRect.top || 0) + (inputRect.height || 0)), 0, window.innerHeight);
+  return {
+    left: Math.min(left, right),
+    top: Math.min(top, bottom),
+    width: Math.max(0, right - left),
+    height: Math.max(0, bottom - top),
+  };
 }
 
-function scheduleSelectionRender(r) {
-  pendingRect = r;
+function isValidRect(nextRect) {
+  return Boolean(nextRect && nextRect.width >= 4 && nextRect.height >= 4);
+}
+
+function updateToolbarPosition(nextRect) {
+  if (!isValidRect(nextRect)) {
+    toolbar.style.display = "none";
+    sizeLabel.style.display = "none";
+    return;
+  }
+
+  const toolbarWidth = toolbar.offsetWidth || 170;
+  const toolbarHeight = toolbar.offsetHeight || 44;
+  const labelWidth = sizeLabel.offsetWidth || 90;
+  const topGap = 10;
+  const bottomGap = 12;
+
+  let toolbarLeft = clamp(nextRect.left + nextRect.width / 2 - toolbarWidth / 2, 12, window.innerWidth - toolbarWidth - 12);
+  let toolbarTop = nextRect.top + nextRect.height + bottomGap;
+  if (toolbarTop + toolbarHeight > window.innerHeight - 12) {
+    toolbarTop = Math.max(12, nextRect.top - toolbarHeight - topGap);
+  }
+
+  let labelLeft = clamp(nextRect.left, 12, window.innerWidth - labelWidth - 12);
+  let labelTop = nextRect.top - 34;
+  if (labelTop < 12) {
+    labelTop = nextRect.top + 10;
+  }
+
+  toolbar.style.display = "flex";
+  toolbar.style.left = `${Math.round(toolbarLeft)}px`;
+  toolbar.style.top = `${Math.round(toolbarTop)}px`;
+  sizeLabel.style.display = "block";
+  sizeLabel.style.left = `${Math.round(labelLeft)}px`;
+  sizeLabel.style.top = `${Math.round(labelTop)}px`;
+  sizeLabel.textContent = `${Math.round(nextRect.width)} × ${Math.round(nextRect.height)}`;
+}
+
+function renderSelectionBox(nextRect) {
+  if (!isValidRect(nextRect)) {
+    selection.style.display = "none";
+    updateToolbarPosition(null);
+    return;
+  }
+
+  selection.style.display = "block";
+  selection.style.left = `${nextRect.left}px`;
+  selection.style.top = `${nextRect.top}px`;
+  selection.style.width = `${nextRect.width}px`;
+  selection.style.height = `${nextRect.height}px`;
+  selectionImage.style.backgroundImage = `url(${fullImage})`;
+  selectionImage.style.backgroundSize = `${window.innerWidth}px ${window.innerHeight}px`;
+  selectionImage.style.backgroundPosition = `-${nextRect.left}px -${nextRect.top}px`;
+  updateToolbarPosition(nextRect);
+}
+
+function scheduleSelectionRender(nextRect) {
+  pendingRect = nextRect;
   if (selectionFrameId) return;
   selectionFrameId = window.requestAnimationFrame(() => {
     selectionFrameId = 0;
@@ -43,32 +109,73 @@ function scheduleSelectionRender(r) {
 }
 
 function cropImage() {
-  if (!rect || rect.width < 4 || rect.height < 4) return null;
+  if (!isValidRect(rect)) return null;
   if (!fullImage || !sourceImage) {
     throw new Error("未获取到屏幕图像，请重新截图");
   }
+
   const scaleX = sourceImage.naturalWidth / window.innerWidth;
   const scaleY = sourceImage.naturalHeight / window.innerHeight;
-
   const sx = Math.max(0, Math.floor(rect.left * scaleX));
   const sy = Math.max(0, Math.floor(rect.top * scaleY));
   const sw = Math.max(1, Math.floor(rect.width * scaleX));
   const sh = Math.max(1, Math.floor(rect.height * scaleY));
 
-  const c = document.createElement("canvas");
-  c.width = sw;
-  c.height = sh;
-  const ctx = c.getContext("2d");
+  const canvas = document.createElement("canvas");
+  canvas.width = sw;
+  canvas.height = sh;
+  const ctx = canvas.getContext("2d");
   ctx.drawImage(sourceImage, sx, sy, sw, sh, 0, 0, sw, sh);
-  return c.toDataURL("image/png");
+  return canvas.toDataURL("image/png");
+}
+
+function cancelCapture() {
+  window.api.closeCapture();
+}
+
+function updateRectByResize(direction, pointerX, pointerY) {
+  const base = actionOriginRect;
+  let left = base.left;
+  let top = base.top;
+  let right = base.left + base.width;
+  let bottom = base.top + base.height;
+
+  if (direction.includes("w")) left = clamp(pointerX, 0, right);
+  if (direction.includes("e")) right = clamp(pointerX, left, window.innerWidth);
+  if (direction.includes("n")) top = clamp(pointerY, 0, bottom);
+  if (direction.includes("s")) bottom = clamp(pointerY, top, window.innerHeight);
+
+  rect = normalizeBoundsRect({ left, top, width: right - left, height: bottom - top });
+}
+
+function updateRectByMove(pointerX, pointerY) {
+  const deltaX = pointerX - startX;
+  const deltaY = pointerY - startY;
+  const maxLeft = window.innerWidth - actionOriginRect.width;
+  const maxTop = window.innerHeight - actionOriginRect.height;
+  rect = {
+    left: clamp(Math.round(actionOriginRect.left + deltaX), 0, Math.max(0, maxLeft)),
+    top: clamp(Math.round(actionOriginRect.top + deltaY), 0, Math.max(0, maxTop)),
+    width: actionOriginRect.width,
+    height: actionOriginRect.height,
+  };
+}
+
+function pointerInsideRect(pointerX, pointerY, nextRect) {
+  return nextRect && pointerX >= nextRect.left && pointerX <= nextRect.left + nextRect.width && pointerY >= nextRect.top && pointerY <= nextRect.top + nextRect.height;
 }
 
 async function init() {
   try {
     document.body.style.visibility = "hidden";
-    const captureWidth = Math.floor(window.innerWidth * window.devicePixelRatio);
-    const captureHeight = Math.floor(window.innerHeight * window.devicePixelRatio);
-    fullImage = await window.api.getScreenImageDataUrl(captureWidth, captureHeight);
+    displayInfo = await window.api.getCaptureDisplayInfo();
+    const captureWidth = Math.floor(window.innerWidth * (displayInfo?.scaleFactor || window.devicePixelRatio || 1));
+    const captureHeight = Math.floor(window.innerHeight * (displayInfo?.scaleFactor || window.devicePixelRatio || 1));
+    fullImage = await window.api.getScreenImageDataUrl({
+      displayId: displayInfo?.id,
+      width: captureWidth,
+      height: captureHeight,
+    });
     sourceImage = await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
@@ -80,36 +187,84 @@ async function init() {
   } catch (error) {
     window.api.reportError("capture:init", error.message || String(error));
     alert(`初始化截图失败：${error.message || error}`);
-    window.api.closeCapture();
+    cancelCapture();
   }
 }
 
-window.addEventListener("mousedown", (e) => {
-  if (e.button !== 0) return;
-  if (toolbar.contains(e.target)) return;
-  isSelecting = true;
-  startX = e.clientX;
-  startY = e.clientY;
+window.addEventListener("pointerdown", (event) => {
+  if (event.button === 2) {
+    event.preventDefault();
+    cancelCapture();
+    return;
+  }
+  if (event.button !== 0) return;
+  if (toolbar.contains(event.target)) return;
+
+  const handle = event.target.closest(".handle");
+  startX = event.clientX;
+  startY = event.clientY;
+  actionOriginRect = rect ? { ...rect } : null;
+
+  if (handle && rect) {
+    action = `resize:${handle.dataset.dir || "se"}`;
+    selection.setPointerCapture(event.pointerId);
+    return;
+  }
+
+  if (pointerInsideRect(event.clientX, event.clientY, rect)) {
+    action = "move";
+    selection.setPointerCapture(event.pointerId);
+    return;
+  }
+
+  action = "create";
   rect = normalizeRect(startX, startY, startX, startY);
   scheduleSelectionRender(rect);
 });
 
-window.addEventListener("mousemove", (e) => {
-  if (!isSelecting) return;
-  rect = normalizeRect(startX, startY, e.clientX, e.clientY);
+window.addEventListener("pointermove", (event) => {
+  if (!action) return;
+  if (action === "create") {
+    rect = normalizeBoundsRect(normalizeRect(startX, startY, event.clientX, event.clientY));
+  } else if (action === "move") {
+    updateRectByMove(event.clientX, event.clientY);
+  } else if (action.startsWith("resize:")) {
+    updateRectByResize(action.split(":")[1], event.clientX, event.clientY);
+  }
   scheduleSelectionRender(rect);
 });
 
-window.addEventListener("mouseup", () => {
-  isSelecting = false;
+window.addEventListener("pointerup", () => {
+  action = null;
+  actionOriginRect = rect ? { ...rect } : null;
+  if (!isValidRect(rect)) {
+    rect = null;
+    scheduleSelectionRender(null);
+  }
 });
 
-btnCancel.addEventListener("click", () => window.api.closeCapture());
+window.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+  cancelCapture();
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    cancelCapture();
+    return;
+  }
+  if ((event.key === "Enter" || event.key === "NumpadEnter") && isValidRect(rect)) {
+    event.preventDefault();
+    btnConfirm.click();
+  }
+});
+
 btnConfirm.addEventListener("click", async () => {
   try {
-    const dataUrl = await cropImage();
+    const dataUrl = cropImage();
     if (!dataUrl) {
-      alert("请先拖拽选中一个区域再点击完成截图");
+      alert("请先拖拽选中一个区域再点击完成");
       return;
     }
     const selectionRect = {
@@ -123,6 +278,10 @@ btnConfirm.addEventListener("click", async () => {
     window.api.reportError("capture:confirm", error.message || String(error));
     alert(`截图失败：${error.message || error}`);
   }
+});
+
+window.addEventListener("resize", () => {
+  scheduleSelectionRender(rect);
 });
 
 init();

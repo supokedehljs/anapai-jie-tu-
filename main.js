@@ -10,6 +10,7 @@ const {
   desktopCapturer,
   globalShortcut,
   clipboard,
+  screen,
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -238,6 +239,7 @@ function getDefaultAppSettings() {
     webhookDetailUrl: "https://www.runninghub.cn/task/openapi/getWebhookDetail",
     selectedWorkflowFile: "",
     captureShortcut: "CommandOrControl+Shift+A",
+    workflowShortcut: "CommandOrControl+Shift+W",
     togglePinnedShortcut: "CommandOrControl+Shift+H",
     defaultClickThrough: false,
     autoCopyToClipboard: true,
@@ -390,6 +392,7 @@ function getRunningHubConfig() {
       webhookDetailUrl: String(parsed.webhookDetailUrl || defaults.webhookDetailUrl),
       selectedWorkflowFile: String(parsed.selectedWorkflowFile || defaults.selectedWorkflowFile),
       captureShortcut: String(parsed.captureShortcut || defaults.captureShortcut),
+      workflowShortcut: String(parsed.workflowShortcut || defaults.workflowShortcut),
       togglePinnedShortcut: String(
         parsed.togglePinnedShortcut || defaults.togglePinnedShortcut
       ),
@@ -1609,6 +1612,10 @@ function registerGlobalShortcuts() {
     config.captureShortcut,
     getDefaultAppSettings().captureShortcut
   );
+  const workflowShortcut = normalizeShortcut(
+    config.workflowShortcut,
+    getDefaultAppSettings().workflowShortcut
+  );
   const togglePinnedShortcut = normalizeShortcut(
     config.togglePinnedShortcut,
     getDefaultAppSettings().togglePinnedShortcut
@@ -1616,6 +1623,9 @@ function registerGlobalShortcuts() {
 
   const captureRegistered = globalShortcut.register(captureShortcut, () => {
     startCapture();
+  });
+  const workflowRegistered = globalShortcut.register(workflowShortcut, () => {
+    showWorkflowWindow();
   });
   const toggleRegistered = globalShortcut.register(togglePinnedShortcut, () => {
     togglePinnedImagesVisibility();
@@ -1626,6 +1636,8 @@ function registerGlobalShortcuts() {
     JSON.stringify({
       captureShortcut,
       captureRegistered,
+      workflowShortcut,
+      workflowRegistered,
       togglePinnedShortcut,
       toggleRegistered,
     })
@@ -1634,6 +1646,8 @@ function registerGlobalShortcuts() {
   return {
     captureShortcut,
     captureRegistered,
+    workflowShortcut,
+    workflowRegistered,
     togglePinnedShortcut,
     toggleRegistered,
   };
@@ -1774,13 +1788,24 @@ function startCapture() {
     return;
   }
 
+  const cursorPoint = screen.getCursorScreenPoint();
+  const targetDisplay = screen.getDisplayNearestPoint(cursorPoint);
+  const displayBounds = targetDisplay && targetDisplay.bounds
+    ? targetDisplay.bounds
+    : screen.getPrimaryDisplay().bounds;
+
   captureWindow = new BrowserWindow({
-    fullscreen: true,
+    x: Math.round(displayBounds.x),
+    y: Math.round(displayBounds.y),
+    width: Math.max(1, Math.round(displayBounds.width)),
+    height: Math.max(1, Math.round(displayBounds.height)),
     frame: false,
     transparent: true,
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
+    movable: false,
+    fullscreenable: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -1788,7 +1813,9 @@ function startCapture() {
     },
   });
 
+  captureWindow.setAlwaysOnTop(true, "screen-saver");
   captureWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  captureWindow.setBounds(displayBounds);
   captureWindow.loadFile(path.join(__dirname, "capture.html"));
   captureWindow.webContents.on("console-message", (_e, _level, msg) => {
     logDebug("capture console", msg);
@@ -1935,8 +1962,9 @@ ipcMain.handle("save-image", async (_event, dataUrl) => {
     fs.mkdirSync(defaultDirectory, { recursive: true });
   }
 
-  const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
-  fs.writeFileSync(targetPath, Buffer.from(base64Data, "base64"));
+  const image = nativeImage.createFromDataURL(String(dataUrl || ""));
+  const pngBuffer = image.toPNG();
+  fs.writeFileSync(targetPath, pngBuffer);
   return { ok: true, filePath: targetPath };
 });
 
@@ -1994,10 +2022,22 @@ ipcMain.handle("choose-workflow-thumbnail-file", async () => {
     fileName: path.basename(sourcePath),
   };
 });
+ipcMain.handle("get-capture-display-info", () => {
+  const cursorPoint = screen.getCursorScreenPoint();
+  const targetDisplay = screen.getDisplayNearestPoint(cursorPoint);
+  const display = targetDisplay || screen.getPrimaryDisplay();
+  return {
+    id: display.id,
+    scaleFactor: display.scaleFactor,
+    bounds: display.bounds,
+    workArea: display.workArea,
+  };
+});
 ipcMain.handle("get-screen-image-data-url", async (_event, payload = {}) => {
+  const displayId = Number(payload.displayId);
   const width = Number.isFinite(payload.width) ? payload.width : 1920;
   const height = Number.isFinite(payload.height) ? payload.height : 1080;
-  logDebug("get-screen-image-data-url", `${width}x${height}`);
+  logDebug("get-screen-image-data-url", `${displayId || "auto"}:${width}x${height}`);
 
   const sources = await desktopCapturer.getSources({
     types: ["screen"],
@@ -2008,8 +2048,11 @@ ipcMain.handle("get-screen-image-data-url", async (_event, payload = {}) => {
     throw new Error("未获取到可用屏幕源");
   }
 
+  const matchedSource = Number.isFinite(displayId)
+    ? sources.find((item) => String(item.display_id || "") === String(displayId))
+    : null;
   const sourceWithImage =
-    sources.find((item) => !item.thumbnail.isEmpty()) || sources[0];
+    matchedSource || sources.find((item) => !item.thumbnail.isEmpty()) || sources[0];
   const dataUrl = sourceWithImage.thumbnail.toDataURL();
 
   if (!dataUrl || dataUrl === "data:image/png;base64,") {
@@ -2298,6 +2341,10 @@ ipcMain.handle("save-settings", async (_event, payload = {}) => {
         payload.captureShortcut,
         getDefaultAppSettings().captureShortcut
       ),
+      workflowShortcut: normalizeShortcut(
+        payload.workflowShortcut,
+        getDefaultAppSettings().workflowShortcut
+      ),
       togglePinnedShortcut: normalizeShortcut(
         payload.togglePinnedShortcut,
         getDefaultAppSettings().togglePinnedShortcut
@@ -2324,7 +2371,11 @@ ipcMain.handle("save-settings", async (_event, payload = {}) => {
     sendWorkflowSelectionData();
     refreshTrayMenu();
 
-    if (!shortcutState.captureRegistered || !shortcutState.toggleRegistered) {
+    if (
+      !shortcutState.captureRegistered ||
+      !shortcutState.workflowRegistered ||
+      !shortcutState.toggleRegistered
+    ) {
       return {
         ok: false,
         error: "部分快捷键注册失败，可能与其他软件冲突。请换一个组合键后重试。",
@@ -2345,6 +2396,8 @@ ipcMain.handle("get-shortcut-registration-state", () => {
   return {
     captureShortcut: config.captureShortcut,
     captureRegistered: globalShortcut.isRegistered(config.captureShortcut),
+    workflowShortcut: config.workflowShortcut,
+    workflowRegistered: globalShortcut.isRegistered(config.workflowShortcut),
     togglePinnedShortcut: config.togglePinnedShortcut,
     togglePinnedRegistered: globalShortcut.isRegistered(config.togglePinnedShortcut),
   };

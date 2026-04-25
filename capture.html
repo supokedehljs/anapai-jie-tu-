@@ -5,12 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>区域截图</title>
     <style>
+      :root {
+        color-scheme: dark;
+        --accent: #4ea1ff;
+        --accent-strong: #2f7fff;
+        --panel: rgba(15, 18, 24, 0.92);
+        --panel-border: rgba(255, 255, 255, 0.12);
+        --text: #f5f8ff;
+      }
       html, body {
         margin: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
         font-family: "Microsoft YaHei", sans-serif;
+        user-select: none;
       }
       #root {
         position: relative;
@@ -18,43 +27,107 @@
         height: 100%;
         cursor: crosshair;
       }
-      #bg {
+      #bg,
+      #mask,
+      #selection,
+      #selectionImage,
+      #selectionOutline,
+      #toolbar,
+      #sizeLabel {
         position: absolute;
+      }
+      #bg,
+      #mask {
         inset: 0;
+      }
+      #bg {
         background-size: 100% 100%;
         background-position: 0 0;
         background-repeat: no-repeat;
       }
       #mask {
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.38);
+        background: rgba(0, 0, 0, 0.46);
       }
       #selection {
-        position: absolute;
-        border: 2px solid #4ea1ff;
-        box-sizing: border-box;
         display: none;
-        will-change: left, top, width, height;
+        box-sizing: border-box;
+        z-index: 10;
       }
-      #toolbar {
+      #selectionImage,
+      #selectionOutline {
+        inset: 0;
+      }
+      #selectionImage {
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        border-radius: 2px;
+      }
+      #selectionOutline {
+        border: 2px solid var(--accent);
+        box-sizing: border-box;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 12px 36px rgba(0,0,0,.22);
+      }
+      .handle {
         position: absolute;
-        top: 16px;
-        right: 16px;
-        z-index: 99;
-        display: flex;
-        gap: 8px;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: #fff;
+        border: 2px solid var(--accent-strong);
+        box-sizing: border-box;
+        box-shadow: 0 4px 10px rgba(0,0,0,.22);
+      }
+      .handle.corner { width: 14px; height: 14px; }
+      .handle[data-dir="nw"] { left: -7px; top: -7px; cursor: nwse-resize; }
+      .handle[data-dir="n"] { left: calc(50% - 6px); top: -6px; cursor: ns-resize; }
+      .handle[data-dir="ne"] { right: -7px; top: -7px; cursor: nesw-resize; }
+      .handle[data-dir="e"] { right: -6px; top: calc(50% - 6px); cursor: ew-resize; }
+      .handle[data-dir="se"] { right: -7px; bottom: -7px; cursor: nwse-resize; }
+      .handle[data-dir="s"] { left: calc(50% - 6px); bottom: -6px; cursor: ns-resize; }
+      .handle[data-dir="sw"] { left: -7px; bottom: -7px; cursor: nesw-resize; }
+      .handle[data-dir="w"] { left: -6px; top: calc(50% - 6px); cursor: ew-resize; }
+      #toolbar {
+        display: none;
+        z-index: 20;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 16px;
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        box-shadow: 0 18px 48px rgba(0,0,0,.3);
+        backdrop-filter: blur(12px);
+      }
+      #sizeLabel {
+        display: none;
+        z-index: 21;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: rgba(9, 13, 18, 0.82);
+        border: 1px solid rgba(255,255,255,.1);
+        color: var(--text);
+        font-size: 12px;
+        line-height: 1;
+        white-space: nowrap;
       }
       button {
         border: none;
-        border-radius: 8px;
-        padding: 8px 12px;
-        background: #2f7fff;
-        color: #fff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,.08);
+        color: var(--text);
         cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
       }
-      button.secondary {
-        background: #5e6574;
+      button:hover { filter: brightness(1.08); }
+      #confirm {
+        background: linear-gradient(135deg, #2f7fff, #5e8cff);
+      }
+      #toolbarPlaceholder {
+        color: rgba(255,255,255,.62);
+        font-size: 12px;
+        padding: 0 2px;
       }
     </style>
   </head>
@@ -62,10 +135,22 @@
     <div id="root">
       <div id="bg"></div>
       <div id="mask"></div>
-      <div id="selection"></div>
+      <div id="selection">
+        <div id="selectionImage"></div>
+        <div id="selectionOutline"></div>
+        <div class="handle corner" data-dir="nw"></div>
+        <div class="handle" data-dir="n"></div>
+        <div class="handle corner" data-dir="ne"></div>
+        <div class="handle" data-dir="e"></div>
+        <div class="handle corner" data-dir="se"></div>
+        <div class="handle" data-dir="s"></div>
+        <div class="handle corner" data-dir="sw"></div>
+        <div class="handle" data-dir="w"></div>
+      </div>
+      <div id="sizeLabel"></div>
       <div id="toolbar">
-        <button id="confirm">完成截图</button>
-        <button id="cancel" class="secondary">取消</button>
+        <button id="confirm">完成</button>
+        <div id="toolbarPlaceholder">后续工具会加在这里</div>
       </div>
     </div>
     <script src="./capture.js"></script>

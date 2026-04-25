@@ -1,11 +1,11 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("api", {
-  async getScreenImageDataUrl(width = 1920, height = 1080) {
-    return ipcRenderer.invoke("get-screen-image-data-url", {
-      width,
-      height,
-    });
+  async getScreenImageDataUrl(payload = {}) {
+    return ipcRenderer.invoke("get-screen-image-data-url", payload);
+  },
+  getCaptureDisplayInfo() {
+    return ipcRenderer.invoke("get-capture-display-info");
   },
   onSetImage(callback) {
     ipcRenderer.on("set-image", (_event, payload) => callback(payload));
