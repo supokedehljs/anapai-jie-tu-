@@ -1,4 +1,4 @@
-项目上传说明（不上传 node_modules 版）
+项目上传说明（源码上传版，不上传 node_modules，不默认打包）
 
 GitHub 仓库地址：
 https://github.com/supokedehljs/anapai-jie-tu-.git
@@ -11,18 +11,23 @@ D:\OneDrive\cursor_workspace\SnapAI-jie-tu
 - 远程地址：https://github.com/supokedehljs/anapai-jie-tu-.git
 - 分支：main
 
+默认理解：
+- 用户说“上传这个版本”“帮我上传”“上传到 GitHub”时，默认指上传当前项目源码改动到 GitHub
+- 不默认执行打包，不默认生成 exe
+- 只有用户明确提到“打包”“构建安装包”“生成 exe”时，才执行打包
+- 上传时不上传 node_modules
+- node_modules 保持在 .gitignore 中，不要移除
+
 当前规则：
 - 这个项目以后默认上传当前项目里改过的、新增的、之前遗漏的内容到 GitHub
-- 不上传 node_modules 文件夹
-- node_modules 已写入 .gitignore
 - 除 node_modules 外，其它项目文件按需一起提交并推送
-- 下次更新时，默认理解为：当前项目里改过的、新增的、之前遗漏的内容，都一起提交并推送，但跳过 node_modules
+- 如果 node_modules 意外进入待提交列表，应先处理 .gitignore 或取消暂存，再提交
 
 仓库当前基础状态：
 - 已初始化 git
 - 已连接远程仓库 origin
 - 已推送到 main 分支
-- 最近一次处理时，曾因为尝试上传 node_modules 和 Electron 大文件导致 GitHub 推送超时，所以以后不要上传 node_modules
+- 之前曾因为尝试上传 node_modules 和 Electron 大文件导致推送超时，所以以后不要上传这些内容
 
 以后更新代码后的标准上传步骤：
 1. 打开终端，进入项目目录：
@@ -44,6 +49,7 @@ D:\OneDrive\cursor_workspace\SnapAI-jie-tu
 - "更新 RunningHub 工作流配置"
 - "上传大致完善版本"
 - "同步项目文件到 GitHub"
+- "优化图标 名字 版本"
 
 常用检查命令：
 查看当前远程仓库地址：
@@ -70,7 +76,8 @@ D:\OneDrive\cursor_workspace\SnapAI-jie-tu
 - 邮箱：supokedehljs@gmail.com
 
 以后执行上传时的默认理解：
-- 上传项目改动内容
+- 上传项目改动内容到 GitHub
 - 不上传 node_modules
+- 不默认打包
 - 不把 node_modules 从 .gitignore 中移除
 - 如果 node_modules 出现在待提交列表，应先处理 .gitignore 或取消暂存，再提交
