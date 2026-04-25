@@ -7,15 +7,15 @@
   "outputNodeId": "8",
   "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
   "generationDurationsMs": [
-    48652,
-    56192,
-    22354,
-    14392,
     60774,
     51139,
     48378,
     34838,
     51279,
-    52817
+    52817,
+    28359,
+    70240,
+    86710,
+    44745
   ]
 }

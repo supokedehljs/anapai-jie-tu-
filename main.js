@@ -106,10 +106,34 @@ function syncPinImages(entry) {
   entry.window.webContents.send("set-image", payload);
 }
 
+function dedupeImageDataUrls(dataUrls = []) {
+  const seen = new Set();
+  return (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter((item) => {
+    if (typeof item !== "string" || !item.trim()) return false;
+    const normalized = item.replace(/^data:image\/[^;]+;base64,/i, "").trim();
+    if (!normalized || seen.has(normalized)) return false;
+    seen.add(normalized);
+    return true;
+  });
+}
+
+function replacePinImages(entry, dataUrls = [], activeIndex = 0) {
+  if (!entry) return;
+  const nextImages = dedupeImageDataUrls(dataUrls);
+  if (!nextImages.length) return;
+  entry.images = nextImages;
+  entry.activeImageIndex = Math.max(0, Math.min(nextImages.length - 1, Number(activeIndex) || 0));
+  syncPinImages(entry);
+}
+
+function replacePinImagesWithGenerationResult(entry, sourceDataUrl, resultDataUrls = []) {
+  const results = dedupeImageDataUrls(resultDataUrls);
+  const nextImages = dedupeImageDataUrls([sourceDataUrl, ...results]);
+  replacePinImages(entry, nextImages, nextImages.length > 1 ? 1 : 0);
+}
+
 function appendImagesToPinEntry(entry, dataUrls = [], options = {}) {
-  const validDataUrls = (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter(
-    (item) => typeof item === "string" && item.trim()
-  );
+  const validDataUrls = dedupeImageDataUrls(dataUrls);
   if (!entry || !validDataUrls.length) return;
   const payload = buildPinImagesPayload(entry);
   const nextImages = [...payload.images, ...validDataUrls];
@@ -1019,6 +1043,9 @@ function pickResultImageUrls(data, preferredNodeId = "", options = {}) {
   if (Array.isArray(data)) {
     return uniqueImageUrls(data.flatMap((item) => pickResultImageUrls(item, normalizedNodeId, options)));
   }
+  if (normalizedNodeId && strictNodeMatch) {
+    return [];
+  }
   if (typeof data === "object") {
     const urls = [];
     const directKeys = [
@@ -1301,7 +1328,10 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
         } catch (_error) {
           parsed = text;
         }
-        const imageUrls = pickResultImageUrls(parsed, outputNodeId, { baseUrl });
+        const imageUrls = pickResultImageUrls(parsed, outputNodeId, {
+          baseUrl,
+          strictNodeMatch: false,
+        });
         const executionError = pickRunningHubExecutionError(parsed);
         logDebug(
           "runninghub websocket parsed",
@@ -1457,7 +1487,7 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
           : (data && (data.status || data.taskStatus || data.state)) || ""
       ).toUpperCase();
       const imageUrls = uniqueImageUrls([
-        ...pickResultImageUrls(data, workflow && workflow.outputNodeId),
+        ...pickResultImageUrls(data, workflow && workflow.outputNodeId, { strictNodeMatch: false }),
         ...(wsWatcher ? wsWatcher.getImageUrls() : []),
       ]);
       const executionError =
@@ -1489,7 +1519,18 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
         throw new Error(String(errMsg));
       }
       if (status === "SUCCESS" && imageUrls.length) {
-        return imageUrls;
+        const additionalUrls = [];
+        try {
+          const outputsData = await queryRunningHubTaskOutputs(config, taskId);
+          additionalUrls.push(...pickResultImageUrls(
+            outputsData,
+            workflow && workflow.outputNodeId,
+            { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || ""), strictNodeMatch: false }
+          ));
+        } catch (error) {
+          logDebug("runninghub outputs fallback failed", error && error.message ? error.message : String(error));
+        }
+        return uniqueImageUrls([...imageUrls, ...additionalUrls]);
       }
       if (status === "SUCCESS" && !imageUrls.length) {
         const successWaitRounds = 24;
@@ -1512,7 +1553,7 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
             const outputsImageUrls = pickResultImageUrls(
               outputsData,
               workflow && workflow.outputNodeId,
-              { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || "") }
+              { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || ""), strictNodeMatch: false }
             );
             if (outputsExecutionError) {
               logRunningHubFailure("outputs.execution_error", {
@@ -1542,7 +1583,7 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
             const webhookImageUrls = pickResultImageUrls(
               webhookData,
               workflow && workflow.outputNodeId,
-              { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || "") }
+              { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || ""), strictNodeMatch: false }
             );
             if (webhookExecutionError) {
               logRunningHubFailure("webhook.execution_error", {
@@ -1659,13 +1700,30 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
       wsUrl,
     }, workflow);
     const resultImageUrls = uniqueImageUrls(Array.isArray(resultImageRefs) ? resultImageRefs : [resultImageRefs]);
+    if (!resultImageUrls.length) {
+      throw new Error("任务已成功，但未获取到结果图链接");
+    }
     if (onProgress) onProgress(`已拿到 ${resultImageUrls.length} 张结果图链接，正在下载结果...`);
     const resultImageDataUrls = [];
+    const downloadErrors = [];
     for (let index = 0; index < resultImageUrls.length; index += 1) {
       if (onProgress && resultImageUrls.length > 1) {
         onProgress(`正在下载第 ${index + 1}/${resultImageUrls.length} 张结果...`);
       }
-      resultImageDataUrls.push(await imageUrlToDataUrl(resultImageUrls[index]));
+      try {
+        resultImageDataUrls.push(await imageUrlToDataUrl(resultImageUrls[index]));
+      } catch (error) {
+        downloadErrors.push({
+          imageUrl: resultImageUrls[index],
+          error: error && error.message ? error.message : String(error),
+        });
+        logRunningHubFailure("download.candidate_failed", downloadErrors[downloadErrors.length - 1]);
+      }
+    }
+    const dedupedResultImageDataUrls = dedupeImageDataUrls(resultImageDataUrls);
+    if (!dedupedResultImageDataUrls.length) {
+      const detail = downloadErrors.map((item, index) => `${index + 1}. ${item.error}`).join("\n");
+      throw new Error(`结果图链接已返回，但全部下载失败${detail ? `：\n${detail}` : ""}`);
     }
     if (onProgress) onProgress("结果已下载，正在替换贴图...");
     const durationMs = Date.now() - startedAt;
@@ -1676,8 +1734,8 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
       imageUrl,
       taskResult,
       taskId,
-      resultImageDataUrl: resultImageDataUrls[0] || "",
-      resultImageDataUrls,
+      resultImageDataUrl: dedupedResultImageDataUrls[0] || "",
+      resultImageDataUrls: dedupedResultImageDataUrls,
       durationMs,
     };
   } catch (error) {
@@ -1710,7 +1768,10 @@ function formatUserFacingRunningHubError(error, context = {}) {
   let title = `${workflowName} · 运行失败`;
   let reason = rawMessage;
 
-  if (/concurrent|concurrency|parallel|simultaneous|同时|并发|会员|super|limit|限制|too many/i.test(rawMessage)) {
+  if (/结果图链接已返回|全部下载失败|下载结果图片失败|download|结果不是可下载图片|未获取到结果图|未拿到生图结果|未获取到结果/i.test(rawMessage)) {
+    title = "结果图片获取失败";
+    reason = rawMessage;
+  } else if (/concurrent|concurrency|parallel|simultaneous|同时|并发|会员|super|limit|限制|too many/i.test(rawMessage)) {
     title = "云端并行任务受限";
     reason = "RunningHub 云端可能限制了同时运行多个任务。请等待当前任务完成，或确认账号是否支持并行/超级会员能力。";
     if (!/同时|并发|会员|限制/.test(rawMessage)) reason += `\n原始信息：${rawMessage}`;
@@ -1996,8 +2057,9 @@ async function runRunningHubForEntries(targetEntries = []) {
           prefix: `第 ${index + 1}/${entries.length} 张`,
         }, [entry]);
       }
-      const result = await runRunningHubGeneration(entry.dataUrl);
-      appendImagesToPinEntry(entry, result.resultImageDataUrls || [result.resultImageDataUrl]);
+      const sourceDataUrl = entry.dataUrl;
+      const result = await runRunningHubGeneration(sourceDataUrl);
+      replacePinImagesWithGenerationResult(entry, sourceDataUrl, result.resultImageDataUrls || [result.resultImageDataUrl]);
       workflowNames.push(result.workflowName);
     }
     sendPinProgress({
@@ -2600,8 +2662,9 @@ ipcMain.handle("run-selected-workflow", async () => {
           prefix: `第 ${index + 1}/${selectedEntries.length} 张`,
         }, [entry]);
       }
-      const result = await runRunningHubGeneration(entry.dataUrl);
-      appendImagesToPinEntry(entry, result.resultImageDataUrls || [result.resultImageDataUrl]);
+      const sourceDataUrl = entry.dataUrl;
+      const result = await runRunningHubGeneration(sourceDataUrl);
+      replacePinImagesWithGenerationResult(entry, sourceDataUrl, result.resultImageDataUrls || [result.resultImageDataUrl]);
       workflowNames.push(result.workflowName);
     }
     sendPinProgress({
