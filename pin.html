@@ -31,6 +31,56 @@
       #stage:active {
         cursor: grabbing;
       }
+      body.alt-adjusting #stage {
+        cursor: crosshair;
+      }
+      body.alt-adjusting #frame {
+        opacity: .9;
+      }
+      #scaleAnchor {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 24px;
+        height: 24px;
+        margin-left: -12px;
+        margin-top: -12px;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 8;
+        filter: drop-shadow(0 2px 5px rgba(0,0,0,.45));
+      }
+      #scaleAnchor::before,
+      #scaleAnchor::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background: #ff2d2d;
+        border-radius: 999px;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.82);
+      }
+      #scaleAnchor::before {
+        width: 24px;
+        height: 3px;
+        transform: translate(-50%, -50%);
+      }
+      #scaleAnchor::after {
+        width: 3px;
+        height: 24px;
+        transform: translate(-50%, -50%);
+      }
+      body.alt-adjusting #scaleAnchor {
+        opacity: 1;
+      }
+      body.scale-anchor-pulse #scaleAnchor {
+        animation: anchorPulse .26s ease-out;
+      }
+      @keyframes anchorPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.45); }
+        100% { transform: scale(1); }
+      }
       #dragHandle {
         position: absolute;
         left: 0;
@@ -179,6 +229,7 @@
   <body>
     <div id="stage">
       <div id="dragHandle"></div>
+      <div id="scaleAnchor"></div>
       <div id="tabsBar" role="tablist" aria-label="贴图图片列表"></div>
       <div id="frame">
         <div id="imageViewport">

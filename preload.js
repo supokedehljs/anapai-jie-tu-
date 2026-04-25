@@ -99,6 +99,15 @@ contextBridge.exposeInMainWorld("api", {
   setPinSize(width, height) {
     return ipcRenderer.invoke("pin-set-size", { width, height });
   },
+  scalePinAt(payload) {
+    return ipcRenderer.invoke("pin-scale-at", payload && typeof payload === "object" ? payload : {});
+  },
+  setPinOpacity(opacity) {
+    return ipcRenderer.invoke("pin-set-opacity", opacity);
+  },
+  startDragImageFile(dataUrl) {
+    ipcRenderer.send("pin-start-file-drag", dataUrl);
+  },
   fitPinToImage(width, height) {
     return ipcRenderer.invoke("pin-fit-to-image", { width, height });
   },

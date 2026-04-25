@@ -2440,6 +2440,33 @@ ipcMain.handle("pin-set-size", (event, payload = {}) => {
   pinEntry.window.setContentSize(width, height);
   return true;
 });
+ipcMain.handle("pin-scale-at", (event, payload = {}) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;
+  const scale = Number(payload.scaleFactor) || 1;
+  if (!Number.isFinite(scale) || scale <= 0) return false;
+  const bounds = pinEntry.window.getBounds();
+  const nextWidth = Math.max(120, Math.round(bounds.width * scale));
+  const nextHeight = Math.max(80, Math.round(bounds.height * scale));
+  const anchorX = Math.min(Math.max(Number(payload.anchorX) || bounds.width / 2, 0), bounds.width);
+  const anchorY = Math.min(Math.max(Number(payload.anchorY) || bounds.height / 2, 0), bounds.height);
+  const ratioX = bounds.width > 0 ? anchorX / bounds.width : 0.5;
+  const ratioY = bounds.height > 0 ? anchorY / bounds.height : 0.5;
+  pinEntry.window.setBounds({
+    x: Math.round(bounds.x + anchorX - nextWidth * ratioX),
+    y: Math.round(bounds.y + anchorY - nextHeight * ratioY),
+    width: nextWidth,
+    height: nextHeight,
+  });
+  return true;
+});
+ipcMain.handle("pin-set-opacity", (event, opacity) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;
+  const value = Math.min(1, Math.max(0.18, Number(opacity) || 1));
+  pinEntry.window.setOpacity(value);
+  return true;
+});
 ipcMain.handle("pin-fit-to-image", (event, payload = {}) => {
   const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
   if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return false;
@@ -2481,6 +2508,24 @@ ipcMain.handle("pin-switch-image", (event, payload = {}) => {
   pinEntry.activeImageIndex = nextIndex;
   syncPinImages(pinEntry);
   return true;
+});
+ipcMain.on("pin-start-file-drag", (event, dataUrl) => {
+  const pinEntry = getPinnedWindowEntryByWebContents(event.sender);
+  if (!pinEntry || !pinEntry.window || pinEntry.window.isDestroyed()) return;
+  try {
+    const image = nativeImage.createFromDataURL(String(dataUrl || pinEntry.dataUrl || ""));
+    if (image.isEmpty()) return;
+    const dragDir = path.join(appDataRoot, "drag-cache");
+    if (!fs.existsSync(dragDir)) fs.mkdirSync(dragDir, { recursive: true });
+    const filePath = path.join(dragDir, `SnapAI-${Date.now()}.png`);
+    fs.writeFileSync(filePath, image.toPNG());
+    event.sender.startDrag({
+      file: filePath,
+      icon: image.resize({ width: 96, height: 96 }),
+    });
+  } catch (error) {
+    logDebug("pin-start-file-drag failed", error && error.message ? error.message : String(error));
+  }
 });
 ipcMain.on("pin-start-drag", (event, payload = {}) => {
   const pinEntry = getPinnedWindowEntryByWebContents(event.sender);

@@ -4,6 +4,7 @@ const frame = document.getElementById("frame");
 const saveBtn = document.getElementById("saveBtn");
 const runningStatus = document.getElementById("runningStatus");
 const tabsBar = document.getElementById("tabsBar");
+const scaleAnchor = document.getElementById("scaleAnchor");
 
 let currentDataUrl = "";
 let currentImages = [];
@@ -16,6 +17,40 @@ let pinWindowId = "";
 let isSelected = false;
 let runningCountdownTimer = null;
 let runningCountdownPayload = null;
+let altAdjusting = false;
+let scaleAnchorPoint = { x: 0.5, y: 0.5 };
+let scaleAnchorPinned = false;
+let lastPointerPosition = null;
+let ctrlFileDragStarted = false;
+
+function updateScaleAnchorVisual() {
+  const rect = stage.getBoundingClientRect();
+  const x = scaleAnchorPoint.x * rect.width;
+  const y = scaleAnchorPoint.y * rect.height;
+  scaleAnchor.style.left = `${x}px`;
+  scaleAnchor.style.top = `${y}px`;
+}
+
+function setAltAdjusting(enabled) {
+  altAdjusting = Boolean(enabled);
+  document.body.classList.toggle("alt-adjusting", altAdjusting);
+  window.api.setPinOpacity(altAdjusting ? 0.72 : 1);
+  if (altAdjusting) updateScaleAnchorVisual();
+}
+
+function setScaleAnchorFromEvent(event, options = {}) {
+  const rect = stage.getBoundingClientRect();
+  scaleAnchorPoint = {
+    x: Math.min(1, Math.max(0, event.clientX / Math.max(1, rect.width))),
+    y: Math.min(1, Math.max(0, event.clientY / Math.max(1, rect.height))),
+  };
+  if (options.pin) {
+    scaleAnchorPinned = true;
+    document.body.classList.add("scale-anchor-pinned", "scale-anchor-pulse");
+    setTimeout(() => document.body.classList.remove("scale-anchor-pulse"), 260);
+  }
+  updateScaleAnchorVisual();
+}
 
 function formatRemainingTime(milliseconds) {
   const totalSeconds = Math.max(0, Math.ceil((Number(milliseconds) || 0) / 1000));
@@ -103,12 +138,24 @@ async function updateDisplayedImage(dataUrl) {
   await fitWindowToCurrentImage();
 }
 
-async function resizePinByScale(scaleFactor) {
+async function resizePinByScale(scaleFactor, options = {}) {
   const rect = stage.getBoundingClientRect();
-  const nextWidth = Math.max(120, Math.round(rect.width * scaleFactor));
-  const nextHeight = Math.max(80, Math.round(rect.height * scaleFactor));
-  await window.api.setPinSize(nextWidth, nextHeight);
-  requestAnimationFrame(resetFrameToStage);
+  const shouldUseAnchor = options.useAnchor !== false;
+  if (shouldUseAnchor) {
+    await window.api.scalePinAt({
+      scaleFactor,
+      anchorX: scaleAnchorPoint.x * rect.width,
+      anchorY: scaleAnchorPoint.y * rect.height,
+    });
+  } else {
+    const nextWidth = Math.max(120, Math.round(rect.width * scaleFactor));
+    const nextHeight = Math.max(80, Math.round(rect.height * scaleFactor));
+    await window.api.setPinSize(nextWidth, nextHeight);
+  }
+  requestAnimationFrame(() => {
+    resetFrameToStage();
+    updateScaleAnchorVisual();
+  });
 }
 
 function updateTabSelection() {
@@ -187,10 +234,25 @@ function applyImagePayload(payload) {
 }
 
 function shouldStartDrag(event) {
-  return event.button === 0 && !event.target.closest("button");
+  return event.button === 0 && !event.target.closest("button") && !event.altKey;
 }
 
 function startDrag(event) {
+  lastPointerPosition = { x: event.clientX, y: event.clientY };
+  if (event.altKey) {
+    event.preventDefault();
+    requestSelection(event);
+    setAltAdjusting(true);
+    setScaleAnchorFromEvent(event, { pin: true });
+    return;
+  }
+  if (event.ctrlKey || event.metaKey) {
+    event.preventDefault();
+    requestSelection(event);
+    ctrlFileDragStarted = true;
+    if (currentDataUrl) window.api.startDragImageFile(currentDataUrl);
+    return;
+  }
   if (!shouldStartDrag(event)) return;
   requestSelection(event);
   event.preventDefault();
@@ -202,6 +264,10 @@ function startDrag(event) {
 }
 
 function moveDrag(event) {
+  lastPointerPosition = { x: event.clientX, y: event.clientY };
+  if ((altAdjusting || event.altKey) && !dragState && !scaleAnchorPinned) {
+    setScaleAnchorFromEvent(event);
+  }
   if (!dragState || dragState.pointerId !== event.pointerId) return;
   window.api.dragPin({ screenX: event.screenX, screenY: event.screenY });
 }
@@ -213,6 +279,7 @@ function endDrag(event) {
   } catch (_error) {
   }
   dragState = null;
+  ctrlFileDragStarted = false;
   window.api.endPinDrag();
 }
 
@@ -259,6 +326,12 @@ frame.addEventListener(
   "wheel",
   async (event) => {
     event.preventDefault();
+    if (event.altKey) {
+      const direction = event.deltaY < 0 ? 1 : -1;
+      const scaleFactor = 1 + direction * 0.025;
+      await resizePinByScale(scaleFactor, { useAnchor: true });
+      return;
+    }
     const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;
     await resizePinByScale(scaleFactor);
   },
@@ -269,6 +342,15 @@ frame.addEventListener("pointerdown", startDrag);
 frame.addEventListener("pointermove", moveDrag);
 frame.addEventListener("pointerup", endDrag);
 frame.addEventListener("pointercancel", endDrag);
+window.addEventListener("pointermove", (event) => {
+  lastPointerPosition = { x: event.clientX, y: event.clientY };
+  if (event.altKey && !altAdjusting) {
+    setAltAdjusting(true);
+  }
+  if (altAdjusting || event.altKey) {
+    if (!scaleAnchorPinned) setScaleAnchorFromEvent(event);
+  }
+});
 
 img.addEventListener("load", async () => {
   if (img.src !== currentDataUrl) return;
@@ -326,6 +408,13 @@ window.api.onPinWindowMeta((payload) => {
 });
 
 window.addEventListener("keydown", async (event) => {
+  if (event.key === "Alt") {
+    setAltAdjusting(true);
+    if (lastPointerPosition) {
+      const syntheticEvent = { clientX: lastPointerPosition.x, clientY: lastPointerPosition.y };
+      if (!scaleAnchorPinned) setScaleAnchorFromEvent(syntheticEvent);
+    }
+  }
   if (event.key === " " || event.code === "Space") {
     event.preventDefault();
     window.api.openWorkflowSelector();
@@ -347,4 +436,15 @@ window.addEventListener("keydown", async (event) => {
     requestSelection(event);
     await switchToImage(activeImageIndex + 1);
   }
+});
+
+window.addEventListener("keyup", (event) => {
+  if (event.key === "Alt") {
+    setAltAdjusting(false);
+  }
+});
+
+window.addEventListener("blur", () => {
+  setAltAdjusting(false);
+  ctrlFileDragStarted = false;
 });
