@@ -20,7 +20,7 @@ if not exist "node_modules" (
   )
 )
 
-echo [Info] Starting SnapAI...
+echo [Info] Starting Running Jietu v2.0...
 call npm start
 
 endlocal

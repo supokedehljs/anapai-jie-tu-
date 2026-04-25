@@ -1,4 +1,4 @@
-# 杰 v1.0
+# Running Jietu v2.0
 
 ## 已实现功能
 

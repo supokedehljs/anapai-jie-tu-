@@ -29,7 +29,7 @@ const bundledWorkflowDir = path.join(__dirname, "runninghub-workflows");
 const appDataRoot = isPackagedApp
   ? path.join(app.getPath("userData"), "runninghub-data")
   : __dirname;
-const logFilePath = path.join(appDataRoot, "snapai-debug.log");
+const logFilePath = path.join(appDataRoot, "running-jietu-debug.log");
 const runningHubConfigPath = path.join(appDataRoot, "runninghub.config.json");
 const runningHubWorkflowDir = isPackagedApp
   ? path.join(appDataRoot, "runninghub-workflows")
@@ -256,19 +256,32 @@ function logDebug(message, extra = "") {
 }
 
 function createTrayIcon() {
+  const iconCandidates = [
+    path.join(__dirname, "assets", "running-jietu-icon.ico"),
+    path.join(__dirname, "assets", "running-jietu-icon.png"),
+    path.join(__dirname, "assets", "running-jietu-icon.svg"),
+  ];
+
+  for (const iconPath of iconCandidates) {
+    if (!fs.existsSync(iconPath)) continue;
+    const image = nativeImage.createFromPath(iconPath);
+    if (!image.isEmpty()) {
+      return image.resize({ width: 16, height: 16 });
+    }
+  }
+
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-    <rect width="64" height="64" rx="14" fill="#1f6feb"/>
-    <text x="32" y="44" text-anchor="middle" font-size="34" font-family="Microsoft YaHei, SimHei, sans-serif" font-weight="700" fill="#ffffff">杰</text>
+    <text x="32" y="58" text-anchor="middle" font-size="63" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#ffffff">R</text>
   </svg>`;
-  return nativeImage.createFromDataURL(
-    `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`
-  );
+  return nativeImage
+    .createFromDataURL(`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`)
+    .resize({ width: 16, height: 16 });
 }
 
 function createTray() {
   tray = new Tray(createTrayIcon());
-  tray.setToolTip("杰 v1.0");
+  tray.setToolTip("Running Jietu v2.0");
 
   const contextMenu = Menu.buildFromTemplate([
     {

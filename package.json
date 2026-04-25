@@ -1,7 +1,7 @@
 {
-  "name": "jie",
-  "version": "1.0.0",
-  "description": "杰 v1.0 - 极简托盘截图工具（区域截图 + 置顶钉图）",
+  "name": "running-jietu",
+  "version": "2.0.0",
+  "description": "Running Jietu v2.0 - 极简托盘截图工具（区域截图 + 置顶钉图）",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -17,10 +17,10 @@
     "electron-builder": "^26.0.12"
   },
   "build": {
-    "appId": "com.jie.v1",
-    "productName": "杰 v1.0",
+    "appId": "com.runningjietu.v2",
+    "productName": "Running Jietu v2.0",
     "directories": {
-      "output": "../jie-v1.0-test-package"
+      "output": "../Running-Jietu-v2.0-package"
     },
     "files": [
       "main.js",
@@ -33,8 +33,9 @@
     "extraMetadata": {
       "main": "main.js"
     },
+    "electronDist": "node_modules/electron/dist",
     "win": {
-      "icon": "assets/jie-icon.ico",
+      "icon": "assets/running-jietu-icon.png",
       "target": [
         {
           "target": "portable",
@@ -43,7 +44,7 @@
           ]
         }
       ],
-      "artifactName": "杰-v${version}-Portable.${ext}"
+      "artifactName": "Running-Jietu-v${version}-Portable.${ext}"
     }
   }
 }
