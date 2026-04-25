@@ -1,0 +1,13 @@
+{
+  "fileName": "图生图多角.json",
+  "displayName": "图生图多角",
+  "workflowId": "2048079156851773441",
+  "imageNodeId": "6",
+  "imageFieldName": "image",
+  "outputNodeId": "1",
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
+  "generationDurationsMs": [
+    142471,
+    218791
+  ]
+}

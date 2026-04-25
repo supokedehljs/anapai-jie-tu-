@@ -106,14 +106,21 @@ function syncPinImages(entry) {
   entry.window.webContents.send("set-image", payload);
 }
 
-function appendImageToPinEntry(entry, dataUrl, options = {}) {
-  if (!entry || typeof dataUrl !== "string" || !dataUrl.trim()) return;
+function appendImagesToPinEntry(entry, dataUrls = [], options = {}) {
+  const validDataUrls = (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter(
+    (item) => typeof item === "string" && item.trim()
+  );
+  if (!entry || !validDataUrls.length) return;
   const payload = buildPinImagesPayload(entry);
-  const nextImages = [...payload.images, dataUrl];
+  const nextImages = [...payload.images, ...validDataUrls];
   entry.images = nextImages;
   entry.activeImageIndex =
-    options.activateAppended === false ? payload.activeIndex : nextImages.length - 1;
+    options.activateAppended === false ? payload.activeIndex : nextImages.length - validDataUrls.length;
   syncPinImages(entry);
+}
+
+function appendImageToPinEntry(entry, dataUrl, options = {}) {
+  appendImagesToPinEntry(entry, [dataUrl], options);
 }
 
 function syncPinnedSelectionStyles() {
@@ -247,9 +254,9 @@ function getDefaultAppSettings() {
     taskOutputsUrl: "https://www.runninghub.ai/task/openapi/outputs",
     webhookDetailUrl: "https://www.runninghub.cn/task/openapi/getWebhookDetail",
     selectedWorkflowFile: "",
-    captureShortcut: "CommandOrControl+Shift+A",
-    workflowShortcut: "CommandOrControl+Shift+W",
-    togglePinnedShortcut: "CommandOrControl+Shift+H",
+    captureShortcut: "Ctrl+Alt+K",
+    workflowShortcut: "Ctrl+Alt+T",
+    togglePinnedShortcut: "Ctrl+Alt+L",
     defaultClickThrough: false,
     autoCopyToClipboard: true,
     launchAtStartup: false,
@@ -536,13 +543,13 @@ function getSelectedWorkflowTimingInfo() {
   const config = getRunningHubConfig();
   const workflowFile = config.selectedWorkflowFile;
   if (!workflowFile) {
-    return { workflowName: "当前工作流", estimatedDurationMs: 180000 };
+    return { workflowName: "当前工作流", estimatedDurationMs: 0 };
   }
   const workflow = readWorkflow(workflowFile);
   const timingStats = getWorkflowTimingStats(workflowFile);
   return {
     workflowName: workflow.name || path.basename(workflowFile, path.extname(workflowFile)),
-    estimatedDurationMs: timingStats.estimatedGenerationDurationMs || 180000,
+    estimatedDurationMs: timingStats.estimatedGenerationDurationMs || 0,
   };
 }
 
@@ -956,6 +963,97 @@ function getResultNodeId(data) {
   ).trim().replace(/^#/, "");
 }
 
+function uniqueImageUrls(urls = []) {
+  const seen = new Set();
+  return urls
+    .map((url) => String(url || "").trim())
+    .filter((url) => {
+      if (!url || seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    });
+}
+
+function pickResultImageUrls(data, preferredNodeId = "", options = {}) {
+  if (!data) return [];
+  const normalizedNodeId = String(preferredNodeId || "").trim().replace(/^#/, "");
+  const strictNodeMatch = options.strictNodeMatch === true;
+  const baseUrl = String(options.baseUrl || "").trim();
+
+  if (normalizedNodeId && typeof data === "object") {
+    const currentNodeId = getResultNodeId(data);
+    if (currentNodeId === normalizedNodeId) {
+      const nodePayload = data.output || data.outputs || data.result || data.results || data.data || data;
+      const urls = pickResultImageUrls(nodePayload, "", options);
+      if (urls.length) return urls;
+    }
+    if (strictNodeMatch && currentNodeId && currentNodeId !== normalizedNodeId) {
+      return [];
+    }
+    const preferredNodeData =
+      data[normalizedNodeId] ||
+      (data.outputs && data.outputs[normalizedNodeId]) ||
+      (data.output && data.output[normalizedNodeId]) ||
+      (data.results && data.results[normalizedNodeId]) ||
+      null;
+    if (preferredNodeData) {
+      const urls = pickResultImageUrls(preferredNodeData, "", options);
+      if (urls.length) return urls;
+    }
+    if (Array.isArray(data.nodeInfoList)) {
+      const matchedNode = data.nodeInfoList.find((item) => {
+        if (!item || typeof item !== "object") return false;
+        const nodeId = String(item.nodeId || item.id || item.node_id || "").trim().replace(/^#/, "");
+        return nodeId === normalizedNodeId;
+      });
+      if (matchedNode) {
+        const urls = pickResultImageUrls(matchedNode, "", options);
+        if (urls.length) return urls;
+      }
+    }
+  }
+
+  if (typeof data === "string") {
+    return looksLikeImageRef(data) ? [data.trim()] : [];
+  }
+  if (Array.isArray(data)) {
+    return uniqueImageUrls(data.flatMap((item) => pickResultImageUrls(item, normalizedNodeId, options)));
+  }
+  if (typeof data === "object") {
+    const urls = [];
+    const directKeys = [
+      "cos_url",
+      "url",
+      "fileUrl",
+      "imageUrl",
+      "image",
+      "src",
+      "ossUrl",
+      "finalUrl",
+      "outputUrl",
+      "resultUrl",
+    ];
+    for (const key of directKeys) {
+      if (typeof data[key] === "string" && looksLikeImageRef(data[key])) {
+        urls.push(data[key].trim());
+      }
+    }
+    const comfyImageUrl = buildComfyViewImageUrl(data, baseUrl);
+    if (comfyImageUrl) urls.push(comfyImageUrl);
+    const arrayKeys = ["results", "images", "outputs", "output", "fileList", "data"];
+    for (const key of arrayKeys) {
+      if (key in data) {
+        urls.push(...pickResultImageUrls(data[key], normalizedNodeId, options));
+      }
+    }
+    for (const value of Object.values(data)) {
+      urls.push(...pickResultImageUrls(value, normalizedNodeId, options));
+    }
+    return uniqueImageUrls(urls);
+  }
+  return [];
+}
+
 function pickResultImageUrl(data, preferredNodeId = "", options = {}) {
   if (!data) return "";
   const normalizedNodeId = String(preferredNodeId || "").trim().replace(/^#/, "");
@@ -1146,22 +1244,22 @@ async function readWebSocketMessageData(data) {
 
 function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeId = "") {
   let socket = null;
-  let latestImageUrl = "";
+  let latestImageUrls = [];
   let latestExecutionError = null;
   let settled = false;
   let timeoutId = null;
   const baseUrl = extractRunningHubTargetBaseUrl(wsUrl);
 
-  new Promise((resolve) => {
+  const waitPromise = new Promise((resolve) => {
     if (!wsUrl || typeof WebSocket !== "function") {
-      resolve("");
+      resolve([]);
       return;
     }
 
-    const finish = (value = "") => {
+    const finish = (values = []) => {
       if (settled) return;
       settled = true;
-      latestImageUrl = value || latestImageUrl;
+      latestImageUrls = uniqueImageUrls([...latestImageUrls, ...values]);
       if (timeoutId) clearTimeout(timeoutId);
       try {
         if (socket && socket.readyState === WebSocket.OPEN) {
@@ -1170,7 +1268,7 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
       } catch (_error) {
         // Ignore websocket close errors.
       }
-      resolve(latestImageUrl || "");
+      resolve(latestImageUrls);
     };
 
     try {
@@ -1181,11 +1279,11 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
         "runninghub websocket connect failed",
         error && error.message ? error.message : String(error)
       );
-      resolve("");
+      resolve([]);
       return;
     }
 
-    timeoutId = setTimeout(() => finish(""), 180000);
+    timeoutId = setTimeout(() => finish([]), 180000);
 
     socket.addEventListener("open", () => {
       if (onProgress) {
@@ -1203,11 +1301,11 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
         } catch (_error) {
           parsed = text;
         }
-        const imageUrl = pickResultImageUrl(parsed, outputNodeId, { baseUrl });
+        const imageUrls = pickResultImageUrls(parsed, outputNodeId, { baseUrl });
         const executionError = pickRunningHubExecutionError(parsed);
         logDebug(
           "runninghub websocket parsed",
-          JSON.stringify(summarizeRunningHubWsMessage(parsed, imageUrl)).slice(0, 2000)
+          JSON.stringify(summarizeRunningHubWsMessage(parsed, imageUrls[0] || "")).slice(0, 2000)
         );
         if (executionError) {
           latestExecutionError = executionError;
@@ -1218,9 +1316,9 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
             payload: parsed,
           });
         }
-        if (imageUrl) {
-          latestImageUrl = imageUrl;
-          finish(imageUrl);
+        if (imageUrls.length) {
+          latestImageUrls = uniqueImageUrls([...latestImageUrls, ...imageUrls]);
+          finish(imageUrls);
         }
       } catch (error) {
         logDebug(
@@ -1235,23 +1333,31 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
     });
 
     socket.addEventListener("close", () => {
-      finish(latestImageUrl);
+      finish(latestImageUrls);
     });
   });
 
   return {
+    getImageUrls() {
+      return latestImageUrls;
+    },
     getImageUrl() {
-      return latestImageUrl;
+      return latestImageUrls[0] || "";
     },
     getExecutionError() {
       return latestExecutionError;
     },
+    async waitForImages(timeoutMs = 8000) {
+      if (latestImageUrls.length) return latestImageUrls;
+      await Promise.race([
+        waitPromise,
+        new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+      ]);
+      return latestImageUrls;
+    },
     async waitForImage(timeoutMs = 8000) {
-      const immediate = latestImageUrl;
-      if (immediate) return immediate;
-      return new Promise((resolve) =>
-        setTimeout(() => resolve(latestImageUrl || ""), timeoutMs)
-      );
+      const images = await this.waitForImages(timeoutMs);
+      return images[0] || "";
     },
     stop() {
       if (timeoutId) clearTimeout(timeoutId);
@@ -1350,9 +1456,10 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
           ? data
           : (data && (data.status || data.taskStatus || data.state)) || ""
       ).toUpperCase();
-      const imageUrl =
-        pickResultImageUrl(data, workflow && workflow.outputNodeId) ||
-        (wsWatcher ? wsWatcher.getImageUrl() : "");
+      const imageUrls = uniqueImageUrls([
+        ...pickResultImageUrls(data, workflow && workflow.outputNodeId),
+        ...(wsWatcher ? wsWatcher.getImageUrls() : []),
+      ]);
       const executionError =
         pickRunningHubExecutionError(data) ||
         (wsWatcher ? wsWatcher.getExecutionError() : null);
@@ -1381,19 +1488,19 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
         });
         throw new Error(String(errMsg));
       }
-      if (status === "SUCCESS" && imageUrl) {
-        return imageUrl;
+      if (status === "SUCCESS" && imageUrls.length) {
+        return imageUrls;
       }
-      if (status === "SUCCESS" && !imageUrl) {
+      if (status === "SUCCESS" && !imageUrls.length) {
         const successWaitRounds = 24;
         for (let round = 0; round < successWaitRounds; round += 1) {
           if (wsWatcher) {
             if (onProgress) {
               onProgress(`状态已成功，正在等待任务结果通道返回图片...（${round + 1}/${successWaitRounds}）`);
             }
-            const wsImageUrl = await wsWatcher.waitForImage(2500);
-            if (wsImageUrl) {
-              return wsImageUrl;
+            const wsImageUrls = await wsWatcher.waitForImages(2500);
+            if (wsImageUrls.length) {
+              return wsImageUrls;
             }
           }
           if (onProgress) {
@@ -1402,7 +1509,7 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
           try {
             const outputsData = await queryRunningHubTaskOutputs(config, taskId);
             const outputsExecutionError = pickRunningHubExecutionError(outputsData);
-            const outputsImageUrl = pickResultImageUrl(
+            const outputsImageUrls = pickResultImageUrls(
               outputsData,
               workflow && workflow.outputNodeId,
               { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || "") }
@@ -1416,8 +1523,8 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
               });
               throw new Error(formatRunningHubExecutionError(outputsExecutionError));
             }
-            if (outputsImageUrl) {
-              return outputsImageUrl;
+            if (outputsImageUrls.length) {
+              return outputsImageUrls;
             }
             logDebug(
               "runninghub outputs no image",
@@ -1432,7 +1539,7 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
           try {
             const webhookData = await queryRunningHubWebhookDetail(config, taskId);
             const webhookExecutionError = pickRunningHubExecutionError(webhookData);
-            const webhookImageUrl = pickResultImageUrl(
+            const webhookImageUrls = pickResultImageUrls(
               webhookData,
               workflow && workflow.outputNodeId,
               { baseUrl: extractRunningHubTargetBaseUrl(options.wsUrl || "") }
@@ -1446,8 +1553,8 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
               });
               throw new Error(formatRunningHubExecutionError(webhookExecutionError));
             }
-            if (webhookImageUrl) {
-              return webhookImageUrl;
+            if (webhookImageUrls.length) {
+              return webhookImageUrls;
             }
             logDebug(
               "runninghub webhook detail no image",
@@ -1483,8 +1590,8 @@ async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}
         });
         throw new Error(detailedError);
       }
-      if (!status && imageUrl) {
-        return imageUrl;
+      if (!status && imageUrls.length) {
+        return imageUrls;
       }
       await new Promise((resolve) => setTimeout(resolve, 2500));
     }
@@ -1548,16 +1655,31 @@ async function runRunningHubGeneration(dataUrl, onProgress) {
       JSON.stringify({ taskId, wsUrl, taskStatus: taskResult && taskResult.taskStatus }).slice(0, 2000)
     );
     if (onProgress) onProgress(`任务已创建，taskId=${taskId}`);
-    const resultImageUrl = await waitRunningHubTaskResult(config, taskId, onProgress, {
+    const resultImageRefs = await waitRunningHubTaskResult(config, taskId, onProgress, {
       wsUrl,
     }, workflow);
-    if (onProgress) onProgress("已拿到结果图链接，正在下载结果...");
-    const resultImageDataUrl = await imageUrlToDataUrl(resultImageUrl);
+    const resultImageUrls = uniqueImageUrls(Array.isArray(resultImageRefs) ? resultImageRefs : [resultImageRefs]);
+    if (onProgress) onProgress(`已拿到 ${resultImageUrls.length} 张结果图链接，正在下载结果...`);
+    const resultImageDataUrls = [];
+    for (let index = 0; index < resultImageUrls.length; index += 1) {
+      if (onProgress && resultImageUrls.length > 1) {
+        onProgress(`正在下载第 ${index + 1}/${resultImageUrls.length} 张结果...`);
+      }
+      resultImageDataUrls.push(await imageUrlToDataUrl(resultImageUrls[index]));
+    }
     if (onProgress) onProgress("结果已下载，正在替换贴图...");
     const durationMs = Date.now() - startedAt;
     recordWorkflowGenerationDuration(workflowFile, durationMs);
     sendWorkflowSelectionData();
-    return { workflowName: workflow.name, imageUrl, taskResult, taskId, resultImageDataUrl, durationMs };
+    return {
+      workflowName: workflow.name,
+      imageUrl,
+      taskResult,
+      taskId,
+      resultImageDataUrl: resultImageDataUrls[0] || "",
+      resultImageDataUrls,
+      durationMs,
+    };
   } catch (error) {
     logRunningHubFailure("runGeneration.catch", {
       workflowFile,
@@ -1875,7 +1997,7 @@ async function runRunningHubForEntries(targetEntries = []) {
         }, [entry]);
       }
       const result = await runRunningHubGeneration(entry.dataUrl);
-      appendImageToPinEntry(entry, result.resultImageDataUrl);
+      appendImagesToPinEntry(entry, result.resultImageDataUrls || [result.resultImageDataUrl]);
       workflowNames.push(result.workflowName);
     }
     sendPinProgress({
@@ -1925,7 +2047,7 @@ function buildPinContextMenu(pinEntry) {
     },
     {
       label: "打开工作流选择器",
-      enabled: !runningHubUploading,
+      enabled: true,
       click: () => showWorkflowWindow(),
     },
     {
@@ -2479,7 +2601,7 @@ ipcMain.handle("run-selected-workflow", async () => {
         }, [entry]);
       }
       const result = await runRunningHubGeneration(entry.dataUrl);
-      appendImageToPinEntry(entry, result.resultImageDataUrl);
+      appendImagesToPinEntry(entry, result.resultImageDataUrls || [result.resultImageDataUrl]);
       workflowNames.push(result.workflowName);
     }
     sendPinProgress({
@@ -2686,14 +2808,22 @@ ipcMain.handle("save-settings", async (_event, payload = {}) => {
     const current = getRunningHubConfig();
     const nextSettings = {
       apiKey: String(payload.apiKey || "").trim(),
-      uploadUrl: String(payload.uploadUrl || "").trim() || getDefaultAppSettings().uploadUrl,
+      uploadUrl:
+        typeof payload.uploadUrl === "string"
+          ? String(payload.uploadUrl || "").trim() || current.uploadUrl || getDefaultAppSettings().uploadUrl
+          : current.uploadUrl || getDefaultAppSettings().uploadUrl,
       createTaskUrl:
-        String(payload.createTaskUrl || "").trim() || getDefaultAppSettings().createTaskUrl,
+        typeof payload.createTaskUrl === "string"
+          ? String(payload.createTaskUrl || "").trim() || current.createTaskUrl || getDefaultAppSettings().createTaskUrl
+          : current.createTaskUrl || getDefaultAppSettings().createTaskUrl,
       taskStatusUrl:
-        String(payload.taskStatusUrl || "").trim() || getDefaultAppSettings().taskStatusUrl,
+        typeof payload.taskStatusUrl === "string"
+          ? String(payload.taskStatusUrl || "").trim() || current.taskStatusUrl || getDefaultAppSettings().taskStatusUrl
+          : current.taskStatusUrl || getDefaultAppSettings().taskStatusUrl,
       webhookDetailUrl:
-        String(payload.webhookDetailUrl || "").trim() ||
-        getDefaultAppSettings().webhookDetailUrl,
+        typeof payload.webhookDetailUrl === "string"
+          ? String(payload.webhookDetailUrl || "").trim() || current.webhookDetailUrl || getDefaultAppSettings().webhookDetailUrl
+          : current.webhookDetailUrl || getDefaultAppSettings().webhookDetailUrl,
       captureShortcut: normalizeShortcut(
         payload.captureShortcut,
         getDefaultAppSettings().captureShortcut

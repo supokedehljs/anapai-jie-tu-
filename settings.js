@@ -21,6 +21,10 @@ const elements = {
 const shortcutInputs = [elements.captureShortcut, elements.workflowShortcut, elements.togglePinnedShortcut];
 let recordingInput = null;
 
+function displayShortcut(value = "") {
+  return String(value || "").replace(/CommandOrControl/gi, "Ctrl");
+}
+
 function setStatus(message = "", isError = false) {
   elements.status.textContent = message;
   elements.status.classList.toggle("error", Boolean(isError));
@@ -35,21 +39,21 @@ function renderShortcutState(state = {}) {
   const workflowOk = Boolean(state.workflowRegistered);
   const toggleOk = Boolean(state.togglePinnedRegistered);
   elements.shortcutState.innerHTML = [
-    `<div class="statusCard"><strong>区域截图 · ${getShortcutBadgeText(captureOk)}</strong><div class="statusValue">${state.captureShortcut || "-"}</div></div>`,
-    `<div class="statusCard"><strong>工作流窗口 · ${getShortcutBadgeText(workflowOk)}</strong><div class="statusValue">${state.workflowShortcut || "-"}</div></div>`,
-    `<div class="statusCard"><strong>显示/隐藏贴图 · ${getShortcutBadgeText(toggleOk)}</strong><div class="statusValue">${state.togglePinnedShortcut || "-"}</div></div>`,
+    `<div class="statusCard"><strong>区域截图 · ${getShortcutBadgeText(captureOk)}</strong><div class="statusValue">${displayShortcut(state.captureShortcut) || "-"}</div></div>`,
+    `<div class="statusCard"><strong>工作流窗口 · ${getShortcutBadgeText(workflowOk)}</strong><div class="statusValue">${displayShortcut(state.workflowShortcut) || "-"}</div></div>`,
+    `<div class="statusCard"><strong>显示/隐藏贴图 · ${getShortcutBadgeText(toggleOk)}</strong><div class="statusValue">${displayShortcut(state.togglePinnedShortcut) || "-"}</div></div>`,
   ].join("");
 }
 
 function applySettings(settings = {}) {
   elements.apiKey.value = settings.apiKey || "";
-  elements.uploadUrl.value = settings.uploadUrl || "";
-  elements.createTaskUrl.value = settings.createTaskUrl || "";
-  elements.taskStatusUrl.value = settings.taskStatusUrl || "";
-  elements.webhookDetailUrl.value = settings.webhookDetailUrl || "";
-  elements.captureShortcut.value = settings.captureShortcut || "";
-  elements.workflowShortcut.value = settings.workflowShortcut || "";
-  elements.togglePinnedShortcut.value = settings.togglePinnedShortcut || "";
+  if (elements.uploadUrl) elements.uploadUrl.value = settings.uploadUrl || "";
+  if (elements.createTaskUrl) elements.createTaskUrl.value = settings.createTaskUrl || "";
+  if (elements.taskStatusUrl) elements.taskStatusUrl.value = settings.taskStatusUrl || "";
+  if (elements.webhookDetailUrl) elements.webhookDetailUrl.value = settings.webhookDetailUrl || "";
+  elements.captureShortcut.value = displayShortcut(settings.captureShortcut || "");
+  elements.workflowShortcut.value = displayShortcut(settings.workflowShortcut || "");
+  elements.togglePinnedShortcut.value = displayShortcut(settings.togglePinnedShortcut || "");
   elements.defaultClickThrough.checked = Boolean(settings.defaultClickThrough);
   elements.autoCopyToClipboard.checked = Boolean(settings.autoCopyToClipboard);
   elements.launchAtStartup.checked = Boolean(settings.launchAtStartup);
@@ -59,10 +63,10 @@ function applySettings(settings = {}) {
 function collectSettings() {
   return {
     apiKey: elements.apiKey.value.trim(),
-    uploadUrl: elements.uploadUrl.value.trim(),
-    createTaskUrl: elements.createTaskUrl.value.trim(),
-    taskStatusUrl: elements.taskStatusUrl.value.trim(),
-    webhookDetailUrl: elements.webhookDetailUrl.value.trim(),
+    uploadUrl: elements.uploadUrl ? elements.uploadUrl.value.trim() : undefined,
+    createTaskUrl: elements.createTaskUrl ? elements.createTaskUrl.value.trim() : undefined,
+    taskStatusUrl: elements.taskStatusUrl ? elements.taskStatusUrl.value.trim() : undefined,
+    webhookDetailUrl: elements.webhookDetailUrl ? elements.webhookDetailUrl.value.trim() : undefined,
     captureShortcut: elements.captureShortcut.value.trim(),
     workflowShortcut: elements.workflowShortcut.value.trim(),
     togglePinnedShortcut: elements.togglePinnedShortcut.value.trim(),
@@ -79,7 +83,7 @@ function keyEventToAccelerator(event) {
   if (["Control", "Shift", "Alt", "Meta"].includes(key)) return "";
 
   const parts = [];
-  if (event.ctrlKey || event.metaKey) parts.push("CommandOrControl");
+  if (event.ctrlKey || event.metaKey) parts.push("Ctrl");
   if (event.altKey) parts.push("Alt");
   if (event.shiftKey) parts.push("Shift");
 

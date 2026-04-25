@@ -22,7 +22,7 @@
         display: grid;
         grid-template-rows: auto 1fr auto;
         margin: 0;
-        border-radius: 22px;
+        border-radius: 18px;
         overflow: hidden;
         background: linear-gradient(180deg, rgba(16,20,28,.97), rgba(10,13,18,.95));
         box-shadow: 0 24px 80px rgba(0,0,0,.42);
@@ -33,13 +33,13 @@
         align-items: flex-start;
         justify-content: space-between;
         gap: 16px;
-        padding: 18px 20px 12px;
+        padding: 14px 18px 8px;
         border-bottom: 1px solid rgba(255,255,255,.06);
         -webkit-app-region: drag;
       }
       #titleWrap { display: flex; flex-direction: column; gap: 6px; }
-      #title { font-size: 21px; font-weight: 700; letter-spacing: .4px; }
-      #subtitle { font-size: 12px; line-height: 1.7; color: rgba(232,238,249,.72); max-width: 760px; }
+      #title { font-size: 19px; font-weight: 700; letter-spacing: .4px; }
+      #subtitle { font-size: 12px; line-height: 1.55; color: rgba(232,238,249,.72); max-width: 760px; }
       #actions {
         display: flex;
         align-items: center;
@@ -74,39 +74,39 @@
       }
       #content {
         overflow: auto;
-        padding: 18px 20px 16px;
+        padding: 12px 18px 12px;
       }
       #stack {
         display: flex;
         flex-direction: column;
-        gap: 14px;
+        gap: 10px;
       }
       .card {
-        border-radius: 18px;
+        border-radius: 14px;
         border: 1px solid rgba(255,255,255,.08);
         background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
         overflow: hidden;
       }
       .cardHeader {
-        padding: 16px 18px 10px;
+        padding: 12px 16px 8px;
       }
       .cardTitle {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
       }
       .cardDesc {
         margin-top: 6px;
         font-size: 12px;
-        line-height: 1.7;
+        line-height: 1.55;
         color: rgba(232,238,249,.68);
       }
       .cardBody {
-        padding: 0 18px 18px;
+        padding: 0 16px 14px;
       }
       .field {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
       }
       .field + .field,
       .switchItem + .switchItem,
@@ -114,7 +114,7 @@
       .field + .statusGrid,
       .switchList + .field,
       .field + .switchList {
-        margin-top: 14px;
+        margin-top: 10px;
       }
       .fieldLabel {
         display: flex;
@@ -125,8 +125,8 @@
       .hint { font-size: 11px; color: rgba(237,243,255,.46); }
       input[type="text"] {
         width: 100%;
-        padding: 13px 14px;
-        border-radius: 14px;
+        padding: 10px 12px;
+        border-radius: 12px;
         border: 1px solid rgba(255,255,255,.09);
         background: rgba(6,10,16,.7);
         color: #f6f9ff;
@@ -137,15 +137,31 @@
         border-color: rgba(91,140,255,.9);
         box-shadow: 0 0 0 4px rgba(91,140,255,.14);
       }
-      .shortcutGrid,
+      .shortcutGrid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .shortcutRow {
+        display: grid;
+        grid-template-columns: minmax(160px, 1fr) minmax(180px, 240px);
+        align-items: center;
+        gap: 16px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,.03);
+        border: 1px solid rgba(255,255,255,.06);
+      }
+      .shortcutName { font-size: 13px; font-weight: 700; color: rgba(246,249,255,.94); }
+      .shortcutRow input { text-align: right; padding: 9px 11px; border-radius: 10px; }
       .statusGrid {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 8px;
       }
       .statusCard {
-        padding: 14px;
-        border-radius: 16px;
+        padding: 10px 12px;
+        border-radius: 12px;
         background: rgba(255,255,255,.03);
         border: 1px solid rgba(255,255,255,.06);
       }
@@ -154,20 +170,20 @@
       .switchList {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
       }
       .switchItem {
         display: grid;
         grid-template-columns: 1fr auto;
         gap: 12px;
         align-items: center;
-        padding: 14px 16px;
-        border-radius: 16px;
+        padding: 10px 12px;
+        border-radius: 12px;
         border: 1px solid rgba(255,255,255,.06);
         background: rgba(255,255,255,.03);
       }
-      .switchInfo strong { display: block; font-size: 14px; margin-bottom: 6px; }
-      .switchInfo span { display: block; color: rgba(237,243,255,.64); font-size: 12px; line-height: 1.7; }
+      .switchInfo strong { display: block; font-size: 13px; margin-bottom: 4px; }
+      .switchInfo span { display: block; color: rgba(237,243,255,.64); font-size: 11px; line-height: 1.55; }
       .switch { position: relative; width: 48px; height: 28px; }
       .switch input { opacity: 0; width: 0; height: 0; }
       .slider { position: absolute; inset: 0; border-radius: 999px; background: rgba(255,255,255,.14); }
@@ -195,7 +211,7 @@
         color: #eef4ff;
       }
       .note {
-        padding: 14px 16px;
+        padding: 10px 12px;
         border-radius: 16px;
         border: 1px solid rgba(91,140,255,.18);
         background: rgba(91,140,255,.07);
@@ -205,7 +221,7 @@
       }
       #footer {
         display: block;
-        padding: 14px 20px 18px;
+        padding: 10px 18px 12px;
         border-top: 1px solid rgba(255,255,255,.06);
         background: rgba(255,255,255,.015);
       }
@@ -217,6 +233,8 @@
       #status.error { color: #ff9d9d; }
       @media (max-width: 760px) {
         .inlineRow { flex-direction: column; }
+        .shortcutRow { grid-template-columns: 1fr; gap: 8px; }
+        .shortcutRow input { text-align: left; }
       }
     </style>
   </head>
@@ -238,28 +256,12 @@
           <div class="card">
             <div class="cardHeader">
               <div class="cardTitle">RunningHub 接入</div>
-              <div class="cardDesc">这里配置 API Key 和接口地址。默认值适用于常规 RunningHub OpenAPI，若你使用代理网关，也可以直接覆盖。</div>
+              <div class="cardDesc">这里只需要配置 API Key。上传、创建任务、状态查询和 Webhook 详情接口都是 RunningHub OpenAPI 固定端点，通常不需要手动修改。</div>
             </div>
             <div class="cardBody">
               <label class="field">
                 <div class="fieldLabel"><strong>API Key</strong><span class="hint">用于上传与创建任务</span></div>
                 <input id="apiKey" type="text" placeholder="请输入 RunningHub API Key" />
-              </label>
-              <label class="field">
-                <div class="fieldLabel"><strong>上传接口</strong><span class="hint">Upload</span></div>
-                <input id="uploadUrl" type="text" />
-              </label>
-              <label class="field">
-                <div class="fieldLabel"><strong>创建任务接口</strong><span class="hint">Create Task</span></div>
-                <input id="createTaskUrl" type="text" />
-              </label>
-              <label class="field">
-                <div class="fieldLabel"><strong>任务状态接口</strong><span class="hint">Task Status</span></div>
-                <input id="taskStatusUrl" type="text" />
-              </label>
-              <label class="field">
-                <div class="fieldLabel"><strong>Webhook 详情接口</strong><span class="hint">Webhook Detail</span></div>
-                <input id="webhookDetailUrl" type="text" />
               </label>
             </div>
           </div>
@@ -271,17 +273,17 @@
             </div>
             <div class="cardBody">
               <div class="shortcutGrid">
-                <label class="field">
-                  <div class="fieldLabel"><strong>区域截图</strong><span class="hint">系统级快捷触发</span></div>
-                  <input id="captureShortcut" class="shortcut-input" type="text" placeholder="点击这里，然后按下快捷键" readonly />
+                <label class="shortcutRow">
+                  <span class="shortcutName">区域截图</span>
+                  <input id="captureShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
                 </label>
-                <label class="field">
-                  <div class="fieldLabel"><strong>选择工作流窗口</strong><span class="hint">快速打开工作流选择器</span></div>
-                  <input id="workflowShortcut" class="shortcut-input" type="text" placeholder="点击这里，然后按下快捷键" readonly />
+                <label class="shortcutRow">
+                  <span class="shortcutName">选择工作流窗口</span>
+                  <input id="workflowShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
                 </label>
-                <label class="field">
-                  <div class="fieldLabel"><strong>显示 / 隐藏所有置顶贴图</strong><span class="hint">适合快速收起参考图</span></div>
-                  <input id="togglePinnedShortcut" class="shortcut-input" type="text" placeholder="点击这里，然后按下快捷键" readonly />
+                <label class="shortcutRow">
+                  <span class="shortcutName">显示隐藏所有置顶贴图</span>
+                  <input id="togglePinnedShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
                 </label>
               </div>
             </div>

@@ -1,0 +1,309 @@
+{
+  "1": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "保存图像"
+    }
+  },
+  "4": {
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAE加载器"
+    }
+  },
+  "5": {
+    "inputs": {
+      "image": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "easy imageSize",
+    "_meta": {
+      "title": "图像尺寸"
+    }
+  },
+  "6": {
+    "inputs": {
+      "image": "pasted/44ccaa3d621ae35720150587c804614eed77f4e0b2e7dfb297dcf8f0dd7e76dd.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "加载图像"
+    }
+  },
+  "7": {
+    "inputs": {
+      "width": [
+        "5",
+        0
+      ],
+      "height": [
+        "5",
+        1
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空Latent"
+    }
+  },
+  "8": {
+    "inputs": {
+      "seed": 378634815426603,
+      "steps": 8,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "13",
+        0
+      ],
+      "positive": [
+        "26",
+        0
+      ],
+      "negative": [
+        "27",
+        0
+      ],
+      "latent_image": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "9": {
+    "inputs": {
+      "samples": [
+        "8",
+        0
+      ],
+      "vae": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "12": {
+    "inputs": {
+      "horizontal_angle": 171,
+      "vertical_angle": 0,
+      "zoom": 5,
+      "default_prompts": false,
+      "camera_view": false
+    },
+    "class_type": "QwenMultiangleCameraNode",
+    "_meta": {
+      "title": "Qwen Multiangle Camera"
+    }
+  },
+  "13": {
+    "inputs": {
+      "lora_name": "new_qwen-image-edit-2511-multiple-angles-lora.safetensors",
+      "strength_model": 0.9000000000000001,
+      "model": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器(仅模型)"
+    }
+  },
+  "14": {
+    "inputs": {
+      "lora_name": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+      "strength_model": 1,
+      "model": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器(仅模型)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "CLIP加载器"
+    }
+  },
+  "16": {
+    "inputs": {
+      "unet_name": "qwen_image_edit_2511_bf16.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNET加载器"
+    }
+  },
+  "17": {
+    "inputs": {
+      "horizontal_angle": 78,
+      "vertical_angle": 0,
+      "zoom": 5,
+      "default_prompts": false,
+      "camera_view": false
+    },
+    "class_type": "QwenMultiangleCameraNode",
+    "_meta": {
+      "title": "Qwen Multiangle Camera"
+    }
+  },
+  "19": {
+    "inputs": {
+      "horizontal_angle": 1,
+      "vertical_angle": 36,
+      "zoom": 5,
+      "default_prompts": false,
+      "camera_view": false
+    },
+    "class_type": "QwenMultiangleCameraNode",
+    "_meta": {
+      "title": "Qwen Multiangle Camera"
+    }
+  },
+  "20": {
+    "inputs": {
+      "horizontal_angle": 269,
+      "vertical_angle": 0,
+      "zoom": 5,
+      "default_prompts": false,
+      "camera_view": false
+    },
+    "class_type": "QwenMultiangleCameraNode",
+    "_meta": {
+      "title": "Qwen Multiangle Camera"
+    }
+  },
+  "21": {
+    "inputs": {
+      "horizontal_angle": 168,
+      "vertical_angle": 38,
+      "zoom": 5,
+      "default_prompts": false,
+      "camera_view": false
+    },
+    "class_type": "QwenMultiangleCameraNode",
+    "_meta": {
+      "title": "Qwen Multiangle Camera"
+    }
+  },
+  "22": {
+    "inputs": {
+      "horizontal_angle": 2,
+      "vertical_angle": -30,
+      "zoom": 5,
+      "default_prompts": false,
+      "camera_view": false
+    },
+    "class_type": "QwenMultiangleCameraNode",
+    "_meta": {
+      "title": "Qwen Multiangle Camera"
+    }
+  },
+  "26": {
+    "inputs": {
+      "prompt": [
+        "51",
+        0
+      ],
+      "target_size": 1024,
+      "target_vl_size": 384,
+      "upscale_method": "lanczos",
+      "crop_method": "center",
+      "instruction": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.",
+      "clip": [
+        "15",
+        0
+      ],
+      "vae": [
+        "4",
+        0
+      ],
+      "vl_resize_image1": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "TextEncodeQwenImageEditPlusAdvance_lrzjason",
+    "_meta": {
+      "title": "TextEncodeQwenImageEditPlusAdvance lrzjason"
+    }
+  },
+  "27": {
+    "inputs": {
+      "conditioning": [
+        "26",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "条件零化"
+    }
+  },
+  "51": {
+    "inputs": {
+      "pwd": "1234",
+      "string_1_1": [
+        "17",
+        0
+      ],
+      "string_2_2": [
+        "12",
+        0
+      ],
+      "string_3_3": [
+        "20",
+        0
+      ],
+      "string_4_4": [
+        "19",
+        0
+      ],
+      "string_5_5": [
+        "21",
+        0
+      ],
+      "string_6_6": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "RHHiddenNodes",
+    "_meta": {
+      "title": "Group Nodes(Password)"
+    }
+  }
+}

@@ -125,10 +125,14 @@ function stopRunningCountdown(delay = 0) {
 function renderRunningCountdown() {
   if (!runningCountdownPayload) return;
   const startedAt = Number(runningCountdownPayload.startedAt) || Date.now();
-  const estimatedDurationMs = Math.max(1000, Number(runningCountdownPayload.estimatedDurationMs) || 180000);
-  const remainingMs = Math.max(0, estimatedDurationMs - (Date.now() - startedAt));
+  const estimatedDurationMs = Number(runningCountdownPayload.estimatedDurationMs) || 0;
   const workflowName = runningCountdownPayload.workflowName || "当前工作流";
   const prefix = runningCountdownPayload.prefix ? `${runningCountdownPayload.prefix} · ` : "";
+  if (estimatedDurationMs <= 0) {
+    setRunningStatus(`${prefix}${workflowName}`, "暂无时间记录");
+    return;
+  }
+  const remainingMs = Math.max(0, estimatedDurationMs - (Date.now() - startedAt));
   setRunningStatus(`${prefix}${workflowName}`, `预计 ${formatRemainingTime(remainingMs)}`);
 }
 
@@ -137,7 +141,7 @@ function startRunningCountdown(payload = {}) {
   runningCountdownPayload = {
     ...payload,
     startedAt: Number(payload.startedAt) || Date.now(),
-    estimatedDurationMs: Number(payload.estimatedDurationMs) || 180000,
+    estimatedDurationMs: Number(payload.estimatedDurationMs) || 0,
   };
   renderRunningCountdown();
   runningCountdownTimer = setInterval(renderRunningCountdown, 1000);
@@ -224,6 +228,12 @@ async function switchToImage(index, options = {}) {
   if (!options.skipSync) {
     await window.api.switchPinImage(nextIndex);
   }
+}
+
+async function switchToNextImage(step = 1) {
+  if (currentImages.length <= 1) return;
+  const nextIndex = (activeImageIndex + step + currentImages.length) % currentImages.length;
+  await switchToImage(nextIndex);
 }
 
 function renderTabs() {
@@ -472,16 +482,22 @@ window.addEventListener("keydown", async (event) => {
     requestSelection(event);
     return;
   }
+  if (event.key === "Tab" && currentImages.length > 1) {
+    event.preventDefault();
+    requestSelection(event);
+    await switchToNextImage(event.shiftKey ? -1 : 1);
+    return;
+  }
   if (event.key === "ArrowLeft" && currentImages.length > 1) {
     event.preventDefault();
     requestSelection(event);
-    await switchToImage(activeImageIndex - 1);
+    await switchToNextImage(-1);
     return;
   }
   if (event.key === "ArrowRight" && currentImages.length > 1) {
     event.preventDefault();
     requestSelection(event);
-    await switchToImage(activeImageIndex + 1);
+    await switchToNextImage(1);
   }
 });
 
