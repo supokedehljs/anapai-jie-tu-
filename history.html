@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>历史记录</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --panel: rgba(15, 19, 28, 0.86);
+        --panel-strong: rgba(20, 25, 36, 0.96);
+        --border: rgba(255, 255, 255, 0.12);
+        --text: #f7f9fc;
+        --muted: rgba(247, 249, 252, 0.62);
+        --accent: #5ea1ff;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+        color: var(--text);
+        background: transparent;
+      }
+      body { overflow: hidden; }
+      .window {
+        height: 100vh;
+        margin: 0;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(94, 161, 255, 0.2), transparent 30%),
+          radial-gradient(circle at 90% 12%, rgba(137, 92, 255, 0.14), transparent 24%),
+          var(--panel);
+        backdrop-filter: blur(22px);
+        box-shadow: 0 18px 52px rgba(0, 0, 0, 0.34);
+      }
+      header {
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 12px 0 16px;
+        border-bottom: 1px solid var(--border);
+        -webkit-app-region: drag;
+      }
+      .title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+      h1 { margin: 0; font-size: 17px; letter-spacing: .02em; }
+      .subtitle { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .actions { display: flex; gap: 6px; -webkit-app-region: no-drag; flex-shrink: 0; }
+      button {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 10px;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.08);
+        cursor: pointer;
+        transition: transform .16s ease, background .16s ease, border-color .16s ease;
+      }
+      button:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.14); border-color: rgba(255,255,255,.22); }
+      .close { width: 30px; padding: 5px 0; font-size: 17px; line-height: 1; }
+      main {
+        height: calc(100vh - 54px);
+        overflow: auto;
+        padding: 10px;
+      }
+      .empty {
+        height: 100%;
+        display: none;
+        place-items: center;
+        text-align: center;
+        color: var(--muted);
+      }
+      .empty.show { display: grid; }
+      .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+        gap: 8px;
+      }
+      .card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        background: rgba(8, 11, 18, 0.42);
+        cursor: pointer;
+        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+        padding: 0;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(94, 161, 255, 0.58);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+      }
+      .thumb {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        display: block;
+        object-fit: cover;
+        background: rgba(0, 0, 0, 0.28);
+      }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 999px; }
+    </style>
+  </head>
+  <body>
+    <section class="window">
+      <header>
+        <div class="title">
+          <h1>历史记录</h1>
+          <div class="subtitle" id="summary">查看所有截图和 AI 生成图片，点击图片可重新钉回屏幕</div>
+        </div>
+        <div class="actions">
+          <button id="openFolderBtn" type="button">打开历史文件夹</button>
+          <button id="refreshBtn" type="button">刷新</button>
+          <button id="closeBtn" class="close" type="button" aria-label="关闭">×</button>
+        </div>
+      </header>
+      <main>
+        <div id="empty" class="empty">
+          <div>
+            <h2>还没有历史记录</h2>
+            <p>每次截图都会在软件目录的 history 文件夹下创建一个新文件夹。</p>
+          </div>
+        </div>
+        <div id="historyGrid" class="image-grid"></div>
+      </main>
+    </section>
+    <script src="history.js"></script>
+  </body>
+</html>

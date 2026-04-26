@@ -174,6 +174,23 @@ contextBridge.exposeInMainWorld("api", {
       callback(settings && typeof settings === "object" ? settings : {})
     );
   },
+  getHistorySessions() {
+    return ipcRenderer.invoke("get-history-sessions");
+  },
+  openHistoryImage(filePath) {
+    return ipcRenderer.invoke("open-history-image", filePath);
+  },
+  openHistoryFolder() {
+    return ipcRenderer.invoke("open-history-folder");
+  },
+  closeHistory() {
+    ipcRenderer.send("history-close");
+  },
+  onHistoryData(callback) {
+    ipcRenderer.on("history-data", (_event, sessions) =>
+      callback(Array.isArray(sessions) ? sessions : [])
+    );
+  },
   reportError(source, message) {
     ipcRenderer.send("renderer-error", { source, message });
   },

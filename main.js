@@ -22,6 +22,7 @@ let captureWindow = null;
 let pendingCapturePayload = null;
 let workflowWindow = null;
 let settingsWindow = null;
+let historyWindow = null;
 let pinDragState = null;
 let pinnedWindowsHidden = false;
 const pinnedImageWindows = new Map();
@@ -38,6 +39,8 @@ const runningHubConfigPath = path.join(appDataRoot, "runninghub.config.json");
 const runningHubWorkflowDir = isPackagedApp
   ? path.join(appDataRoot, "runninghub-workflows")
   : bundledWorkflowDir;
+const historyRootDir = path.join(appDataRoot, "history");
+let currentHistorySession = null;
 let runningHubActiveCount = 0;
 const WORKFLOW_IMAGE_PLACEHOLDER = "{{RUNNINGHUB_IMAGE_URL}}";
 
@@ -327,11 +330,8 @@ function createTrayIcon() {
     .resize({ width: 16, height: 16 });
 }
 
-function createTray() {
-  tray = new Tray(createTrayIcon());
-  tray.setToolTip("Running Jietu v2.0");
-
-  const contextMenu = Menu.buildFromTemplate([
+function createTrayMenu() {
+  return Menu.buildFromTemplate([
     {
       label: "区域截图",
       click: () => startCapture(),
@@ -345,6 +345,10 @@ function createTray() {
       click: () => togglePinnedImagesVisibility(),
     },
     {
+      label: "历史菜单",
+      click: () => showHistoryWindow(),
+    },
+    {
       label: "设置",
       click: () => showSettingsWindow(),
     },
@@ -354,36 +358,17 @@ function createTray() {
       click: () => app.quit(),
     },
   ]);
+}
 
-  tray.setContextMenu(contextMenu);
+function createTray() {
+  tray = new Tray(createTrayIcon());
+  tray.setToolTip("Running Jietu v2.0");
+  tray.setContextMenu(createTrayMenu());
 }
 
 function refreshTrayMenu() {
   if (!tray) return;
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: "区域截图",
-      click: () => startCapture(),
-    },
-    {
-      label: "选择工作流窗口",
-      click: () => showWorkflowWindow(),
-    },
-    {
-      label: pinnedWindowsHidden ? "显示置顶贴图" : "隐藏置顶贴图",
-      click: () => togglePinnedImagesVisibility(),
-    },
-    {
-      label: "设置",
-      click: () => showSettingsWindow(),
-    },
-    { type: "separator" },
-    {
-      label: "退出",
-      click: () => app.quit(),
-    },
-  ]);
-  tray.setContextMenu(contextMenu);
+  tray.setContextMenu(createTrayMenu());
 }
 
 function copyBundledWorkflowsToUserDir() {
@@ -408,6 +393,9 @@ function ensureRunningHubFiles() {
   }
   if (!fs.existsSync(runningHubWorkflowDir)) {
     fs.mkdirSync(runningHubWorkflowDir, { recursive: true });
+  }
+  if (!fs.existsSync(historyRootDir)) {
+    fs.mkdirSync(historyRootDir, { recursive: true });
   }
   copyBundledWorkflowsToUserDir();
   if (!fs.existsSync(runningHubConfigPath)) {
@@ -554,6 +542,174 @@ function fileToDataUrl(filePath) {
   const mimeType = mimeMap[ext] || "application/octet-stream";
   const buffer = fs.readFileSync(filePath);
   return `data:${mimeType};base64,${buffer.toString("base64")}`;
+}
+
+function sanitizeFileNamePart(input = "") {
+  return String(input || "")
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[-.]+|[-.]+$/g, "") || "image";
+}
+
+function formatHistoryTimestamp(date = new Date()) {
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+}
+
+function ensureHistoryRootDir() {
+  if (!fs.existsSync(historyRootDir)) {
+    fs.mkdirSync(historyRootDir, { recursive: true });
+  }
+}
+
+function createHistorySession() {
+  ensureHistoryRootDir();
+  const startedAt = new Date();
+  let dirName = formatHistoryTimestamp(startedAt);
+  let sessionDir = path.join(historyRootDir, dirName);
+  let suffix = 2;
+  while (fs.existsSync(sessionDir)) {
+    dirName = `${formatHistoryTimestamp(startedAt)}-${suffix}`;
+    sessionDir = path.join(historyRootDir, dirName);
+    suffix += 1;
+  }
+  fs.mkdirSync(sessionDir, { recursive: true });
+  currentHistorySession = {
+    id: dirName,
+    dirName,
+    dirPath: sessionDir,
+    startedAt: startedAt.toISOString(),
+    nextImageIndex: 1,
+  };
+  writeHistorySessionMeta(currentHistorySession);
+  return currentHistorySession;
+}
+
+function getOrCreateHistorySession() {
+  if (!currentHistorySession || !currentHistorySession.dirPath || !fs.existsSync(currentHistorySession.dirPath)) {
+    return createHistorySession();
+  }
+  return currentHistorySession;
+}
+
+function writeHistorySessionMeta(session) {
+  if (!session || !session.dirPath) return;
+  const imageFiles = fs.existsSync(session.dirPath)
+    ? fs.readdirSync(session.dirPath).filter((name) => /\.(png|jpg|jpeg|webp|gif)$/i.test(name)).sort((a, b) => a.localeCompare(b, "zh-CN"))
+    : [];
+  const meta = {
+    id: session.id,
+    dirName: session.dirName,
+    createdAt: session.startedAt,
+    updatedAt: new Date().toISOString(),
+    images: imageFiles,
+  };
+  fs.writeFileSync(path.join(session.dirPath, "history.json"), JSON.stringify(meta, null, 2), "utf8");
+}
+
+function getImageExtensionFromDataUrl(dataUrl = "") {
+  const match = String(dataUrl || "").match(/^data:image\/(png|jpeg|jpg|webp|gif);base64,/i);
+  if (!match) return "png";
+  return match[1].toLowerCase() === "jpeg" ? "jpg" : match[1].toLowerCase();
+}
+
+function writeDataUrlImageToFile(dataUrl, targetPath) {
+  const image = nativeImage.createFromDataURL(String(dataUrl || ""));
+  if (image.isEmpty()) throw new Error("未收到有效图片数据");
+  const ext = path.extname(targetPath).toLowerCase();
+  const buffer = ext === ".jpg" || ext === ".jpeg" ? image.toJPEG(95) : image.toPNG();
+  fs.writeFileSync(targetPath, buffer);
+  return targetPath;
+}
+
+function saveImageToHistory(dataUrl, options = {}) {
+  const session = options.newSession ? createHistorySession() : getOrCreateHistorySession();
+  const type = sanitizeFileNamePart(options.type || "image");
+  const ext = getImageExtensionFromDataUrl(dataUrl);
+  let index = Number(session.nextImageIndex) || 1;
+  let fileName = `${String(index).padStart(3, "0")}-${type}.${ext}`;
+  let filePath = path.join(session.dirPath, fileName);
+  while (fs.existsSync(filePath)) {
+    index += 1;
+    fileName = `${String(index).padStart(3, "0")}-${type}.${ext}`;
+    filePath = path.join(session.dirPath, fileName);
+  }
+  writeDataUrlImageToFile(dataUrl, filePath);
+  session.nextImageIndex = index + 1;
+  writeHistorySessionMeta(session);
+  sendHistoryData();
+  return { session, filePath, fileName };
+}
+
+function getHistorySessions() {
+  ensureHistoryRootDir();
+  return fs.readdirSync(historyRootDir)
+    .map((dirName) => {
+      const dirPath = path.join(historyRootDir, dirName);
+      if (!fs.statSync(dirPath).isDirectory()) return null;
+      const imageFiles = fs.readdirSync(dirPath)
+        .filter((name) => /\.(png|jpg|jpeg|webp|gif)$/i.test(name))
+        .sort((a, b) => a.localeCompare(b, "zh-CN"));
+      if (!imageFiles.length) return null;
+      let meta = {};
+      try {
+        const metaPath = path.join(dirPath, "history.json");
+        if (fs.existsSync(metaPath)) {
+          meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+        }
+      } catch (_error) {
+        meta = {};
+      }
+      const stat = fs.statSync(dirPath);
+      return {
+        id: dirName,
+        dirName,
+        dirPath,
+        createdAt: meta.createdAt || stat.birthtime.toISOString(),
+        updatedAt: meta.updatedAt || stat.mtime.toISOString(),
+        images: imageFiles.map((fileName) => {
+          const filePath = path.join(dirPath, fileName);
+          const fileStat = fs.statSync(filePath);
+          return {
+            id: `${dirName}/${fileName}`,
+            fileName,
+            filePath,
+            dataUrl: fileToDataUrl(filePath),
+            createdAt: fileStat.birthtime.toISOString(),
+          };
+        }),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+}
+
+function getHistoryGroupDataUrls(filePath) {
+  const normalizedPath = path.resolve(String(filePath || ""));
+  const normalizedRoot = path.resolve(historyRootDir);
+  if (!normalizedPath.startsWith(normalizedRoot) || !fs.existsSync(normalizedPath)) {
+    throw new Error("历史图片不存在");
+  }
+  const sessionDir = path.dirname(normalizedPath);
+  if (!path.resolve(sessionDir).startsWith(normalizedRoot)) {
+    throw new Error("历史图片路径无效");
+  }
+  const imageFiles = fs.readdirSync(sessionDir)
+    .filter((name) => /\.(png|jpg|jpeg|webp|gif)$/i.test(name))
+    .sort((a, b) => a.localeCompare(b, "zh-CN"));
+  const dataUrls = imageFiles.map((fileName) => fileToDataUrl(path.join(sessionDir, fileName)));
+  if (!dataUrls.length) {
+    throw new Error("这个历史记录里没有可恢复的图片");
+  }
+  return dataUrls;
+}
+
+function sendHistoryData() {
+  if (historyWindow && !historyWindow.isDestroyed()) {
+    historyWindow.webContents.send("history-data", getHistorySessions());
+  }
 }
 
 function getWorkflowThumbnailPath(fileName) {
@@ -2211,6 +2367,44 @@ function togglePinnedImagesVisibility(forceVisible) {
   return true;
 }
 
+function showHistoryWindow() {
+  if (historyWindow && !historyWindow.isDestroyed()) {
+    historyWindow.show();
+    historyWindow.focus();
+    sendHistoryData();
+    return;
+  }
+
+  historyWindow = new BrowserWindow({
+    width: 1120,
+    height: 760,
+    minWidth: 760,
+    minHeight: 520,
+    frame: false,
+    transparent: true,
+    hasShadow: true,
+    backgroundColor: "#00000000",
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  historyWindow.setMenuBarVisibility(false);
+  historyWindow.loadFile(path.join(__dirname, "history.html"));
+  historyWindow.webContents.on("console-message", (_e, _level, msg) => {
+    logDebug("history console", msg);
+  });
+  historyWindow.webContents.once("did-finish-load", () => {
+    sendHistoryData();
+  });
+  historyWindow.on("closed", () => {
+    historyWindow = null;
+  });
+}
+
 function showSettingsWindow() {
   if (settingsWindow && !settingsWindow.isDestroyed()) {
     settingsWindow.show();
@@ -2277,7 +2471,11 @@ async function runRunningHubForEntries(targetEntries = []) {
       }
       const sourceDataUrl = entry.dataUrl;
       const result = await runRunningHubGeneration(sourceDataUrl);
-      appendImagesToPinEntry(entry, result.resultImageDataUrls || [result.resultImageDataUrl]);
+      const resultImages = result.resultImageDataUrls || [result.resultImageDataUrl];
+      resultImages.forEach((item, resultIndex) => {
+        if (item) saveImageToHistory(item, { type: `ai-${resultIndex + 1}` });
+      });
+      appendImagesToPinEntry(entry, resultImages);
       workflowNames.push(result.workflowName);
     }
     sendPinProgress({
@@ -2594,6 +2792,7 @@ ipcMain.on("capture-complete", (_event, payload) => {
     return;
   }
   try {
+    saveImageToHistory(dataUrl, { type: "screenshot", newSession: true });
     const pinEntry = openPinnedImage(dataUrl, selectionRect);
     if (runImmediately && pinEntry) {
       setImmediate(() => runRunningHubForEntries([pinEntry]));
@@ -2614,9 +2813,7 @@ ipcMain.handle("save-image", async (_event, dataUrl) => {
     fs.mkdirSync(defaultDirectory, { recursive: true });
   }
 
-  const image = nativeImage.createFromDataURL(String(dataUrl || ""));
-  const pngBuffer = image.toPNG();
-  fs.writeFileSync(targetPath, pngBuffer);
+  writeDataUrlImageToFile(dataUrl, targetPath);
   return { ok: true, filePath: targetPath };
 });
 
@@ -2726,6 +2923,7 @@ ipcMain.handle("run-workflow-with-image", async (_event, dataUrl) => {
     return { ok: false, error: "请先放入一张图片" };
   }
   try {
+    saveImageToHistory(imageDataUrl, { type: "input", newSession: true });
     const pinEntry = openPinnedImage(imageDataUrl, null);
     if (pinEntry && pinEntry.window && !pinEntry.window.isDestroyed() && pinEntry.window.webContents.isLoading()) {
       await new Promise((resolve) => pinEntry.window.webContents.once("did-finish-load", resolve));
@@ -2734,6 +2932,32 @@ ipcMain.handle("run-workflow-with-image", async (_event, dataUrl) => {
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error && error.message ? error.message : String(error) };
+  }
+});
+ipcMain.handle("get-history-sessions", () => {
+  return getHistorySessions();
+});
+ipcMain.handle("open-history-image", (_event, filePath) => {
+  try {
+    const dataUrls = getHistoryGroupDataUrls(filePath);
+    openPinnedImage(dataUrls[0], null);
+    const pinEntry = getPrimaryPinnedWindowEntry();
+    if (pinEntry) {
+      replacePinImages(pinEntry, dataUrls, 0);
+    }
+    return { ok: true, restoredCount: dataUrls.length };
+  } catch (error) {
+    return { ok: false, error: error && error.message ? error.message : String(error) };
+  }
+});
+ipcMain.handle("open-history-folder", async () => {
+  ensureHistoryRootDir();
+  await shell.openPath(historyRootDir);
+  return { ok: true, folderPath: historyRootDir };
+});
+ipcMain.on("history-close", () => {
+  if (historyWindow && !historyWindow.isDestroyed()) {
+    historyWindow.close();
   }
 });
 ipcMain.handle("open-workflow-link", async (_event, fileName) => {
@@ -2886,7 +3110,11 @@ ipcMain.handle("run-selected-workflow", async () => {
       }
       const sourceDataUrl = entry.dataUrl;
       const result = await runRunningHubGeneration(sourceDataUrl);
-      appendImagesToPinEntry(entry, result.resultImageDataUrls || [result.resultImageDataUrl]);
+      const resultImages = result.resultImageDataUrls || [result.resultImageDataUrl];
+      resultImages.forEach((item, resultIndex) => {
+        if (item) saveImageToHistory(item, { type: `ai-${resultIndex + 1}` });
+      });
+      appendImagesToPinEntry(entry, resultImages);
       workflowNames.push(result.workflowName);
     }
     sendPinProgress({

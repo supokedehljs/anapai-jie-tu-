@@ -3,4 +3,5 @@ node_modules/
 snapai-debug*.log
 runninghub.config.json
 drag-cache/
+history/
 
