@@ -7,5 +7,8 @@
   "outputNodeId": "55",
   "duckDecodeEnabled": false,
   "duckDecodePassword": "",
-  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
+  "generationDurationsMs": [
+    155876
+  ]
 }
