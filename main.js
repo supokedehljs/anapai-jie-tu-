@@ -284,11 +284,12 @@ function getDefaultAppSettings() {
     uploadUrl: "https://www.runninghub.cn/task/openapi/upload",
     createTaskUrl: "https://www.runninghub.cn/task/openapi/create",
     taskStatusUrl: "https://www.runninghub.cn/task/openapi/status",
-    taskOutputsUrl: "https://www.runninghub.ai/task/openapi/outputs",
+    taskOutputsUrl: "https://www.runninghub.cn/task/openapi/outputs",
     webhookDetailUrl: "https://www.runninghub.cn/task/openapi/getWebhookDetail",
     selectedWorkflowFile: "",
     captureShortcut: "Ctrl+Alt+K",
     workflowShortcut: "Ctrl+Alt+T",
+    historyShortcut: "Ctrl+Alt+H",
     togglePinnedShortcut: "Ctrl+Alt+L",
     defaultClickThrough: false,
     autoCopyToClipboard: true,
@@ -323,7 +324,14 @@ function createTrayIcon() {
 
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-    <text x="32" y="58" text-anchor="middle" font-size="63" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#ffffff">R</text>
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#2b7cff" />
+        <stop offset="100%" stop-color="#1753d1" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" rx="14" fill="url(#bg)" />
+    <text x="32" y="43" text-anchor="middle" font-size="37" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#ffffff">R</text>
   </svg>`;
   return nativeImage
     .createFromDataURL(`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`)
@@ -338,7 +346,7 @@ function createTrayMenu() {
     },
     {
       label: "选择工作流窗口",
-      click: () => showWorkflowWindow(),
+      click: () => toggleWorkflowWindow(),
     },
     {
       label: pinnedWindowsHidden ? "显示置顶贴图" : "隐藏置顶贴图",
@@ -346,7 +354,7 @@ function createTrayMenu() {
     },
     {
       label: "历史菜单",
-      click: () => showHistoryWindow(),
+      click: () => toggleHistoryWindow(),
     },
     {
       label: "设置",
@@ -427,6 +435,7 @@ function getRunningHubConfig() {
       selectedWorkflowFile: String(parsed.selectedWorkflowFile || defaults.selectedWorkflowFile),
       captureShortcut: String(parsed.captureShortcut || defaults.captureShortcut),
       workflowShortcut: String(parsed.workflowShortcut || defaults.workflowShortcut),
+      historyShortcut: String(parsed.historyShortcut || defaults.historyShortcut),
       togglePinnedShortcut: String(
         parsed.togglePinnedShortcut || defaults.togglePinnedShortcut
       ),
@@ -894,15 +903,72 @@ function replacePlaceholderDeep(input, placeholder, value) {
   return input;
 }
 
+async function parseResponseJsonSafely(response) {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch (_error) {
+    return { rawText: text };
+  }
+}
+
+function normalizeHtmlErrorText(text = "") {
+  return String(text || "")
+    .replace(/<title[^>]*>(.*?)<\/title>/gis, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getRunningHubErrorMessage(responseJson, fallback = "RunningHub 调用失败") {
+  if (!responseJson || typeof responseJson !== "object") return fallback;
+  const messages = [
+    responseJson.msg,
+    responseJson.message,
+    responseJson.errorMessage,
+    responseJson.error,
+    responseJson.reason,
+    responseJson.rawText,
+  ].filter((item) => typeof item === "string" && item.trim());
+  if (Array.isArray(responseJson.errorMessages) && responseJson.errorMessages.length) {
+    messages.push(responseJson.errorMessages.map((item) => String(item || "")).filter(Boolean).join("；"));
+  }
+  const message = messages.find(Boolean) || fallback;
+  const normalized = /<\s*html[\s>]/i.test(message) ? normalizeHtmlErrorText(message) : message;
+  return normalized || fallback;
+}
+
+function isRetryableUploadStatus(status) {
+  return [408, 429, 500, 502, 503, 504].includes(Number(status));
+}
+
+function getUploadRetryDelayMs(attempt) {
+  return [0, 1200, 3000][attempt] || 5000;
+}
+
+function formatUploadHttpError(status, message = "") {
+  if (Number(status) === 504 || /504\s+gateway\s+time-?out/i.test(message)) {
+    return "RunningHub 上传服务网关超时（504）。这通常是云端服务繁忙或网络链路过慢导致，请稍后重试。";
+  }
+  if (Number(status) === 502 || Number(status) === 503) {
+    return `RunningHub 上传服务暂时不可用（HTTP ${status}），请稍后重试。`;
+  }
+  if (Number(status) === 429) {
+    return "RunningHub 请求过于频繁或账号限流（HTTP 429），请稍后再试。";
+  }
+  return message || `HTTP ${status}`;
+}
+
 function getRunningHubResultData(responseJson) {
   if (!responseJson || typeof responseJson !== "object") {
     throw new Error("RunningHub 返回数据格式异常");
   }
   if (responseJson.code && Number(responseJson.code) !== 0) {
-    throw new Error(responseJson.msg || `RunningHub 错误码: ${responseJson.code}`);
+    throw new Error(getRunningHubErrorMessage(responseJson, `RunningHub 错误码: ${responseJson.code}`));
   }
   if (responseJson.success === false) {
-    throw new Error(responseJson.message || "RunningHub 调用失败");
+    throw new Error(getRunningHubErrorMessage(responseJson, "RunningHub 调用失败"));
   }
   return responseJson.data ?? responseJson.result ?? responseJson;
 }
@@ -990,28 +1056,88 @@ function pickRunningHubImageRef(data) {
 }
 
 async function uploadImageToRunningHub(dataUrl, config) {
-  const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
-  const imageBuffer = Buffer.from(base64Data, "base64");
-  const formData = new FormData();
-  formData.append("file", new Blob([imageBuffer], { type: "image/png" }), "snap.png");
-  formData.append("apiKey", config.apiKey);
+  const { mimeType, buffer: imageBuffer } = getImageDataUrlBuffer(dataUrl);
+  const extensionByMime = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  };
+  const extension = extensionByMime[String(mimeType || "").toLowerCase()] || "png";
+  const maxAttempts = 3;
+  let lastError = null;
 
-  const response = await fetch(config.uploadUrl, {
-    method: "POST",
-    headers: {
-      "x-api-key": config.apiKey,
-    },
-    body: formData,
-  });
-  if (!response.ok) {
-    throw new Error(`上传失败: HTTP ${response.status}`);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const delayMs = getUploadRetryDelayMs(attempt);
+    if (delayMs) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+
+    const formData = new FormData();
+    formData.append("file", new Blob([imageBuffer], { type: mimeType || "image/png" }), `snap.${extension}`);
+    formData.append("apiKey", config.apiKey);
+
+    let response;
+    try {
+      response = await fetch(config.uploadUrl, {
+        method: "POST",
+        headers: {
+          "x-api-key": config.apiKey,
+        },
+        body: formData,
+      });
+    } catch (error) {
+      lastError = new Error(`上传失败: ${error && error.message ? error.message : String(error)}`);
+      logRunningHubFailure("upload.network", {
+        uploadUrl: config.uploadUrl,
+        attempt: attempt + 1,
+        maxAttempts,
+        error: error && error.message ? error.message : String(error),
+      });
+      if (attempt < maxAttempts - 1) continue;
+      throw lastError;
+    }
+
+    const json = await parseResponseJsonSafely(response);
+    logDebug("runninghub upload response", JSON.stringify(json || {}).slice(0, 2000));
+    if (!response.ok) {
+      const rawMessage = getRunningHubErrorMessage(json, `HTTP ${response.status}`);
+      const message = formatUploadHttpError(response.status, rawMessage);
+      lastError = new Error(`上传失败: ${message}`);
+      logRunningHubFailure("upload.http", {
+        uploadUrl: config.uploadUrl,
+        attempt: attempt + 1,
+        maxAttempts,
+        status: response.status,
+        response: json,
+      });
+      if (isRetryableUploadStatus(response.status) && attempt < maxAttempts - 1) continue;
+      throw lastError;
+    }
+
+    let data;
+    try {
+      data = getRunningHubResultData(json);
+    } catch (error) {
+      lastError = new Error(`上传失败: ${error && error.message ? error.message : String(error)}`);
+      logRunningHubFailure("upload.api", {
+        uploadUrl: config.uploadUrl,
+        attempt: attempt + 1,
+        maxAttempts,
+        response: json,
+        error: error && error.message ? error.message : String(error),
+      });
+      throw lastError;
+    }
+    const imageRef = pickRunningHubImageRef(data);
+    if (imageRef) return imageRef;
+    lastError = new Error("上传成功但未返回图片地址");
+    logRunningHubFailure("upload.no_image_ref", { response: json, data });
+    throw lastError;
   }
-  const json = await response.json();
-  logDebug("runninghub upload response", JSON.stringify(json).slice(0, 2000));
-  const data = getRunningHubResultData(json);
-  const imageRef = pickRunningHubImageRef(data);
-  if (imageRef) return imageRef;
-  throw new Error("上传成功但未返回图片地址");
+
+  throw lastError || new Error("上传失败: RunningHub 上传服务暂时不可用");
 }
 
 async function createRunningHubTask(config, workflow, imageUrl) {
@@ -2285,6 +2411,14 @@ function showWorkflowWindow(options = {}) {
   });
 }
 
+function toggleWorkflowWindow(options = {}) {
+  if (workflowWindow && !workflowWindow.isDestroyed() && workflowWindow.isVisible()) {
+    workflowWindow.hide();
+    return;
+  }
+  showWorkflowWindow(options);
+}
+
 function sendSettingsData() {
   if (settingsWindow && !settingsWindow.isDestroyed()) {
     settingsWindow.webContents.send("settings-data", getRunningHubConfig());
@@ -2307,6 +2441,10 @@ function registerGlobalShortcuts() {
     config.workflowShortcut,
     getDefaultAppSettings().workflowShortcut
   );
+  const historyShortcut = normalizeShortcut(
+    config.historyShortcut,
+    getDefaultAppSettings().historyShortcut
+  );
   const togglePinnedShortcut = normalizeShortcut(
     config.togglePinnedShortcut,
     getDefaultAppSettings().togglePinnedShortcut
@@ -2316,7 +2454,10 @@ function registerGlobalShortcuts() {
     startCapture();
   });
   const workflowRegistered = globalShortcut.register(workflowShortcut, () => {
-    showWorkflowWindow();
+    toggleWorkflowWindow();
+  });
+  const historyRegistered = globalShortcut.register(historyShortcut, () => {
+    toggleHistoryWindow();
   });
   const toggleRegistered = globalShortcut.register(togglePinnedShortcut, () => {
     togglePinnedImagesVisibility();
@@ -2329,6 +2470,8 @@ function registerGlobalShortcuts() {
       captureRegistered,
       workflowShortcut,
       workflowRegistered,
+      historyShortcut,
+      historyRegistered,
       togglePinnedShortcut,
       toggleRegistered,
     })
@@ -2339,8 +2482,11 @@ function registerGlobalShortcuts() {
     captureRegistered,
     workflowShortcut,
     workflowRegistered,
+    historyShortcut,
+    historyRegistered,
     togglePinnedShortcut,
     toggleRegistered,
+    togglePinnedRegistered: toggleRegistered,
   };
 }
 
@@ -2403,6 +2549,14 @@ function showHistoryWindow() {
   historyWindow.on("closed", () => {
     historyWindow = null;
   });
+}
+
+function toggleHistoryWindow() {
+  if (historyWindow && !historyWindow.isDestroyed() && historyWindow.isVisible()) {
+    historyWindow.hide();
+    return;
+  }
+  showHistoryWindow();
 }
 
 function showSettingsWindow() {
@@ -2902,7 +3056,7 @@ ipcMain.on("pin-close", (event) => {
   pinEntry.window.close();
 });
 ipcMain.on("pin-open-workflow-selector", () => {
-  showWorkflowWindow();
+  toggleWorkflowWindow();
 });
 ipcMain.handle("get-workflow-summaries", () => {
   return getWorkflowSummaries();
@@ -3312,6 +3466,11 @@ ipcMain.on("workflow-selector-close", () => {
     workflowWindow.close();
   }
 });
+ipcMain.on("workflow-selector-hide", () => {
+  if (workflowWindow && !workflowWindow.isDestroyed()) {
+    workflowWindow.hide();
+  }
+});
 
 ipcMain.handle("get-settings", () => {
   return getRunningHubConfig();
@@ -3345,6 +3504,10 @@ ipcMain.handle("save-settings", async (_event, payload = {}) => {
         payload.workflowShortcut,
         getDefaultAppSettings().workflowShortcut
       ),
+      historyShortcut: normalizeShortcut(
+        payload.historyShortcut,
+        getDefaultAppSettings().historyShortcut
+      ),
       togglePinnedShortcut: normalizeShortcut(
         payload.togglePinnedShortcut,
         getDefaultAppSettings().togglePinnedShortcut
@@ -3374,6 +3537,7 @@ ipcMain.handle("save-settings", async (_event, payload = {}) => {
     if (
       !shortcutState.captureRegistered ||
       !shortcutState.workflowRegistered ||
+      !shortcutState.historyRegistered ||
       !shortcutState.toggleRegistered
     ) {
       return {
@@ -3398,6 +3562,8 @@ ipcMain.handle("get-shortcut-registration-state", () => {
     captureRegistered: globalShortcut.isRegistered(config.captureShortcut),
     workflowShortcut: config.workflowShortcut,
     workflowRegistered: globalShortcut.isRegistered(config.workflowShortcut),
+    historyShortcut: config.historyShortcut,
+    historyRegistered: globalShortcut.isRegistered(config.historyShortcut),
     togglePinnedShortcut: config.togglePinnedShortcut,
     togglePinnedRegistered: globalShortcut.isRegistered(config.togglePinnedShortcut),
   };

@@ -32,6 +32,19 @@ function normalizeRect(x1, y1, x2, y2) {
   return { left, top, width, height };
 }
 
+function normalizeSquareRect(x1, y1, x2, y2) {
+  const deltaX = x2 - x1;
+  const deltaY = y2 - y1;
+  const directionX = deltaX < 0 ? -1 : 1;
+  const directionY = deltaY < 0 ? -1 : 1;
+  const maxWidth = directionX > 0 ? window.innerWidth - x1 : x1;
+  const maxHeight = directionY > 0 ? window.innerHeight - y1 : y1;
+  const side = Math.min(Math.max(Math.abs(deltaX), Math.abs(deltaY)), maxWidth, maxHeight);
+  const left = directionX > 0 ? x1 : x1 - side;
+  const top = directionY > 0 ? y1 : y1 - side;
+  return { left, top, width: side, height: side };
+}
+
 function normalizeBoundsRect(inputRect) {
   if (!inputRect) return null;
   const left = clamp(Math.round(inputRect.left || 0), 0, window.innerWidth);
@@ -261,7 +274,10 @@ window.addEventListener("pointerdown", (event) => {
 window.addEventListener("pointermove", (event) => {
   if (!action) return;
   if (action === "create") {
-    rect = normalizeBoundsRect(normalizeRect(startX, startY, event.clientX, event.clientY));
+    const nextRect = event.shiftKey
+      ? normalizeSquareRect(startX, startY, event.clientX, event.clientY)
+      : normalizeRect(startX, startY, event.clientX, event.clientY);
+    rect = normalizeBoundsRect(nextRect);
   } else if (action === "move") {
     updateRectByMove(event.clientX, event.clientY);
   } else if (action.startsWith("resize:")) {

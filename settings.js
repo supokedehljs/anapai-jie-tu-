@@ -6,19 +6,25 @@ const elements = {
   webhookDetailUrl: document.getElementById("webhookDetailUrl"),
   captureShortcut: document.getElementById("captureShortcut"),
   workflowShortcut: document.getElementById("workflowShortcut"),
+  historyShortcut: document.getElementById("historyShortcut"),
   togglePinnedShortcut: document.getElementById("togglePinnedShortcut"),
   defaultClickThrough: document.getElementById("defaultClickThrough"),
   autoCopyToClipboard: document.getElementById("autoCopyToClipboard"),
   launchAtStartup: document.getElementById("launchAtStartup"),
   defaultSaveDirectory: document.getElementById("defaultSaveDirectory"),
   browseSaveDirectoryBtn: document.getElementById("browseSaveDirectoryBtn"),
-  shortcutState: document.getElementById("shortcutState"),
+  shortcutBadges: {
+    capture: document.getElementById("captureShortcutState"),
+    workflow: document.getElementById("workflowShortcutState"),
+    history: document.getElementById("historyShortcutState"),
+    togglePinned: document.getElementById("togglePinnedShortcutState"),
+  },
   status: document.getElementById("status"),
   saveButtons: [document.getElementById("saveBtnTop")].filter(Boolean),
   closeButtons: [document.getElementById("closeBtnTop")].filter(Boolean),
 };
 
-const shortcutInputs = [elements.captureShortcut, elements.workflowShortcut, elements.togglePinnedShortcut];
+const shortcutInputs = [elements.captureShortcut, elements.workflowShortcut, elements.historyShortcut, elements.togglePinnedShortcut];
 let recordingInput = null;
 
 function displayShortcut(value = "") {
@@ -31,18 +37,36 @@ function setStatus(message = "", isError = false) {
 }
 
 function getShortcutBadgeText(ok) {
-  return ok ? "已注册" : "未注册或冲突";
+  return ok ? "已注册" : "未注册";
+}
+
+function setShortcutBadge(element, ok) {
+  if (!element) return;
+  element.textContent = getShortcutBadgeText(ok);
+  element.classList.toggle("error", !ok);
+}
+
+function readShortcutRegisteredState(state, ...keys) {
+  return keys.some((key) => state[key] === true);
 }
 
 function renderShortcutState(state = {}) {
-  const captureOk = Boolean(state.captureRegistered);
-  const workflowOk = Boolean(state.workflowRegistered);
-  const toggleOk = Boolean(state.togglePinnedRegistered);
-  elements.shortcutState.innerHTML = [
-    `<div class="statusCard"><strong>区域截图 · ${getShortcutBadgeText(captureOk)}</strong><div class="statusValue">${displayShortcut(state.captureShortcut) || "-"}</div></div>`,
-    `<div class="statusCard"><strong>工作流窗口 · ${getShortcutBadgeText(workflowOk)}</strong><div class="statusValue">${displayShortcut(state.workflowShortcut) || "-"}</div></div>`,
-    `<div class="statusCard"><strong>显示/隐藏贴图 · ${getShortcutBadgeText(toggleOk)}</strong><div class="statusValue">${displayShortcut(state.togglePinnedShortcut) || "-"}</div></div>`,
-  ].join("");
+  setShortcutBadge(
+    elements.shortcutBadges.capture,
+    readShortcutRegisteredState(state, "captureRegistered")
+  );
+  setShortcutBadge(
+    elements.shortcutBadges.workflow,
+    readShortcutRegisteredState(state, "workflowRegistered")
+  );
+  setShortcutBadge(
+    elements.shortcutBadges.history,
+    readShortcutRegisteredState(state, "historyRegistered")
+  );
+  setShortcutBadge(
+    elements.shortcutBadges.togglePinned,
+    readShortcutRegisteredState(state, "togglePinnedRegistered", "toggleRegistered")
+  );
 }
 
 function applySettings(settings = {}) {
@@ -53,6 +77,7 @@ function applySettings(settings = {}) {
   if (elements.webhookDetailUrl) elements.webhookDetailUrl.value = settings.webhookDetailUrl || "";
   elements.captureShortcut.value = displayShortcut(settings.captureShortcut || "");
   elements.workflowShortcut.value = displayShortcut(settings.workflowShortcut || "");
+  elements.historyShortcut.value = displayShortcut(settings.historyShortcut || "");
   elements.togglePinnedShortcut.value = displayShortcut(settings.togglePinnedShortcut || "");
   elements.defaultClickThrough.checked = Boolean(settings.defaultClickThrough);
   elements.autoCopyToClipboard.checked = Boolean(settings.autoCopyToClipboard);
@@ -69,6 +94,7 @@ function collectSettings() {
     webhookDetailUrl: elements.webhookDetailUrl ? elements.webhookDetailUrl.value.trim() : undefined,
     captureShortcut: elements.captureShortcut.value.trim(),
     workflowShortcut: elements.workflowShortcut.value.trim(),
+    historyShortcut: elements.historyShortcut.value.trim(),
     togglePinnedShortcut: elements.togglePinnedShortcut.value.trim(),
     defaultClickThrough: elements.defaultClickThrough.checked,
     autoCopyToClipboard: elements.autoCopyToClipboard.checked,

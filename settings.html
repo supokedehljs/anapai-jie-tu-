@@ -22,34 +22,35 @@
         display: grid;
         grid-template-rows: auto 1fr auto;
         margin: 0;
-        border-radius: 18px;
+        border-radius: 14px;
         overflow: hidden;
         background: linear-gradient(180deg, rgba(16,20,28,.97), rgba(10,13,18,.95));
-        box-shadow: 0 24px 80px rgba(0,0,0,.42);
+        box-shadow: 0 18px 56px rgba(0,0,0,.38);
         border: 1px solid rgba(255,255,255,.08);
       }
       #topbar {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
-        gap: 16px;
-        padding: 14px 18px 8px;
+        gap: 12px;
+        padding: 10px 14px 8px;
         border-bottom: 1px solid rgba(255,255,255,.06);
         -webkit-app-region: drag;
       }
-      #titleWrap { display: flex; flex-direction: column; gap: 6px; }
-      #title { font-size: 19px; font-weight: 700; letter-spacing: .4px; }
-      #subtitle { font-size: 12px; line-height: 1.55; color: rgba(232,238,249,.72); max-width: 760px; }
+      #titleWrap { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+      #title { font-size: 17px; font-weight: 700; letter-spacing: .3px; }
+      #subtitle { font-size: 11px; line-height: 1.35; color: rgba(232,238,249,.68); max-width: 760px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       #actions {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         -webkit-app-region: no-drag;
+        flex-shrink: 0;
       }
       button {
         border: none;
-        border-radius: 10px;
-        padding: 8px 12px;
+        border-radius: 9px;
+        padding: 6px 10px;
         font-size: 12px;
         font-weight: 600;
         cursor: pointer;
@@ -63,75 +64,73 @@
         min-width: 76px;
       }
       #closeBtnTop {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         padding: 0;
         border-radius: 999px;
         background: linear-gradient(135deg, #ff5f6d, #ff3b30);
         color: #fff;
-        font-size: 16px;
+        font-size: 15px;
         line-height: 1;
       }
       #content {
         overflow: auto;
-        padding: 12px 18px 12px;
+        padding: 10px 14px;
       }
       #stack {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
       }
       .card {
-        border-radius: 14px;
+        border-radius: 12px;
         border: 1px solid rgba(255,255,255,.08);
         background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
         overflow: hidden;
       }
       .cardHeader {
-        padding: 12px 16px 8px;
+        padding: 9px 12px 6px;
       }
       .cardTitle {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 700;
       }
       .cardDesc {
-        margin-top: 6px;
-        font-size: 12px;
-        line-height: 1.55;
-        color: rgba(232,238,249,.68);
+        margin-top: 3px;
+        font-size: 11px;
+        line-height: 1.35;
+        color: rgba(232,238,249,.62);
       }
       .cardBody {
-        padding: 0 16px 14px;
+        padding: 0 12px 10px;
       }
       .field {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 5px;
       }
       .field + .field,
       .switchItem + .switchItem,
-      .statusGrid + .field,
-      .field + .statusGrid,
       .switchList + .field,
       .field + .switchList {
-        margin-top: 10px;
+        margin-top: 7px;
       }
       .fieldLabel {
         display: flex;
         justify-content: space-between;
         gap: 8px;
       }
-      .fieldLabel strong { font-size: 13px; }
-      .hint { font-size: 11px; color: rgba(237,243,255,.46); }
+      .fieldLabel strong { font-size: 12px; }
+      .hint { font-size: 10px; color: rgba(237,243,255,.46); }
       input[type="text"] {
         width: 100%;
-        padding: 10px 12px;
-        border-radius: 12px;
+        padding: 8px 10px;
+        border-radius: 10px;
         border: 1px solid rgba(255,255,255,.09);
         background: rgba(6,10,16,.7);
         color: #f6f9ff;
         outline: none;
-        font-size: 13px;
+        font-size: 12px;
       }
       input[type="text"]:focus {
         border-color: rgba(91,140,255,.9);
@@ -140,58 +139,62 @@
       .shortcutGrid {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
       }
       .shortcutRow {
         display: grid;
-        grid-template-columns: minmax(160px, 1fr) minmax(180px, 240px);
+        grid-template-columns: minmax(150px, 1fr) auto minmax(170px, 230px);
         align-items: center;
-        gap: 16px;
-        padding: 10px 12px;
-        border-radius: 12px;
+        gap: 10px;
+        padding: 7px 9px;
+        border-radius: 10px;
         background: rgba(255,255,255,.03);
         border: 1px solid rgba(255,255,255,.06);
       }
-      .shortcutName { font-size: 13px; font-weight: 700; color: rgba(246,249,255,.94); }
-      .shortcutRow input { text-align: right; padding: 9px 11px; border-radius: 10px; }
-      .statusGrid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 8px;
+      .shortcutName { font-size: 12px; font-weight: 700; color: rgba(246,249,255,.94); }
+      .shortcutRow input { text-align: right; padding: 7px 9px; border-radius: 9px; }
+      .shortcutBadge {
+        min-width: 74px;
+        justify-self: end;
+        padding: 3px 8px;
+        border-radius: 999px;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #7ee787;
+        background: rgba(126, 231, 135, .12);
+        border: 1px solid rgba(126, 231, 135, .24);
       }
-      .statusCard {
-        padding: 10px 12px;
-        border-radius: 12px;
-        background: rgba(255,255,255,.03);
-        border: 1px solid rgba(255,255,255,.06);
+      .shortcutBadge.error {
+        color: #ffb3b3;
+        background: rgba(255, 99, 99, .12);
+        border-color: rgba(255, 99, 99, .24);
       }
-      .statusCard strong { display: block; font-size: 13px; margin-bottom: 6px; }
-      .statusValue { font-size: 12px; color: rgba(237,243,255,.64); line-height: 1.65; word-break: break-all; }
       .switchList {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
       }
       .switchItem {
         display: grid;
         grid-template-columns: 1fr auto;
-        gap: 12px;
+        gap: 10px;
         align-items: center;
-        padding: 10px 12px;
-        border-radius: 12px;
+        padding: 8px 10px;
+        border-radius: 10px;
         border: 1px solid rgba(255,255,255,.06);
         background: rgba(255,255,255,.03);
       }
-      .switchInfo strong { display: block; font-size: 13px; margin-bottom: 4px; }
-      .switchInfo span { display: block; color: rgba(237,243,255,.64); font-size: 11px; line-height: 1.55; }
-      .switch { position: relative; width: 48px; height: 28px; }
+      .switchInfo strong { display: block; font-size: 12px; margin-bottom: 2px; }
+      .switchInfo span { display: block; color: rgba(237,243,255,.62); font-size: 10px; line-height: 1.35; }
+      .switch { position: relative; width: 42px; height: 24px; }
       .switch input { opacity: 0; width: 0; height: 0; }
       .slider { position: absolute; inset: 0; border-radius: 999px; background: rgba(255,255,255,.14); }
       .slider:before {
         content: "";
         position: absolute;
-        width: 22px;
-        height: 22px;
+        width: 18px;
+        height: 18px;
         left: 3px;
         top: 3px;
         border-radius: 50%;
@@ -199,7 +202,7 @@
         transition: transform .18s ease;
       }
       .switch input:checked + .slider { background: linear-gradient(135deg, #5d8dff, #7463ff); }
-      .switch input:checked + .slider:before { transform: translateX(20px); }
+      .switch input:checked + .slider:before { transform: translateX(18px); }
       .inlineRow {
         display: flex;
         gap: 10px;
@@ -211,29 +214,30 @@
         color: #eef4ff;
       }
       .note {
-        padding: 10px 12px;
-        border-radius: 16px;
+        padding: 8px 10px;
+        border-radius: 12px;
         border: 1px solid rgba(91,140,255,.18);
         background: rgba(91,140,255,.07);
-        font-size: 12px;
-        line-height: 1.8;
-        color: rgba(230,238,255,.86);
+        font-size: 11px;
+        line-height: 1.55;
+        color: rgba(230,238,255,.82);
       }
       #footer {
         display: block;
-        padding: 10px 18px 12px;
+        padding: 7px 14px 8px;
         border-top: 1px solid rgba(255,255,255,.06);
         background: rgba(255,255,255,.015);
       }
       #status {
-        min-height: 20px;
-        font-size: 13px;
+        min-height: 17px;
+        font-size: 12px;
         color: #7ee787;
       }
       #status.error { color: #ff9d9d; }
       @media (max-width: 760px) {
         .inlineRow { flex-direction: column; }
-        .shortcutRow { grid-template-columns: 1fr; gap: 8px; }
+        .shortcutRow { grid-template-columns: 1fr; gap: 6px; }
+        .shortcutBadge { justify-self: start; }
         .shortcutRow input { text-align: left; }
       }
     </style>
@@ -269,33 +273,31 @@
           <div class="card">
             <div class="cardHeader">
               <div class="cardTitle">全局快捷键</div>
-              <div class="cardDesc">点击输入框后直接按下快捷键即可录入。Backspace / Delete 清空，Escape 取消本次录制。</div>
+              <div class="cardDesc">点击输入框后直接按下快捷键即可录入。右侧会显示当前快捷键是否已成功注册。</div>
             </div>
             <div class="cardBody">
               <div class="shortcutGrid">
                 <label class="shortcutRow">
                   <span class="shortcutName">区域截图</span>
+                  <span id="captureShortcutState" class="shortcutBadge">检测中</span>
                   <input id="captureShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
                 </label>
                 <label class="shortcutRow">
                   <span class="shortcutName">选择工作流窗口</span>
+                  <span id="workflowShortcutState" class="shortcutBadge">检测中</span>
                   <input id="workflowShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
                 </label>
                 <label class="shortcutRow">
+                  <span class="shortcutName">打开/关闭历史菜单</span>
+                  <span id="historyShortcutState" class="shortcutBadge">检测中</span>
+                  <input id="historyShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
+                </label>
+                <label class="shortcutRow">
                   <span class="shortcutName">显示隐藏所有置顶贴图</span>
+                  <span id="togglePinnedShortcutState" class="shortcutBadge">检测中</span>
                   <input id="togglePinnedShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
                 </label>
               </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="cardHeader">
-              <div class="cardTitle">快捷键状态</div>
-              <div class="cardDesc">这里会显示当前快捷键是否已注册成功，方便判断是否与系统或其他软件冲突。</div>
-            </div>
-            <div class="cardBody">
-              <div id="shortcutState" class="statusGrid"></div>
             </div>
           </div>
 

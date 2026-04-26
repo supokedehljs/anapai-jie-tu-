@@ -20,13 +20,14 @@
     "appId": "com.runningjietu.v2",
     "productName": "Running Jietu v2.0",
     "directories": {
-      "output": "../Running-Jietu-v2.0-package"
+      "output": "../打包文件"
     },
     "files": [
       "main.js",
       "preload.js",
       "*.html",
       "*.js",
+      "assets/**/*",
       "runninghub-workflows/**/*",
       "package.json"
     ],

@@ -1,0 +1,11 @@
+{
+  "fileName": "衬衫武士刀-01_api.json",
+  "displayName": "衬衫武士刀-01_api",
+  "workflowId": "2048337988328890369",
+  "imageNodeId": "36",
+  "imageFieldName": "image",
+  "outputNodeId": "55",
+  "duckDecodeEnabled": false,
+  "duckDecodePassword": "",
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}"
+}

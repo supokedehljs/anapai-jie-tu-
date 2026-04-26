@@ -168,15 +168,40 @@
         right: 8px;
         display: flex;
         gap: 6px;
-        padding: 6px;
-        border-radius: 8px;
-        background: rgba(20, 24, 30, 0.62);
-        backdrop-filter: blur(8px);
+        padding: 0;
+        border-radius: 999px;
+        background: transparent;
         opacity: 0;
         transform: translateY(-4px);
         transition: opacity 0.16s ease, transform 0.16s ease;
         -webkit-app-region: no-drag;
         z-index: 7;
+      }
+      #saveBtn {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: none;
+        border-radius: 999px;
+        background: rgba(20, 24, 30, 0.72);
+        color: #fff;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+        transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+      }
+      #saveBtn:hover {
+        transform: translateY(-1px) scale(1.04);
+        background: rgba(50, 132, 255, 0.92);
+        box-shadow: 0 10px 24px rgba(50, 132, 255, 0.28);
+      }
+      #saveBtn svg {
+        width: 17px;
+        height: 17px;
+        display: block;
       }
       #stage:hover #toolbar {
         opacity: 1;
@@ -297,7 +322,11 @@
         </div>
       </div>
       <div id="toolbar">
-        <button id="saveBtn">保存</button>
+        <button id="saveBtn" type="button" aria-label="保存图片" title="保存图片">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M5 3h12.2L21 6.8V21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 2v5h10V5H6Zm2 11v3h8v-3H8Zm10 3h1V7.65L16.35 5H18v14Z"/>
+          </svg>
+        </button>
       </div>
       <div id="runningStatus">
         <div id="runningStatusLeft"></div>

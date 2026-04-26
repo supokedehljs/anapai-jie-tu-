@@ -81,6 +81,9 @@ contextBridge.exposeInMainWorld("api", {
   closeWorkflowSelector() {
     ipcRenderer.send("workflow-selector-close");
   },
+  hideWorkflowSelector() {
+    ipcRenderer.send("workflow-selector-hide");
+  },
   onWorkflowSelectionData(callback) {
     ipcRenderer.on("workflow-selection-data", (_event, workflows) =>
       callback(Array.isArray(workflows) ? workflows : [])
