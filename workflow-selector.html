@@ -71,12 +71,29 @@
       #inputImageBox[data-dragging="true"] { border-color: rgba(74,136,255,.86); background: rgba(74,136,255,.12); }
       #inputImagePreview { width: 100%; height: 100%; object-fit: contain; display: none; }
       #inputImageBox[data-has-image="true"] #inputImagePreview { display: block; }
-      #inputImageBox[data-has-image="true"] #inputImagePlaceholder { display: none; }
-      #inputImagePlaceholder { padding: 12px; text-align: center; color: rgba(232,238,249,.66); font-size: 11px; line-height: 1.55; }
+      #inputImageBox[data-has-image="true"] #inputImagePlaceholder,
+      #inputImageBox[data-has-image="true"] #chooseInputImageBtn { display: none; }
+      #inputImagePlaceholder {
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; height: 100%; padding: 12px; text-align: center; color: rgba(232,238,249,.76); font-size: 11px; line-height: 1.55;
+      }
+      #chooseInputImageBtn {
+        width: 64px; height: 64px; padding: 0; border-radius: 999px;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,.1); color: rgba(246,248,252,.94);
+        border: 1px solid rgba(255,255,255,.12); font-size: 36px; line-height: 1;
+      }
+      #chooseInputImageBtn:hover { background: rgba(74,136,255,.22); }
+      #clearInputImageBtn {
+        position: absolute; right: 8px; top: 8px; z-index: 6;
+        display: none; width: 26px; height: 26px; padding: 0; border-radius: 999px;
+        background: rgba(10,13,18,.72); color: #fff; border: 1px solid rgba(255,255,255,.18);
+        font-size: 16px; line-height: 1;
+      }
+      #inputImageBox[data-has-image="true"] #clearInputImageBtn { display: inline-flex; align-items: center; justify-content: center; }
       #inputImageActions { display: flex; flex-direction: column; gap: 6px; }
       #inputImageActions button { padding: 7px 8px; font-size: 11px; }
       #pasteImageBtn { background: rgba(255,255,255,.1); color: #eef3fb; }
-      #clearInputImageBtn { background: rgba(255,92,92,.16); color: #ffd7d7; }
       #inputImageHint { min-height: 16px; font-size: 10px; line-height: 1.45; color: rgba(232,238,249,.56); }
       #workflowArea { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
       #tips { display: none; }
@@ -87,7 +104,7 @@
       .card {
         position: relative; display: flex; flex-direction: column; padding: 0; border-radius: 18px;
         background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); cursor: pointer;
-        transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease;
+        transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
         overflow: hidden;
       }
       .cardInfo {
@@ -103,13 +120,13 @@
         overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       }
       .card:hover {
-        transform: translateY(-2px); border-color: rgba(97,146,255,.56); background: rgba(255,255,255,.07);
-        box-shadow: 0 14px 30px rgba(22,36,67,.24);
+        border-color: rgba(97,146,255,.56); background: rgba(255,255,255,.07);
+        box-shadow: 0 0 0 1px rgba(97,146,255,.18);
       }
       .card.selected {
-        border-color: rgba(82,153,255,.95);
-        background: linear-gradient(180deg, rgba(55,110,255,.2), rgba(255,255,255,.06));
-        box-shadow: 0 16px 34px rgba(53,112,255,.22);
+        border-color: rgba(82,153,255,1);
+        background: rgba(255,255,255,.055);
+        box-shadow: 0 0 0 4px rgba(82,153,255,.48);
       }
       .thumb {
         aspect-ratio: 1 / 1; width: 100%; border-radius: 17px;
@@ -125,13 +142,21 @@
         position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 999px;
         background: rgba(59,128,255,.92); color: #fff; font-size: 11px; font-weight: 700;
       }
-      .workflowLinkBtn {
-        position: absolute; left: 10px; top: 10px; width: 28px; height: 28px; padding: 0;
+      .workflowLinkBtn,
+      .favoriteWorkflowBtn {
+        position: absolute; top: 10px; width: 28px; height: 28px; padding: 0;
         display: inline-flex; align-items: center; justify-content: center; border-radius: 999px;
         background: rgba(20,24,30,.62); color: rgba(246,248,252,.92); border: 1px solid rgba(255,255,255,.16);
         z-index: 5;
       }
-      .workflowLinkBtn:hover { background: rgba(255,255,255,.18); transform: translateY(-1px); }
+      .workflowLinkBtn { left: 10px; }
+      .favoriteWorkflowBtn { left: 44px; }
+      .favoriteWorkflowBtn[data-favorite="true"] { color: #ffd76a; background: rgba(70,49,10,.72); border-color: rgba(255,215,106,.42); }
+      .workflowLinkBtn:hover,
+      .favoriteWorkflowBtn:hover { background: rgba(255,255,255,.18); transform: none; }
+      .starIcon { width: 16px; height: 16px; display: block; }
+      .starIcon path { fill: transparent; stroke: currentColor; stroke-width: 1.9; stroke-linejoin: round; }
+      .favoriteWorkflowBtn[data-favorite="true"] .starIcon path { fill: currentColor; }
       .linkIcon { position: relative; width: 16px; height: 12px; display: block; }
       .linkIcon::before,
       .linkIcon::after {
@@ -231,11 +256,14 @@
           <div id="leftPanelTitle">处理图片</div>
           <div id="inputImageBox" data-has-image="false" data-dragging="false">
             <img id="inputImagePreview" alt="当前处理图片" />
-            <div id="inputImagePlaceholder">选择置顶贴图后会显示在这里。<br />也可以拖入图片，或从剪贴板粘贴。</div>
+            <button id="clearInputImageBtn" type="button" title="取消当前图片" aria-label="取消当前图片">×</button>
+            <div id="inputImagePlaceholder">
+              <button id="chooseInputImageBtn" type="button" title="从文件夹中导入" aria-label="从文件夹中导入">+</button>
+              <span>从文件夹中导入</span>
+            </div>
           </div>
           <div id="inputImageActions">
             <button id="pasteImageBtn" type="button">从剪贴板放入图片</button>
-            <button id="clearInputImageBtn" type="button">取消当前图片</button>
           </div>
           <div id="inputImageHint">没有选中置顶图时，可在这里临时放入图片。</div>
         </aside>

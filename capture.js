@@ -8,8 +8,7 @@ const btnPin = document.getElementById("pinBtn");
 const btnRun = document.getElementById("runBtn");
 const sizeLabel = document.getElementById("sizeLabel");
 
-let fullImage = "";
-let sourceImage = null;
+let displayImages = [];
 let displayInfo = null;
 let rect = null;
 let action = null;
@@ -19,6 +18,59 @@ let startY = 0;
 let pendingRect = null;
 let selectionFrameId = 0;
 let completing = false;
+
+function getDisplayImageIntersections(nextRect) {
+  if (!isValidRect(nextRect)) return [];
+  return displayImages
+    .map((item) => {
+      const bounds = item && item.relativeBounds;
+      if (!bounds || !item.image) return null;
+      const left = Math.max(nextRect.left, bounds.x);
+      const top = Math.max(nextRect.top, bounds.y);
+      const right = Math.min(nextRect.left + nextRect.width, bounds.x + bounds.width);
+      const bottom = Math.min(nextRect.top + nextRect.height, bounds.y + bounds.height);
+      if (right <= left || bottom <= top) return null;
+      return { item, left, top, width: right - left, height: bottom - top };
+    })
+    .filter(Boolean);
+}
+
+function clearElementChildren(element) {
+  while (element.firstChild) element.removeChild(element.firstChild);
+}
+
+function renderScreenBackgrounds() {
+  clearElementChildren(bg);
+  displayImages.forEach((item) => {
+    const bounds = item && item.relativeBounds;
+    if (!bounds || !item.dataUrl) return;
+    const layer = document.createElement("div");
+    layer.className = "screenBg";
+    layer.style.left = `${bounds.x}px`;
+    layer.style.top = `${bounds.y}px`;
+    layer.style.width = `${bounds.width}px`;
+    layer.style.height = `${bounds.height}px`;
+    layer.style.backgroundImage = `url(${item.dataUrl})`;
+    bg.appendChild(layer);
+  });
+}
+
+function renderSelectionPreview(nextRect) {
+  clearElementChildren(selectionImage);
+  getDisplayImageIntersections(nextRect).forEach(({ item, left, top, width, height }) => {
+    const bounds = item.relativeBounds;
+    const layer = document.createElement("div");
+    layer.className = "selectionImagePart";
+    layer.style.left = `${left - nextRect.left}px`;
+    layer.style.top = `${top - nextRect.top}px`;
+    layer.style.width = `${width}px`;
+    layer.style.height = `${height}px`;
+    layer.style.backgroundImage = `url(${item.dataUrl})`;
+    layer.style.backgroundSize = `${bounds.width}px ${bounds.height}px`;
+    layer.style.backgroundPosition = `-${left - bounds.x}px -${top - bounds.y}px`;
+    selectionImage.appendChild(layer);
+  });
+}
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -100,6 +152,7 @@ function updateToolbarPosition(nextRect) {
 function renderSelectionBox(nextRect) {
   if (!isValidRect(nextRect)) {
     selection.style.display = "none";
+    clearElementChildren(selectionImage);
     updateToolbarPosition(null);
     return;
   }
@@ -109,9 +162,7 @@ function renderSelectionBox(nextRect) {
   selection.style.top = `${nextRect.top}px`;
   selection.style.width = `${nextRect.width}px`;
   selection.style.height = `${nextRect.height}px`;
-  selectionImage.style.backgroundImage = `url(${fullImage})`;
-  selectionImage.style.backgroundSize = `${window.innerWidth}px ${window.innerHeight}px`;
-  selectionImage.style.backgroundPosition = `-${nextRect.left}px -${nextRect.top}px`;
+  renderSelectionPreview(nextRect);
   updateToolbarPosition(nextRect);
 }
 
@@ -120,29 +171,39 @@ function scheduleSelectionRender(nextRect) {
   if (selectionFrameId) return;
   selectionFrameId = window.requestAnimationFrame(() => {
     selectionFrameId = 0;
-    if (!pendingRect) return;
     renderSelectionBox(pendingRect);
   });
 }
 
 function cropImage() {
   if (!isValidRect(rect)) return null;
-  if (!fullImage || !sourceImage) {
+  if (!displayImages.length) {
     throw new Error("未获取到屏幕图像，请重新截图");
   }
 
-  const scaleX = sourceImage.naturalWidth / window.innerWidth;
-  const scaleY = sourceImage.naturalHeight / window.innerHeight;
-  const sx = Math.max(0, Math.floor(rect.left * scaleX));
-  const sy = Math.max(0, Math.floor(rect.top * scaleY));
-  const sw = Math.max(1, Math.floor(rect.width * scaleX));
-  const sh = Math.max(1, Math.floor(rect.height * scaleY));
+  const intersections = getDisplayImageIntersections(rect);
+  if (!intersections.length) {
+    throw new Error("选区没有覆盖任何屏幕内容");
+  }
 
   const canvas = document.createElement("canvas");
-  canvas.width = sw;
-  canvas.height = sh;
+  canvas.width = Math.max(1, Math.round(rect.width));
+  canvas.height = Math.max(1, Math.round(rect.height));
   const ctx = canvas.getContext("2d");
-  ctx.drawImage(sourceImage, sx, sy, sw, sh, 0, 0, sw, sh);
+
+  intersections.forEach(({ item, left, top, width, height }) => {
+    const bounds = item.relativeBounds;
+    const scaleX = item.image.naturalWidth / bounds.width;
+    const scaleY = item.image.naturalHeight / bounds.height;
+    const sx = Math.max(0, Math.floor((left - bounds.x) * scaleX));
+    const sy = Math.max(0, Math.floor((top - bounds.y) * scaleY));
+    const sw = Math.max(1, Math.floor(width * scaleX));
+    const sh = Math.max(1, Math.floor(height * scaleY));
+    const dx = Math.round(left - rect.left);
+    const dy = Math.round(top - rect.top);
+    ctx.drawImage(item.image, sx, sy, sw, sh, dx, dy, Math.round(width), Math.round(height));
+  });
+
   return canvas.toDataURL("image/png");
 }
 
@@ -217,20 +278,40 @@ function pointerInsideRect(pointerX, pointerY, nextRect) {
   return nextRect && pointerX >= nextRect.left && pointerX <= nextRect.left + nextRect.width && pointerY >= nextRect.top && pointerY <= nextRect.top + nextRect.height;
 }
 
+async function loadImage(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("截图图像解码失败，请重试"));
+    img.src = dataUrl;
+  });
+}
+
 async function initWithCaptureData(payload = {}) {
   try {
     displayInfo = payload.displayInfo || null;
-    fullImage = String(payload.fullImage || "");
-    if (!fullImage) {
+    const rawDisplayImages = Array.isArray(payload.displayImages) ? payload.displayImages : [];
+    if (rawDisplayImages.length) {
+      displayImages = await Promise.all(rawDisplayImages.map(async (item) => ({
+        ...item,
+        image: await loadImage(String(item.dataUrl || "")),
+      })));
+    } else {
+      const fallbackImage = String(payload.fullImage || "");
+      if (!fallbackImage) {
+        throw new Error("未收到屏幕图像，请重新截图");
+      }
+      const image = await loadImage(fallbackImage);
+      displayImages = [{
+        dataUrl: fallbackImage,
+        image,
+        relativeBounds: { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight },
+      }];
+    }
+    if (!displayImages.length) {
       throw new Error("未收到屏幕图像，请重新截图");
     }
-    sourceImage = await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error("截图图像解码失败，请重试"));
-      img.src = fullImage;
-    });
-    bg.style.backgroundImage = `url(${fullImage})`;
+    renderScreenBackgrounds();
     document.body.dataset.ready = "true";
   } catch (error) {
     window.api.reportError("capture:init", error.message || String(error));
@@ -240,7 +321,7 @@ async function initWithCaptureData(payload = {}) {
 }
 
 window.addEventListener("pointerdown", (event) => {
-  if (!sourceImage) return;
+  if (!displayImages.length) return;
   if (event.button === 2) {
     event.preventDefault();
     cancelCapture();

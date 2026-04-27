@@ -54,6 +54,27 @@ function getPinnedWindowEntries() {
   );
 }
 
+function isWorkflowWindowVisible() {
+  return Boolean(workflowWindow && !workflowWindow.isDestroyed() && workflowWindow.isVisible());
+}
+
+function setPinnedWindowsAboveNormalWindows(enabled) {
+  getPinnedWindowEntries().forEach((entry) => {
+    entry.window.setAlwaysOnTop(Boolean(enabled), "screen-saver");
+    if (enabled) {
+      entry.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    }
+  });
+}
+
+function preparePinsForWorkflowWindow() {
+  setPinnedWindowsAboveNormalWindows(false);
+}
+
+function restorePinsAfterWorkflowWindow() {
+  setPinnedWindowsAboveNormalWindows(true);
+}
+
 function getPinnedWindowEntryByWebContents(webContents) {
   if (!webContents) return null;
   return (
@@ -219,6 +240,7 @@ function getDefaultWorkflowConfig(fileName = "") {
     duckDecodeEnabled: false,
     duckDecodePassword: "",
     imagePlaceholder: WORKFLOW_IMAGE_PLACEHOLDER,
+    favorite: false,
   };
 }
 
@@ -523,6 +545,7 @@ function readWorkflowConfig(fileName, workflowJson = null) {
         ? parsed.duckDecodeEnabled
         : String(parsed.duckDecodeEnabled || "").toLowerCase() === "true" || defaults.duckDecodeEnabled,
     duckDecodePassword: String(parsed.duckDecodePassword || defaults.duckDecodePassword || ""),
+    favorite: typeof parsed.favorite === "boolean" ? parsed.favorite : Boolean(defaults.favorite),
     imagePlaceholder: String(parsed.imagePlaceholder || derived.imagePlaceholder || defaults.imagePlaceholder),
   };
 }
@@ -733,9 +756,13 @@ function getWorkflowTimingStats(fileName) {
   const durations = Array.isArray(config.generationDurationsMs)
     ? config.generationDurationsMs.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0).slice(-10)
     : [];
+  const averageDurationMs = durations.length
+    ? Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length)
+    : 0;
   return {
     generationSampleCount: durations.length,
-    estimatedGenerationDurationMs: durations[0] || 0,
+    averageGenerationDurationMs: averageDurationMs,
+    estimatedGenerationDurationMs: averageDurationMs,
   };
 }
 
@@ -743,13 +770,13 @@ function getSelectedWorkflowTimingInfo() {
   const config = getRunningHubConfig();
   const workflowFile = config.selectedWorkflowFile;
   if (!workflowFile) {
-    return { workflowName: "当前工作流", estimatedDurationMs: 0 };
+    return { workflowName: "当前工作流", averageDurationMs: 0 };
   }
   const workflow = readWorkflow(workflowFile);
   const timingStats = getWorkflowTimingStats(workflowFile);
   return {
     workflowName: workflow.name || path.basename(workflowFile, path.extname(workflowFile)),
-    estimatedDurationMs: timingStats.estimatedGenerationDurationMs || 0,
+    averageDurationMs: timingStats.averageGenerationDurationMs || 0,
   };
 }
 
@@ -787,10 +814,14 @@ function getWorkflowSummaries() {
       imageFieldName: workflow.imageFieldName,
       outputNodeId: workflow.outputNodeId,
       duckDecodeEnabled: Boolean(workflow.duckDecodeEnabled),
+      favorite: Boolean(workflow.favorite),
       selected: config.selectedWorkflowFile === fileName,
       thumbnailDataUrl: thumbnailPath ? fileToDataUrl(thumbnailPath) : "",
       ...timingStats,
     };
+  }).sort((a, b) => {
+    if (a.favorite !== b.favorite) return a.favorite ? -1 : 1;
+    return String(a.name || a.fileName).localeCompare(String(b.name || b.fileName), "zh-CN");
   });
 }
 
@@ -820,6 +851,7 @@ function readWorkflow(fileName) {
     imageFieldName: String(workflowConfig.imageFieldName || "image"),
     outputNodeId: String(workflowConfig.outputNodeId || ""),
     duckDecodeEnabled: Boolean(workflowConfig.duckDecodeEnabled),
+    favorite: Boolean(workflowConfig.favorite),
     duckDecodePassword: String(workflowConfig.duckDecodePassword || ""),
     imagePlaceholder: String(
       workflowConfig.imagePlaceholder || parsed.imagePlaceholder || WORKFLOW_IMAGE_PLACEHOLDER
@@ -2359,7 +2391,9 @@ function setSelectedWorkflow(fileName) {
 }
 
 function showWorkflowWindow(options = {}) {
+  preparePinsForWorkflowWindow();
   if (workflowWindow && !workflowWindow.isDestroyed()) {
+    workflowWindow.setAlwaysOnTop(false);
     if (!workflowWindow.isVisible()) {
       workflowWindow.show();
     }
@@ -2382,7 +2416,7 @@ function showWorkflowWindow(options = {}) {
     transparent: true,
     hasShadow: true,
     backgroundColor: "#00000000",
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     resizable: true,
     skipTaskbar: false,
     autoHideMenuBar: true,
@@ -2392,8 +2426,6 @@ function showWorkflowWindow(options = {}) {
       nodeIntegration: false,
     },
   });
-
-  workflowWindow.setAlwaysOnTop(true, "floating");
 
   workflowWindow.setMenuBarVisibility(false);
   workflowWindow.loadFile(path.join(__dirname, "workflow-selector.html"));
@@ -2409,12 +2441,14 @@ function showWorkflowWindow(options = {}) {
   });
   workflowWindow.on("closed", () => {
     workflowWindow = null;
+    restorePinsAfterWorkflowWindow();
   });
 }
 
 function toggleWorkflowWindow(options = {}) {
   if (workflowWindow && !workflowWindow.isDestroyed() && workflowWindow.isVisible()) {
     workflowWindow.hide();
+    restorePinsAfterWorkflowWindow();
     return;
   }
   showWorkflowWindow(options);
@@ -2602,7 +2636,7 @@ async function runRunningHubForEntries(targetEntries = []) {
   sendPinProgress({
     state: "running",
     workflowName: timingInfo.workflowName,
-    estimatedDurationMs: timingInfo.estimatedDurationMs,
+    averageDurationMs: timingInfo.averageDurationMs,
     startedAt: Date.now(),
   }, entries);
   try {
@@ -2613,7 +2647,7 @@ async function runRunningHubForEntries(targetEntries = []) {
         sendPinProgress({
           state: "running",
           workflowName: timingInfo.workflowName,
-          estimatedDurationMs: timingInfo.estimatedDurationMs,
+          averageDurationMs: timingInfo.averageDurationMs,
           startedAt: Date.now(),
           prefix: `第 ${index + 1}/${entries.length} 张`,
         }, [entry]);
@@ -2694,6 +2728,21 @@ function buildPinContextMenu(pinEntry) {
   ]);
 }
 
+function getDisplaysUnionBounds(displays = []) {
+  const validDisplays = displays.filter((display) => display && display.bounds);
+  if (!validDisplays.length) return screen.getPrimaryDisplay().bounds;
+  const left = Math.min(...validDisplays.map((display) => display.bounds.x));
+  const top = Math.min(...validDisplays.map((display) => display.bounds.y));
+  const right = Math.max(...validDisplays.map((display) => display.bounds.x + display.bounds.width));
+  const bottom = Math.max(...validDisplays.map((display) => display.bounds.y + display.bounds.height));
+  return {
+    x: Math.round(left),
+    y: Math.round(top),
+    width: Math.max(1, Math.round(right - left)),
+    height: Math.max(1, Math.round(bottom - top)),
+  };
+}
+
 async function captureScreenImageDataUrl(payload = {}) {
   const displayId = Number(payload.displayId);
   const width = Number.isFinite(payload.width) ? payload.width : 1920;
@@ -2731,24 +2780,31 @@ function startCapture() {
     return;
   }
 
-  const cursorPoint = screen.getCursorScreenPoint();
-  const targetDisplay = screen.getDisplayNearestPoint(cursorPoint);
-  const displayBounds = targetDisplay && targetDisplay.bounds
-    ? targetDisplay.bounds
-    : screen.getPrimaryDisplay().bounds;
-  const scaleFactor = targetDisplay && targetDisplay.scaleFactor ? targetDisplay.scaleFactor : 1;
+  const displays = screen.getAllDisplays();
+  const unionBounds = getDisplaysUnionBounds(displays);
+  const displayInfos = displays.map((display) => ({
+    id: display.id,
+    scaleFactor: display.scaleFactor || 1,
+    bounds: display.bounds,
+    workArea: display.workArea,
+    relativeBounds: {
+      x: Math.round(display.bounds.x - unionBounds.x),
+      y: Math.round(display.bounds.y - unionBounds.y),
+      width: Math.round(display.bounds.width),
+      height: Math.round(display.bounds.height),
+    },
+  }));
   const displayInfo = {
-    id: targetDisplay && targetDisplay.id,
-    scaleFactor,
-    bounds: displayBounds,
-    workArea: targetDisplay && targetDisplay.workArea,
+    id: "all",
+    bounds: unionBounds,
+    displays: displayInfos,
   };
 
   captureWindow = new BrowserWindow({
-    x: Math.round(displayBounds.x),
-    y: Math.round(displayBounds.y),
-    width: Math.max(1, Math.round(displayBounds.width)),
-    height: Math.max(1, Math.round(displayBounds.height)),
+    x: Math.round(unionBounds.x),
+    y: Math.round(unionBounds.y),
+    width: Math.max(1, Math.round(unionBounds.width)),
+    height: Math.max(1, Math.round(unionBounds.height)),
     frame: false,
     transparent: true,
     show: false,
@@ -2757,6 +2813,7 @@ function startCapture() {
     resizable: false,
     movable: false,
     fullscreenable: false,
+    enableLargerThanScreen: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -2766,17 +2823,22 @@ function startCapture() {
 
   captureWindow.setAlwaysOnTop(true, "screen-saver");
   captureWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  captureWindow.setBounds(displayBounds);
+  captureWindow.setBounds(unionBounds);
 
   const pageReady = new Promise((resolve) => {
     captureWindow.webContents.once("did-finish-load", resolve);
   });
-  const captureScale = Math.min(scaleFactor, 1.5);
-  const imageReady = captureScreenImageDataUrl({
-    displayId: displayInfo.id,
-    width: Math.floor(displayBounds.width * captureScale),
-    height: Math.floor(displayBounds.height * captureScale),
-  });
+  const imagesReady = Promise.all(
+    displayInfos.map(async (info) => {
+      const captureScale = Math.min(info.scaleFactor || 1, 1.5);
+      const dataUrl = await captureScreenImageDataUrl({
+        displayId: info.id,
+        width: Math.max(1, Math.floor(info.bounds.width * captureScale)),
+        height: Math.max(1, Math.floor(info.bounds.height * captureScale)),
+      });
+      return { ...info, dataUrl };
+    })
+  );
 
   captureWindow.loadFile(path.join(__dirname, "capture.html"));
   captureWindow.webContents.on("console-message", (_e, _level, msg) => {
@@ -2788,10 +2850,14 @@ function startCapture() {
     pendingCapturePayload = null;
   });
 
-  Promise.all([pageReady, imageReady])
-    .then(([, fullImage]) => {
+  Promise.all([pageReady, imagesReady])
+    .then(([, displayImages]) => {
       if (!captureWindow || captureWindow.isDestroyed()) return;
-      pendingCapturePayload = { fullImage, displayInfo };
+      pendingCapturePayload = {
+        fullImage: displayImages[0] ? displayImages[0].dataUrl : "",
+        displayInfo,
+        displayImages,
+      };
       captureWindow.webContents.send("capture-ready-data", pendingCapturePayload);
       captureWindow.showInactive();
       captureWindow.focus();
@@ -2857,7 +2923,7 @@ function openPinnedImage(dataUrl, selectionRect) {
   pinnedImageWindows.set(pinId, pinEntry);
   lastFocusedPinWindowId = pinId;
 
-  pinWindow.setAlwaysOnTop(true, "screen-saver");
+  pinWindow.setAlwaysOnTop(!isWorkflowWindowVisible(), "screen-saver");
   pinWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   pinWindow.setMenuBarVisibility(false);
   pinWindow.setIgnoreMouseEvents(Boolean(config.defaultClickThrough), {
@@ -3028,6 +3094,30 @@ ipcMain.handle("choose-workflow-thumbnail-file", async () => {
     sourcePath,
     fileName: path.basename(sourcePath),
   };
+});
+ipcMain.handle("choose-input-image-file", async () => {
+  const result = await dialog.showOpenDialog({
+    title: "选择处理图片",
+    defaultPath: app.getPath("pictures"),
+    properties: ["openFile"],
+    filters: [{ name: "Image Files", extensions: ["png", "jpg", "jpeg", "webp", "gif"] }],
+  });
+
+  if (result.canceled || !Array.isArray(result.filePaths) || !result.filePaths[0]) {
+    return { ok: false, cancelled: true };
+  }
+
+  const sourcePath = result.filePaths[0];
+  try {
+    return {
+      ok: true,
+      sourcePath,
+      fileName: path.basename(sourcePath),
+      dataUrl: fileToDataUrl(sourcePath),
+    };
+  } catch (error) {
+    return { ok: false, error: error && error.message ? error.message : String(error) };
+  }
 });
 ipcMain.handle("get-capture-display-info", () => {
   const cursorPoint = screen.getCursorScreenPoint();
@@ -3208,6 +3298,23 @@ ipcMain.handle("select-workflow", (_event, fileName) => {
   setSelectedWorkflow(fileName);
   return { ok: true };
 });
+ipcMain.handle("set-workflow-favorite", (_event, payload = {}) => {
+  const fileName = String(payload.fileName || "").trim();
+  if (!fileName) {
+    return { ok: false, error: "无效的工作流文件名" };
+  }
+  try {
+    const current = readWorkflowConfig(fileName);
+    const saved = saveWorkflowConfig(fileName, {
+      ...current,
+      favorite: Boolean(payload.favorite),
+    });
+    sendWorkflowSelectionData();
+    return { ok: true, favorite: Boolean(saved.favorite) };
+  } catch (error) {
+    return { ok: false, error: error && error.message ? error.message : String(error) };
+  }
+});
 ipcMain.handle("delete-workflow", (_event, fileName) => {
   const normalizedFileName = String(fileName || "").trim();
   if (!normalizedFileName) {
@@ -3241,7 +3348,7 @@ ipcMain.handle("run-selected-workflow", async () => {
   sendPinProgress({
     state: "running",
     workflowName: timingInfo.workflowName,
-    estimatedDurationMs: timingInfo.estimatedDurationMs,
+    averageDurationMs: timingInfo.averageDurationMs,
     startedAt: Date.now(),
   }, selectedEntries);
   try {
@@ -3252,7 +3359,7 @@ ipcMain.handle("run-selected-workflow", async () => {
         sendPinProgress({
           state: "running",
           workflowName: timingInfo.workflowName,
-          estimatedDurationMs: timingInfo.estimatedDurationMs,
+          averageDurationMs: timingInfo.averageDurationMs,
           startedAt: Date.now(),
           prefix: `第 ${index + 1}/${selectedEntries.length} 张`,
         }, [entry]);
@@ -3460,11 +3567,13 @@ ipcMain.on("workflow-selector-close", () => {
   if (workflowWindow && !workflowWindow.isDestroyed()) {
     workflowWindow.hide();
   }
+  restorePinsAfterWorkflowWindow();
 });
 ipcMain.on("workflow-selector-hide", () => {
   if (workflowWindow && !workflowWindow.isDestroyed()) {
     workflowWindow.hide();
   }
+  restorePinsAfterWorkflowWindow();
 });
 
 ipcMain.handle("get-settings", () => {

@@ -8,6 +8,7 @@
   "duckDecodeEnabled": true,
   "duckDecodePassword": "",
   "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
+  "favorite": false,
   "generationDurationsMs": [
     226087,
     219069,

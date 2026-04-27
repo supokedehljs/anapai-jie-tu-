@@ -20,8 +20,8 @@ let imageLoadToken = 0;
 let dragState = null;
 let pinWindowId = "";
 let isSelected = false;
-let runningCountdownTimer = null;
-let runningCountdownPayload = null;
+let runningElapsedTimer = null;
+let runningElapsedPayload = null;
 let altAdjusting = false;
 let scaleAnchorPoint = { x: 0.5, y: 0.5 };
 let scaleAnchorPinned = false;
@@ -90,7 +90,7 @@ function setRunningStatus(left = "", right = "") {
 }
 
 function showPersistentError(payload = {}) {
-  stopRunningCountdown();
+  stopRunningElapsed();
   setRunningStatus("", "");
   errorStatusTitle.textContent = payload.title || "运行失败";
   errorStatusMessage.textContent = payload.message || "发生未知错误";
@@ -101,20 +101,20 @@ function clearPersistentError() {
   document.body.classList.remove("show-error-status");
 }
 
-function formatRemainingTime(milliseconds) {
-  const totalSeconds = Math.max(0, Math.ceil((Number(milliseconds) || 0) / 1000));
+function formatElapsedTime(milliseconds) {
+  const totalSeconds = Math.max(0, Math.floor((Number(milliseconds) || 0) / 1000));
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   if (minutes <= 0) return `${seconds}秒`;
-  return `${minutes}分${String(seconds).padStart(2, "0")}秒`;
+  return `${minutes}分钟${seconds}秒`;
 }
 
-function stopRunningCountdown(delay = 0) {
-  if (runningCountdownTimer) {
-    clearInterval(runningCountdownTimer);
-    runningCountdownTimer = null;
+function stopRunningElapsed(delay = 0) {
+  if (runningElapsedTimer) {
+    clearInterval(runningElapsedTimer);
+    runningElapsedTimer = null;
   }
-  runningCountdownPayload = null;
+  runningElapsedPayload = null;
   if (delay > 0) {
     setTimeout(() => {
       setRunningStatus("", "");
@@ -122,29 +122,22 @@ function stopRunningCountdown(delay = 0) {
   }
 }
 
-function renderRunningCountdown() {
-  if (!runningCountdownPayload) return;
-  const startedAt = Number(runningCountdownPayload.startedAt) || Date.now();
-  const estimatedDurationMs = Number(runningCountdownPayload.estimatedDurationMs) || 0;
-  const workflowName = runningCountdownPayload.workflowName || "当前工作流";
-  const prefix = runningCountdownPayload.prefix ? `${runningCountdownPayload.prefix} · ` : "";
-  if (estimatedDurationMs <= 0) {
-    setRunningStatus(`${prefix}${workflowName}`, "暂无时间记录");
-    return;
-  }
-  const remainingMs = Math.max(0, estimatedDurationMs - (Date.now() - startedAt));
-  setRunningStatus(`${prefix}${workflowName}`, `预计 ${formatRemainingTime(remainingMs)}`);
+function renderRunningElapsed() {
+  if (!runningElapsedPayload) return;
+  const startedAt = Number(runningElapsedPayload.startedAt) || Date.now();
+  const workflowName = runningElapsedPayload.workflowName || "当前工作流";
+  const prefix = runningElapsedPayload.prefix ? `${runningElapsedPayload.prefix} · ` : "";
+  setRunningStatus(`${prefix}${workflowName}`, `已运行 ${formatElapsedTime(Date.now() - startedAt)}`);
 }
 
-function startRunningCountdown(payload = {}) {
-  if (runningCountdownTimer) clearInterval(runningCountdownTimer);
-  runningCountdownPayload = {
+function startRunningElapsed(payload = {}) {
+  if (runningElapsedTimer) clearInterval(runningElapsedTimer);
+  runningElapsedPayload = {
     ...payload,
     startedAt: Number(payload.startedAt) || Date.now(),
-    estimatedDurationMs: Number(payload.estimatedDurationMs) || 0,
   };
-  renderRunningCountdown();
-  runningCountdownTimer = setInterval(renderRunningCountdown, 1000);
+  renderRunningElapsed();
+  runningElapsedTimer = setInterval(renderRunningElapsed, 1000);
 }
 
 function applySelectionState(nextSelected) {
@@ -423,7 +416,7 @@ if (typeof ResizeObserver === "function") {
 
 window.api.onRunningHubStatus((message) => {
   if (!message) return;
-  stopRunningCountdown();
+  stopRunningElapsed();
   setRunningStatus(message, "");
   if (message.includes("生图完成")) {
     setTimeout(() => {
@@ -438,17 +431,17 @@ window.api.onRunningHubStatus((message) => {
 window.api.onRunningHubProgress((payload) => {
   if (!payload || typeof payload !== "object") return;
   if (payload.state === "running") {
-    startRunningCountdown(payload);
+    startRunningElapsed(payload);
     return;
   }
   if (payload.state === "done") {
-    stopRunningCountdown();
+    stopRunningElapsed();
     setRunningStatus(payload.workflowName || "工作流", "已完成");
-    stopRunningCountdown(3500);
+    stopRunningElapsed(3500);
     return;
   }
   if (payload.state === "error") {
-    stopRunningCountdown();
+    stopRunningElapsed();
     showPersistentError({
       title: payload.title || `${payload.workflowName || "工作流"} · 失败`,
       message: payload.message || "运行失败，但没有返回详细原因。",

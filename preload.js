@@ -57,8 +57,14 @@ contextBridge.exposeInMainWorld("api", {
   chooseWorkflowThumbnailFile() {
     return ipcRenderer.invoke("choose-workflow-thumbnail-file");
   },
+  chooseInputImageFile() {
+    return ipcRenderer.invoke("choose-input-image-file");
+  },
   selectWorkflow(fileName) {
     return ipcRenderer.invoke("select-workflow", fileName);
+  },
+  setWorkflowFavorite(payload) {
+    return ipcRenderer.invoke("set-workflow-favorite", payload);
   },
   deleteWorkflow(fileName) {
     return ipcRenderer.invoke("delete-workflow", fileName);
