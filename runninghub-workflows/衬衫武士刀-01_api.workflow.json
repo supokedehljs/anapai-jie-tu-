@@ -9,6 +9,7 @@
   "duckDecodePassword": "",
   "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
   "generationDurationsMs": [
-    155876
+    155876,
+    135620
   ]
 }
