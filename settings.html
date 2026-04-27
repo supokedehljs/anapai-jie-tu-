@@ -143,7 +143,7 @@
       }
       .shortcutRow {
         display: grid;
-        grid-template-columns: minmax(150px, 1fr) auto minmax(170px, 230px);
+        grid-template-columns: minmax(150px, 1fr) auto minmax(300px, 420px);
         align-items: center;
         gap: 10px;
         padding: 7px 9px;
@@ -152,7 +152,43 @@
         border: 1px solid rgba(255,255,255,.06);
       }
       .shortcutName { font-size: 12px; font-weight: 700; color: rgba(246,249,255,.94); }
-      .shortcutRow input { text-align: right; padding: 7px 9px; border-radius: 9px; }
+      .shortcutBuilder {
+        display: grid;
+        grid-template-columns: repeat(3, auto) minmax(76px, 1fr);
+        align-items: center;
+        gap: 8px;
+      }
+      .modifierCheck {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 30px;
+        padding: 5px 8px;
+        border-radius: 9px;
+        background: rgba(6,10,16,.62);
+        border: 1px solid rgba(255,255,255,.08);
+        color: rgba(246,249,255,.9);
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .modifierCheck input {
+        width: auto;
+        accent-color: #5d8dff;
+      }
+      .shortcutKeyInput {
+        text-align: center;
+        text-transform: uppercase;
+        padding: 7px 9px;
+        border-radius: 9px;
+      }
+      .shortcutPreview {
+        grid-column: 1 / -1;
+        min-height: 16px;
+        color: rgba(237,243,255,.52);
+        font-size: 10px;
+        text-align: right;
+      }
       .shortcutBadge {
         min-width: 74px;
         justify-self: end;
@@ -273,30 +309,54 @@
           <div class="card">
             <div class="cardHeader">
               <div class="cardTitle">全局快捷键</div>
-              <div class="cardDesc">点击输入框后直接按下快捷键即可录入。右侧会显示当前快捷键是否已成功注册。</div>
+              <div class="cardDesc">不再录制按键，避免触发其他软件快捷键。请勾选 Shift/Ctrl/Alt，然后手动输入一个字母，保存后生效。</div>
             </div>
             <div class="cardBody">
               <div class="shortcutGrid">
-                <label class="shortcutRow">
+                <div class="shortcutRow" data-shortcut="captureShortcut">
                   <span class="shortcutName">区域截图</span>
                   <span id="captureShortcutState" class="shortcutBadge">检测中</span>
-                  <input id="captureShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
-                </label>
-                <label class="shortcutRow">
+                  <div class="shortcutBuilder">
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Shift" />Shift</label>
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Ctrl" />Ctrl</label>
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Alt" />Alt</label>
+                    <input id="captureShortcut" class="shortcut-input shortcutKeyInput" type="text" maxlength="1" placeholder="字母" inputmode="latin" autocomplete="off" />
+                    <div class="shortcutPreview" data-preview-for="captureShortcut"></div>
+                  </div>
+                </div>
+                <div class="shortcutRow" data-shortcut="workflowShortcut">
                   <span class="shortcutName">选择工作流窗口</span>
                   <span id="workflowShortcutState" class="shortcutBadge">检测中</span>
-                  <input id="workflowShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
-                </label>
-                <label class="shortcutRow">
+                  <div class="shortcutBuilder">
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Shift" />Shift</label>
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Ctrl" />Ctrl</label>
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Alt" />Alt</label>
+                    <input id="workflowShortcut" class="shortcut-input shortcutKeyInput" type="text" maxlength="1" placeholder="字母" inputmode="latin" autocomplete="off" />
+                    <div class="shortcutPreview" data-preview-for="workflowShortcut"></div>
+                  </div>
+                </div>
+                <div class="shortcutRow" data-shortcut="historyShortcut">
                   <span class="shortcutName">打开/关闭历史菜单</span>
                   <span id="historyShortcutState" class="shortcutBadge">检测中</span>
-                  <input id="historyShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
-                </label>
-                <label class="shortcutRow">
+                  <div class="shortcutBuilder">
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Shift" />Shift</label>
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Ctrl" />Ctrl</label>
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Alt" />Alt</label>
+                    <input id="historyShortcut" class="shortcut-input shortcutKeyInput" type="text" maxlength="1" placeholder="字母" inputmode="latin" autocomplete="off" />
+                    <div class="shortcutPreview" data-preview-for="historyShortcut"></div>
+                  </div>
+                </div>
+                <div class="shortcutRow" data-shortcut="togglePinnedShortcut">
                   <span class="shortcutName">显示隐藏所有置顶贴图</span>
                   <span id="togglePinnedShortcutState" class="shortcutBadge">检测中</span>
-                  <input id="togglePinnedShortcut" class="shortcut-input" type="text" placeholder="点击录入" readonly />
-                </label>
+                  <div class="shortcutBuilder">
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Shift" />Shift</label>
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Ctrl" />Ctrl</label>
+                    <label class="modifierCheck"><input type="checkbox" data-modifier="Alt" />Alt</label>
+                    <input id="togglePinnedShortcut" class="shortcut-input shortcutKeyInput" type="text" maxlength="1" placeholder="字母" inputmode="latin" autocomplete="off" />
+                    <div class="shortcutPreview" data-preview-for="togglePinnedShortcut"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

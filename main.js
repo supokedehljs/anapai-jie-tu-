@@ -2360,17 +2360,18 @@ function setSelectedWorkflow(fileName) {
 
 function showWorkflowWindow(options = {}) {
   if (workflowWindow && !workflowWindow.isDestroyed()) {
-    workflowWindow.show();
+    if (!workflowWindow.isVisible()) {
+      workflowWindow.show();
+    }
+    workflowWindow.moveTop();
     workflowWindow.focus();
     sendWorkflowSelectionData();
+    sendWorkflowInputContext();
     if (options.editFileName) {
       sendWorkflowEditRequest(options.editFileName);
     }
     return;
   }
-
-  const parentEntry = getPrimaryPinnedWindowEntry();
-  const parentWindow = parentEntry ? parentEntry.window : undefined;
 
   workflowWindow = new BrowserWindow({
     width: 1080,
@@ -2381,18 +2382,18 @@ function showWorkflowWindow(options = {}) {
     transparent: true,
     hasShadow: true,
     backgroundColor: "#00000000",
-    alwaysOnTop: false,
+    alwaysOnTop: true,
     resizable: true,
     skipTaskbar: false,
     autoHideMenuBar: true,
-    parent: parentWindow,
-    modal: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
+
+  workflowWindow.setAlwaysOnTop(true, "floating");
 
   workflowWindow.setMenuBarVisibility(false);
   workflowWindow.loadFile(path.join(__dirname, "workflow-selector.html"));
@@ -2500,14 +2501,8 @@ function togglePinnedImagesVisibility(forceVisible) {
   pinnedWindowsHidden = nextHidden;
   if (pinnedWindowsHidden) {
     entries.forEach((entry) => entry.window.hide());
-    if (workflowWindow && !workflowWindow.isDestroyed()) {
-      workflowWindow.hide();
-    }
   } else {
     entries.forEach((entry) => entry.window.show());
-    if (workflowWindow && !workflowWindow.isDestroyed()) {
-      workflowWindow.show();
-    }
   }
   refreshTrayMenu();
   return true;
@@ -3463,7 +3458,7 @@ ipcMain.on("pin-select", (event, payload = {}) => {
 });
 ipcMain.on("workflow-selector-close", () => {
   if (workflowWindow && !workflowWindow.isDestroyed()) {
-    workflowWindow.close();
+    workflowWindow.hide();
   }
 });
 ipcMain.on("workflow-selector-hide", () => {

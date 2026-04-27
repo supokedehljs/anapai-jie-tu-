@@ -24,9 +24,12 @@ const elements = {
   closeButtons: [document.getElementById("closeBtnTop")].filter(Boolean),
 };
 
-const shortcutInputs = [elements.captureShortcut, elements.workflowShortcut, elements.historyShortcut, elements.togglePinnedShortcut];
-let recordingInput = null;
-
+const shortcutFields = [
+  "captureShortcut",
+  "workflowShortcut",
+  "historyShortcut",
+  "togglePinnedShortcut",
+];
 function displayShortcut(value = "") {
   return String(value || "").replace(/CommandOrControl/gi, "Ctrl");
 }
@@ -69,16 +72,74 @@ function renderShortcutState(state = {}) {
   );
 }
 
+function normalizeShortcutParts(value = "") {
+  const parts = displayShortcut(value)
+    .split("+")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const modifiers = new Set();
+  let key = "";
+  parts.forEach((part) => {
+    const lower = part.toLowerCase();
+    if (lower === "shift") modifiers.add("Shift");
+    else if (lower === "ctrl" || lower === "control" || lower === "cmd" || lower === "command") modifiers.add("Ctrl");
+    else if (lower === "alt" || lower === "option") modifiers.add("Alt");
+    else if (/^[a-z]$/i.test(part)) key = part.toUpperCase();
+  });
+  return { modifiers, key };
+}
+
+function getShortcutRow(fieldName) {
+  return document.querySelector(`[data-shortcut="${fieldName}"]`);
+}
+
+function setShortcutBuilderValue(fieldName, value = "") {
+  const row = getShortcutRow(fieldName);
+  const input = elements[fieldName];
+  if (!row || !input) return;
+  const { modifiers, key } = normalizeShortcutParts(value);
+  row.querySelectorAll("[data-modifier]").forEach((checkbox) => {
+    checkbox.checked = modifiers.has(checkbox.dataset.modifier);
+  });
+  input.value = key;
+  updateShortcutPreview(fieldName);
+}
+
+function buildShortcutValue(fieldName) {
+  const row = getShortcutRow(fieldName);
+  const input = elements[fieldName];
+  if (!row || !input) return "";
+  const parts = [];
+  ["Shift", "Ctrl", "Alt"].forEach((modifier) => {
+    const checkbox = row.querySelector(`[data-modifier="${modifier}"]`);
+    if (checkbox && checkbox.checked) parts.push(modifier);
+  });
+  const key = String(input.value || "").trim().toUpperCase();
+  if (!/^[A-Z]$/.test(key)) return "";
+  if (!parts.length) return "";
+  parts.push(key);
+  return parts.join("+");
+}
+
+function updateShortcutPreview(fieldName) {
+  const row = getShortcutRow(fieldName);
+  if (!row) return;
+  const preview = row.querySelector(`[data-preview-for="${fieldName}"]`);
+  if (!preview) return;
+  const value = buildShortcutValue(fieldName);
+  preview.textContent = value ? `当前组合：${value}` : "请至少勾选一个修饰键，并输入 A-Z 字母";
+}
+
 function applySettings(settings = {}) {
   elements.apiKey.value = settings.apiKey || "";
   if (elements.uploadUrl) elements.uploadUrl.value = settings.uploadUrl || "";
   if (elements.createTaskUrl) elements.createTaskUrl.value = settings.createTaskUrl || "";
   if (elements.taskStatusUrl) elements.taskStatusUrl.value = settings.taskStatusUrl || "";
   if (elements.webhookDetailUrl) elements.webhookDetailUrl.value = settings.webhookDetailUrl || "";
-  elements.captureShortcut.value = displayShortcut(settings.captureShortcut || "");
-  elements.workflowShortcut.value = displayShortcut(settings.workflowShortcut || "");
-  elements.historyShortcut.value = displayShortcut(settings.historyShortcut || "");
-  elements.togglePinnedShortcut.value = displayShortcut(settings.togglePinnedShortcut || "");
+  setShortcutBuilderValue("captureShortcut", settings.captureShortcut || "");
+  setShortcutBuilderValue("workflowShortcut", settings.workflowShortcut || "");
+  setShortcutBuilderValue("historyShortcut", settings.historyShortcut || "");
+  setShortcutBuilderValue("togglePinnedShortcut", settings.togglePinnedShortcut || "");
   elements.defaultClickThrough.checked = Boolean(settings.defaultClickThrough);
   elements.autoCopyToClipboard.checked = Boolean(settings.autoCopyToClipboard);
   elements.launchAtStartup.checked = Boolean(settings.launchAtStartup);
@@ -92,10 +153,10 @@ function collectSettings() {
     createTaskUrl: elements.createTaskUrl ? elements.createTaskUrl.value.trim() : undefined,
     taskStatusUrl: elements.taskStatusUrl ? elements.taskStatusUrl.value.trim() : undefined,
     webhookDetailUrl: elements.webhookDetailUrl ? elements.webhookDetailUrl.value.trim() : undefined,
-    captureShortcut: elements.captureShortcut.value.trim(),
-    workflowShortcut: elements.workflowShortcut.value.trim(),
-    historyShortcut: elements.historyShortcut.value.trim(),
-    togglePinnedShortcut: elements.togglePinnedShortcut.value.trim(),
+    captureShortcut: buildShortcutValue("captureShortcut"),
+    workflowShortcut: buildShortcutValue("workflowShortcut"),
+    historyShortcut: buildShortcutValue("historyShortcut"),
+    togglePinnedShortcut: buildShortcutValue("togglePinnedShortcut"),
     defaultClickThrough: elements.defaultClickThrough.checked,
     autoCopyToClipboard: elements.autoCopyToClipboard.checked,
     launchAtStartup: elements.launchAtStartup.checked,
@@ -103,94 +164,37 @@ function collectSettings() {
   };
 }
 
-function keyEventToAccelerator(event) {
-  const key = event.key;
-  const code = event.code;
-  if (["Control", "Shift", "Alt", "Meta"].includes(key)) return "";
-
-  const parts = [];
-  if (event.ctrlKey || event.metaKey) parts.push("Ctrl");
-  if (event.altKey) parts.push("Alt");
-  if (event.shiftKey) parts.push("Shift");
-
-  let mainKey = "";
-  if (/^Key[A-Z]$/.test(code)) {
-    mainKey = code.slice(3);
-  } else if (/^Digit\d$/.test(code)) {
-    mainKey = code.slice(5);
-  } else if (/^F\d{1,2}$/i.test(key)) {
-    mainKey = key.toUpperCase();
-  } else {
-    const map = {
-      Escape: "Escape", Enter: "Enter", Tab: "Tab", Backspace: "Backspace", Delete: "Delete",
-      Insert: "Insert", Home: "Home", End: "End", PageUp: "PageUp", PageDown: "PageDown",
-      ArrowUp: "Up", ArrowDown: "Down", ArrowLeft: "Left", ArrowRight: "Right",
-      Space: "Space", " ": "Space", Minus: "-", Equal: "=", BracketLeft: "[",
-      BracketRight: "]", Semicolon: ";", Quote: "'", Comma: ",", Period: ".",
-      Slash: "/", Backslash: "\\", Backquote: "`",
-    };
-    mainKey = map[code] || map[key] || "";
-    if (!mainKey && typeof key === "string" && key.length === 1) mainKey = key.toUpperCase();
+function validateShortcutBuilders() {
+  const missing = shortcutFields.filter((fieldName) => !buildShortcutValue(fieldName));
+  if (missing.length) {
+    setStatus("请为每个快捷键至少勾选一个修饰键，并输入 A-Z 字母", true);
+    return false;
   }
-
-  if (!mainKey) return "";
-  const hasModifier = parts.length > 0;
-  const isFunctionKey = /^F\d{1,2}$/.test(mainKey);
-  if (!hasModifier && !isFunctionKey) return "";
-  return [...parts, mainKey].join("+");
+  const values = shortcutFields.map((fieldName) => buildShortcutValue(fieldName));
+  if (new Set(values).size !== values.length) {
+    setStatus("快捷键不能重复，请修改后再保存", true);
+    return false;
+  }
+  return true;
 }
 
-function stopShortcutRecording(commit = false, nextValue = "") {
-  if (!recordingInput) return;
-  const input = recordingInput;
-  input.dataset.recording = "false";
-  input.blur();
-  input.value = commit ? nextValue : (input.dataset.previousValue || input.value || "");
-  recordingInput = null;
-}
-
-function startShortcutRecording(input) {
-  if (!input) return;
-  if (recordingInput && recordingInput !== input) stopShortcutRecording(false);
-  recordingInput = input;
-  input.dataset.previousValue = input.value;
-  input.dataset.recording = "true";
-  input.value = "请按下快捷键...";
-  input.focus();
-  setStatus("请直接按下快捷键。Backspace/Delete 清空，Escape 取消。", false);
-}
-
-function bindShortcutRecorder(input) {
-  if (!input) return;
-  input.addEventListener("click", () => startShortcutRecording(input));
-  input.addEventListener("focus", () => { if (recordingInput !== input) startShortcutRecording(input); });
-  input.addEventListener("blur", () => {
-    if (recordingInput === input) {
-      stopShortcutRecording(false);
-      setStatus("快捷键录制已取消", false);
-    }
+function bindShortcutBuilder(fieldName) {
+  const row = getShortcutRow(fieldName);
+  const input = elements[fieldName];
+  if (!row || !input) return;
+  row.querySelectorAll("[data-modifier]").forEach((checkbox) => {
+    checkbox.addEventListener("change", () => updateShortcutPreview(fieldName));
+  });
+  input.addEventListener("input", () => {
+    const match = String(input.value || "").toUpperCase().match(/[A-Z]/);
+    input.value = match ? match[0] : "";
+    updateShortcutPreview(fieldName);
   });
   input.addEventListener("keydown", (event) => {
-    if (recordingInput !== input) return;
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.key === "Escape") {
-      stopShortcutRecording(false);
-      setStatus("已取消本次快捷键录制", false);
-      return;
+    if (event.key === "Backspace" || event.key === "Delete" || event.key === "Tab") return;
+    if (!/^[a-z]$/i.test(event.key)) {
+      event.preventDefault();
     }
-    if (event.key === "Backspace" || event.key === "Delete") {
-      stopShortcutRecording(true, "");
-      setStatus("快捷键已清空，保存后生效", false);
-      return;
-    }
-    const accelerator = keyEventToAccelerator(event);
-    if (!accelerator) {
-      setStatus("请至少包含一个修饰键，或直接使用 F1-F12 这类功能键", true);
-      return;
-    }
-    stopShortcutRecording(true, accelerator);
-    setStatus(`已录入快捷键：${accelerator}`);
   });
 }
 
@@ -217,7 +221,7 @@ async function chooseSaveDirectory() {
 }
 
 async function saveSettings() {
-  if (recordingInput) stopShortcutRecording(false);
+  if (!validateShortcutBuilders()) return;
   setStatus("正在保存...");
   elements.saveButtons.forEach((btn) => { btn.disabled = true; });
   try {
@@ -234,14 +238,13 @@ async function saveSettings() {
   }
 }
 
-shortcutInputs.forEach((input) => bindShortcutRecorder(input));
+shortcutFields.forEach((fieldName) => bindShortcutBuilder(fieldName));
 elements.browseSaveDirectoryBtn.addEventListener("click", () => chooseSaveDirectory());
 elements.saveButtons.forEach((btn) => btn.addEventListener("click", () => saveSettings()));
 elements.closeButtons.forEach((btn) => btn.addEventListener("click", () => window.api.closeSettings()));
 window.api.onSettingsData((settings) => applySettings(settings));
 
 window.addEventListener("keydown", (event) => {
-  if (recordingInput) return;
   if (event.key === "Escape") {
     window.api.closeSettings();
     return;
