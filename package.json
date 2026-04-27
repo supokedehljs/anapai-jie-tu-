@@ -17,7 +17,7 @@
     "electron-builder": "^26.0.12"
   },
   "build": {
-    "appId": "com.runningjietu.v2",
+    "appId": "com.ruADWnningjietu.v2",
     "productName": "Running Jietu v2.0",
     "directories": {
       "output": "../打包文件"

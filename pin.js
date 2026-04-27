@@ -31,6 +31,21 @@ let pendingScaleFactor = 1;
 let pendingScaleOptions = null;
 let scaleFrameRequest = 0;
 let scaleInFlight = false;
+let pinOpacity = 1;
+
+function clampOpacity(value) {
+  return Math.min(1, Math.max(0.18, Number(value) || 1));
+}
+
+function applyPinOpacity() {
+  const nextOpacity = altAdjusting ? Math.min(pinOpacity, 0.72) : pinOpacity;
+  window.api.setPinOpacity(nextOpacity);
+}
+
+function adjustPinOpacity(delta) {
+  pinOpacity = clampOpacity(pinOpacity + delta);
+  applyPinOpacity();
+}
 
 function scheduleScaleOperation(scaleFactor, options = {}) {
   pendingScaleFactor *= scaleFactor;
@@ -65,7 +80,7 @@ function updateScaleAnchorVisual() {
 function setAltAdjusting(enabled) {
   altAdjusting = Boolean(enabled);
   document.body.classList.toggle("alt-adjusting", altAdjusting);
-  window.api.setPinOpacity(altAdjusting ? 0.72 : 1);
+  applyPinOpacity();
   if (altAdjusting) updateScaleAnchorVisual();
 }
 
@@ -282,18 +297,11 @@ function applyImagePayload(payload) {
 }
 
 function shouldStartDrag(event) {
-  return event.button === 0 && !event.target.closest("button") && !event.altKey;
+  return event.button === 0 && !event.target.closest("button") && !event.ctrlKey && !event.metaKey;
 }
 
 function startDrag(event) {
   lastPointerPosition = { x: event.clientX, y: event.clientY };
-  if (event.altKey) {
-    event.preventDefault();
-    requestSelection(event);
-    setAltAdjusting(true);
-    setScaleAnchorFromEvent(event, { pin: true });
-    return;
-  }
   if (event.ctrlKey || event.metaKey) {
     event.preventDefault();
     requestSelection(event);
@@ -304,8 +312,13 @@ function startDrag(event) {
   if (!shouldStartDrag(event)) return;
   requestSelection(event);
   event.preventDefault();
+  if (event.altKey) setAltAdjusting(true);
   dragState = {
     pointerId: event.pointerId,
+    startClientX: event.clientX,
+    startClientY: event.clientY,
+    startedWithAlt: Boolean(event.altKey),
+    moved: false,
   };
   frame.setPointerCapture(event.pointerId);
   window.api.startPinDrag({ screenX: event.screenX, screenY: event.screenY });
@@ -317,11 +330,17 @@ function moveDrag(event) {
     setScaleAnchorFromEvent(event);
   }
   if (!dragState || dragState.pointerId !== event.pointerId) return;
+  const deltaX = event.clientX - dragState.startClientX;
+  const deltaY = event.clientY - dragState.startClientY;
+  if (Math.hypot(deltaX, deltaY) >= 3) {
+    dragState.moved = true;
+  }
   window.api.dragPin({ screenX: event.screenX, screenY: event.screenY });
 }
 
 function endDrag(event) {
   if (!dragState || dragState.pointerId !== event.pointerId) return;
+  const completedDrag = dragState;
   try {
     frame.releasePointerCapture(event.pointerId);
   } catch (_error) {
@@ -329,6 +348,9 @@ function endDrag(event) {
   dragState = null;
   ctrlFileDragStarted = false;
   window.api.endPinDrag();
+  if (completedDrag.startedWithAlt && !completedDrag.moved) {
+    setScaleAnchorFromEvent(event, { pin: true });
+  }
 }
 
 window.api.onSetImage((payload) => {
@@ -373,6 +395,11 @@ frame.addEventListener(
   "wheel",
   async (event) => {
     event.preventDefault();
+    if (event.ctrlKey || event.metaKey) {
+      const direction = event.deltaY < 0 ? 1 : -1;
+      adjustPinOpacity(direction * 0.06);
+      return;
+    }
     if (event.altKey) {
       const direction = event.deltaY < 0 ? 1 : -1;
       const scaleFactor = 1 + direction * 0.025;
@@ -396,7 +423,7 @@ window.addEventListener("pointermove", (event) => {
     setAltAdjusting(true);
   }
   if (altAdjusting || event.altKey) {
-    if (!scaleAnchorPinned) setScaleAnchorFromEvent(event);
+    if (!dragState && !scaleAnchorPinned) setScaleAnchorFromEvent(event);
   }
 });
 
