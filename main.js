@@ -320,7 +320,51 @@ function getDefaultAppSettings() {
   };
 }
 
+const LOG_MAX_SIZE = 5 * 1024 * 1024;
+const LOG_DIR_NAME = "logs";
+
+function rotateLogFileIfNeeded() {
+  try {
+    if (!fs.existsSync(logFilePath)) return;
+    const stats = fs.statSync(logFilePath);
+    if (stats.size < LOG_MAX_SIZE) return;
+    const timestamp = formatHistoryTimestamp(new Date());
+    const dirPath = path.join(appDataRoot, LOG_DIR_NAME);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+    const rotatedPath = path.join(dirPath, `running-jietu-${timestamp}.log`);
+    fs.renameSync(logFilePath, rotatedPath);
+    cleanupOldLogs(dirPath, 7);
+  } catch (error) {
+    // Ignore rotation errors
+  }
+}
+
+function cleanupOldLogs(logDir, keepDays) {
+  try {
+    if (!fs.existsSync(logDir)) return;
+    const files = fs.readdirSync(logDir).filter((name) => name.endsWith(".log")).sort().reverse();
+    const cutoff = Date.now() - keepDays * 24 * 60 * 60 * 1000;
+    files.forEach((fileName, index) => {
+      if (index < keepDays) return;
+      const filePath = path.join(logDir, fileName);
+      try {
+        const stats = fs.statSync(filePath);
+        if (stats.mtimeMs < cutoff) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (e) {
+        // Ignore
+      }
+    });
+  } catch (error) {
+    // Ignore cleanup errors
+  }
+}
+
 function logDebug(message, extra = "") {
+  rotateLogFileIfNeeded();
   const line = `[${new Date().toISOString()}] ${message}${
     extra ? ` | ${extra}` : ""
   }\n`;
@@ -1733,67 +1777,79 @@ function createRunningHubWebSocketWatcher(wsUrl, taskId, onProgress, outputNodeI
 }
 
 async function queryRunningHubTaskStatus(config, taskId) {
-  const response = await fetch(config.taskStatusUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": config.apiKey,
-      Authorization: `Bearer ${config.apiKey}`,
-    },
-    body: JSON.stringify({
-      apiKey: config.apiKey,
-      taskId,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`查询任务状态失败: HTTP ${response.status}`);
+  try {
+    const response = await fetch(config.taskStatusUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": config.apiKey,
+      },
+      body: JSON.stringify({
+        apiKey: config.apiKey,
+        taskId,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`查询任务状态失败: HTTP ${response.status}`);
+    }
+    const json = await response.json();
+    logDebug("runninghub status response", JSON.stringify(json).slice(0, 2000));
+    return getRunningHubResultData(json);
+  } catch (error) {
+    logDebug("queryRunningHubTaskStatus error", error && error.message ? error.message : String(error));
+    throw error;
   }
-  const json = await response.json();
-  logDebug("runninghub status response", JSON.stringify(json).slice(0, 2000));
-  return getRunningHubResultData(json);
 }
 
 async function queryRunningHubTaskOutputs(config, taskId) {
   const outputsUrl = String(config.taskOutputsUrl || "https://www.runninghub.ai/task/openapi/outputs");
-  const response = await fetch(outputsUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": config.apiKey,
-      Authorization: `Bearer ${config.apiKey}`,
-    },
-    body: JSON.stringify({
-      apiKey: config.apiKey,
-      taskId,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`查询任务输出失败: HTTP ${response.status}`);
+  try {
+    const response = await fetch(outputsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": config.apiKey,
+      },
+      body: JSON.stringify({
+        apiKey: config.apiKey,
+        taskId,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`查询任务输出失败: HTTP ${response.status}`);
+    }
+    const json = await response.json();
+logDebug("runninghub outputs response", JSON.stringify(json).slice(0, 4000));
+    return getRunningHubResultData(json);
+  } catch (error) {
+    logDebug("queryRunningHubTaskOutputs error", error && error.message ? error.message : String(error));
+    throw error;
   }
-  const json = await response.json();
-  logDebug("runninghub outputs response", JSON.stringify(json).slice(0, 4000));
-  return getRunningHubResultData(json);
 }
 
 async function queryRunningHubWebhookDetail(config, taskId) {
-  const response = await fetch(config.webhookDetailUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": config.apiKey,
-      Authorization: `Bearer ${config.apiKey}`,
-    },
-    body: JSON.stringify({
-      apiKey: config.apiKey,
-      taskId,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`查询 webhook 详情失败: HTTP ${response.status}`);
+  try {
+    const response = await fetch(config.webhookDetailUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": config.apiKey,
+      },
+      body: JSON.stringify({
+        apiKey: config.apiKey,
+        taskId,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`查询 webhook 详情失败: HTTP ${response.status}`);
+    }
+    const json = await response.json();
+    logDebug("runninghub webhook detail response", JSON.stringify(json).slice(0, 2000));
+    return getRunningHubResultData(json);
+  } catch (error) {
+    logDebug("queryRunningHubWebhookDetail error", error && error.message ? error.message : String(error));
+    throw error;
   }
-  const json = await response.json();
-  logDebug("runninghub webhook detail response", JSON.stringify(json).slice(0, 2000));
-  return getRunningHubResultData(json);
 }
 
 async function waitRunningHubTaskResult(config, taskId, onProgress, options = {}, workflow = null) {
