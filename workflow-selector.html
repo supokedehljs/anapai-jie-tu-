@@ -98,14 +98,19 @@
       #workflowArea { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
       #tips { display: none; }
       #grid {
-        flex: 1; min-height: 0; overflow: auto; display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; align-content: start; padding-right: 6px;
+        flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 200px)); gap: 16px;
+        padding: 16px 16px 16px 8px;
+        justify-content: start;
+        align-content: start;
       }
       .card {
         position: relative; display: flex; flex-direction: column; padding: 0; border-radius: 18px;
         background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); cursor: pointer;
         transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
         overflow: hidden;
+        width: 100%;
+        aspect-ratio: 1 / 1;
       }
       .cardInfo {
         display: flex; flex-direction: column; gap: 4px; padding: 10px 12px 12px;
@@ -124,9 +129,9 @@
         box-shadow: 0 0 0 1px rgba(97,146,255,.18);
       }
       .card.selected {
-        border-color: rgba(82,153,255,1);
-        background: rgba(255,255,255,.055);
-        box-shadow: 0 0 0 4px rgba(82,153,255,.48);
+        border-color: #3d85ff;
+        background: rgba(255,255,255,.08);
+        box-shadow: 0 0 0 4px #3d85ff;
       }
       .thumb {
         aspect-ratio: 1 / 1; width: 100%; border-radius: 17px;
