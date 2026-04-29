@@ -411,72 +411,51 @@ function createTrayIcon() {
 function createTrayMenu() {
   return Menu.buildFromTemplate([
     {
-      label: "截图",
-      submenu: [
-        {
-          label: "区域截图",
-          click: () => startCapture(),
-        },
-        {
-          label: "从剪贴板粘贴图片",
-          click: () => {
-            const dataUrl = clipboard.readImage().toDataURL();
-            if (dataUrl && !clipboard.readImage().isEmpty()) {
-              saveImageToHistory(dataUrl, { type: "input", newSession: true });
-              showHistoryWindow();
-            }
-          },
-        },
-      ],
+      label: "区域截图",
+      click: () => startCapture(),
     },
     {
-      label: "工作流",
-      submenu: [
-        {
-          label: "管理工作流",
-          click: () => toggleWorkflowWindow(),
-        },
-        { type: "separator" },
-        {
-          label: "运行当前工作流",
-          click: () => {
-            const config = getRunningHubConfig();
-            if (config.selectedWorkflowFile) {
-              window.api.runSelectedWorkflow();
-            }
-          },
-        },
-        {
-          label: "打开工作流目录",
-          click: () => shell.openPath(runningHubWorkflowDir),
-        },
-      ],
+      label: "从剪贴板粘贴图片",
+      click: () => {
+        const dataUrl = clipboard.readImage().toDataURL();
+        if (dataUrl && !clipboard.readImage().isEmpty()) {
+          saveImageToHistory(dataUrl, { type: "input", newSession: true });
+          showHistoryWindow();
+        }
+      },
     },
     {
-      label: "置顶贴图",
-      submenu: [
-        {
-          label: pinnedWindowsHidden ? "显示全部置顶贴图" : "隐藏全部置顶贴图",
-          click: () => togglePinnedImagesVisibility(),
-        },
-        {
-          label: "关闭所有置顶贴图",
-          click: () => closeAllPinnedWindows(),
-        },
-      ],
+      label: "管理工作流",
+      click: () => toggleWorkflowWindow(),
     },
     {
-      label: "历史记录",
-      submenu: [
-        {
-          label: "打开历史记录",
-          click: () => toggleHistoryWindow(),
-        },
-        {
-          label: "打开历史文件夹",
-          click: () => shell.openPath(historyRootDir),
-        },
-      ],
+      label: "运行当前工作流",
+      click: () => {
+        const config = getRunningHubConfig();
+        if (config.selectedWorkflowFile) {
+          window.api.runSelectedWorkflow();
+        }
+      },
+    },
+    {
+      label: "打开工作流目录",
+      click: () => shell.openPath(runningHubWorkflowDir),
+    },
+    {
+      label: pinnedWindowsHidden ? "显示全部置顶贴图" : "隐藏全部置顶贴图",
+      click: () => togglePinnedImagesVisibility(),
+    },
+    {
+      label: "关闭所有置顶贴图",
+      click: () => closeAllPinnedWindows(),
+    },
+    {
+      label: "打开历史记录",
+      click: () => toggleHistoryWindow(),
+    },
+    {
+      label: "打开历史文件夹",
+      click: () => shell.openPath(historyRootDir),
     },
     { type: "separator" },
     {
