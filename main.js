@@ -416,16 +416,6 @@ function createTrayMenu() {
       click: () => startCapture(),
     },
     {
-      label: "从剪贴板粘贴图片",
-      click: () => {
-        const dataUrl = clipboard.readImage().toDataURL();
-        if (dataUrl && !clipboard.readImage().isEmpty()) {
-          saveImageToHistory(dataUrl, { type: "input", newSession: true });
-          showHistoryWindow();
-        }
-      },
-    },
-    {
       label: "粘贴为置顶贴图",
       click: () => pasteImageAsPinned(),
     },
@@ -434,33 +424,25 @@ function createTrayMenu() {
       click: () => toggleWorkflowWindow(),
     },
     {
-      label: "运行当前工作流",
-      click: () => {
-        const config = getRunningHubConfig();
-        if (config.selectedWorkflowFile) {
-          window.api.runSelectedWorkflow();
-        }
-      },
-    },
-    {
-      label: "打开工作流目录",
-      click: () => shell.openPath(runningHubWorkflowDir),
-    },
-    {
       label: pinnedWindowsHidden ? "显示全部置顶贴图" : "隐藏全部置顶贴图",
       click: () => togglePinnedImagesVisibility(),
-    },
-    {
-      label: "关闭所有置顶贴图",
-      click: () => closeAllPinnedWindows(),
     },
     {
       label: "打开历史记录",
       click: () => toggleHistoryWindow(),
     },
     {
-      label: "打开历史文件夹",
-      click: () => shell.openPath(historyRootDir),
+      label: "其他",
+      submenu: [
+        {
+          label: "打开工作流目录",
+          click: () => shell.openPath(runningHubWorkflowDir),
+        },
+        {
+          label: "打开历史文件夹",
+          click: () => shell.openPath(historyRootDir),
+        },
+      ],
     },
     { type: "separator" },
     {
@@ -473,8 +455,8 @@ function createTrayMenu() {
         dialog.showMessageBox({
           type: "info",
           title: "关于 Running Jietu",
-          message: "Running Jietu v2.0",
-          detail: "极简托盘截图工具（区域截图 + 置顶钉图）\n\n快捷键:\nCtrl+Alt+A: 区域截图\nCtrl+Alt+H: 历史记录\nCtrl+Alt+W: 工作流",
+          message: "Running Jietu v2.2",
+          detail: "极简托盘截图工具（区域截图 + 置顶钉图）\n\n作者：礼予杰\nBilibili：https://space.bilibili.com/485380088",
         });
       },
     },
@@ -557,6 +539,7 @@ function getRunningHubConfig() {
       togglePinnedShortcut: String(
         parsed.togglePinnedShortcut || defaults.togglePinnedShortcut
       ),
+      pastePinnedShortcut: String(parsed.pastePinnedShortcut || defaults.pastePinnedShortcut),
       defaultClickThrough: Boolean(parsed.defaultClickThrough),
       autoCopyToClipboard:
         typeof parsed.autoCopyToClipboard === "boolean"
@@ -3844,6 +3827,10 @@ ipcMain.handle("save-settings", async (_event, payload = {}) => {
         payload.togglePinnedShortcut,
         getDefaultAppSettings().togglePinnedShortcut
       ),
+      pastePinnedShortcut: normalizeShortcut(
+        payload.pastePinnedShortcut,
+        getDefaultAppSettings().pastePinnedShortcut
+      ),
       defaultClickThrough: Boolean(payload.defaultClickThrough),
       autoCopyToClipboard:
         typeof payload.autoCopyToClipboard === "boolean"
@@ -3870,7 +3857,8 @@ ipcMain.handle("save-settings", async (_event, payload = {}) => {
       !shortcutState.captureRegistered ||
       !shortcutState.workflowRegistered ||
       !shortcutState.historyRegistered ||
-      !shortcutState.toggleRegistered
+      !shortcutState.toggleRegistered ||
+      !shortcutState.pastePinnedRegistered
     ) {
       return {
         ok: false,
