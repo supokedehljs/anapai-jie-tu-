@@ -323,6 +323,7 @@ function getDefaultAppSettings() {
     workflowShortcut: "Ctrl+Alt+T",
     historyShortcut: "Ctrl+Alt+H",
     togglePinnedShortcut: "Ctrl+Alt+L",
+    pastePinnedShortcut: "Ctrl+Alt+V",
     defaultClickThrough: false,
     autoCopyToClipboard: true,
     launchAtStartup: false,
@@ -423,6 +424,10 @@ function createTrayMenu() {
           showHistoryWindow();
         }
       },
+    },
+    {
+      label: "粘贴为置顶贴图",
+      click: () => pasteImageAsPinned(),
     },
     {
       label: "管理工作流",
@@ -2677,6 +2682,10 @@ function registerGlobalShortcuts() {
     config.togglePinnedShortcut,
     getDefaultAppSettings().togglePinnedShortcut
   );
+  const pastePinnedShortcut = normalizeShortcut(
+    config.pastePinnedShortcut,
+    getDefaultAppSettings().pastePinnedShortcut
+  );
 
   const captureRegistered = globalShortcut.register(captureShortcut, () => {
     startCapture();
@@ -2690,6 +2699,9 @@ function registerGlobalShortcuts() {
   const toggleRegistered = globalShortcut.register(togglePinnedShortcut, () => {
     togglePinnedImagesVisibility();
   });
+  const pastePinnedRegistered = globalShortcut.register(pastePinnedShortcut, () => {
+    pasteImageAsPinned();
+  });
 
   logDebug(
     "global shortcuts registered",
@@ -2702,6 +2714,8 @@ function registerGlobalShortcuts() {
       historyRegistered,
       togglePinnedShortcut,
       toggleRegistered,
+      pastePinnedShortcut,
+      pastePinnedRegistered,
     })
   );
 
@@ -2715,6 +2729,8 @@ function registerGlobalShortcuts() {
     togglePinnedShortcut,
     toggleRegistered,
     togglePinnedRegistered: toggleRegistered,
+    pastePinnedShortcut,
+    pastePinnedRegistered,
   };
 }
 
@@ -3063,6 +3079,20 @@ function startCapture() {
       }
       dialog.showErrorBox("截图失败", `获取屏幕图像失败：${error.message || error}`);
     });
+}
+
+function pasteImageAsPinned() {
+  const image = clipboard.readImage();
+  if (image.isEmpty()) {
+    dialog.showErrorBox("粘贴失败", "剪贴板中没有图片");
+    return;
+  }
+  const dataUrl = image.toDataURL();
+  if (!dataUrl) {
+    dialog.showErrorBox("粘贴失败", "无法读取剪贴板图片");
+    return;
+  }
+  openPinnedImage(dataUrl, null);
 }
 
 function openPinnedImage(dataUrl, selectionRect) {

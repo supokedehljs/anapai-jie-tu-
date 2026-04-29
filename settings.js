@@ -8,6 +8,7 @@ const elements = {
   workflowShortcut: document.getElementById("workflowShortcut"),
   historyShortcut: document.getElementById("historyShortcut"),
   togglePinnedShortcut: document.getElementById("togglePinnedShortcut"),
+  pastePinnedShortcut: document.getElementById("pastePinnedShortcut"),
   defaultClickThrough: document.getElementById("defaultClickThrough"),
   autoCopyToClipboard: document.getElementById("autoCopyToClipboard"),
   launchAtStartup: document.getElementById("launchAtStartup"),
@@ -18,6 +19,7 @@ const elements = {
     workflow: document.getElementById("workflowShortcutState"),
     history: document.getElementById("historyShortcutState"),
     togglePinned: document.getElementById("togglePinnedShortcutState"),
+    pastePinned: document.getElementById("pastePinnedShortcutState"),
   },
   status: document.getElementById("status"),
   saveButtons: [document.getElementById("saveBtnTop")].filter(Boolean),
@@ -29,6 +31,7 @@ const shortcutFields = [
   "workflowShortcut",
   "historyShortcut",
   "togglePinnedShortcut",
+  "pastePinnedShortcut",
 ];
 function displayShortcut(value = "") {
   return String(value || "").replace(/CommandOrControl/gi, "Ctrl");
@@ -140,6 +143,7 @@ function applySettings(settings = {}) {
   setShortcutBuilderValue("workflowShortcut", settings.workflowShortcut || "");
   setShortcutBuilderValue("historyShortcut", settings.historyShortcut || "");
   setShortcutBuilderValue("togglePinnedShortcut", settings.togglePinnedShortcut || "");
+  setShortcutBuilderValue("pastePinnedShortcut", settings.pastePinnedShortcut || "");
   elements.defaultClickThrough.checked = Boolean(settings.defaultClickThrough);
   elements.autoCopyToClipboard.checked = Boolean(settings.autoCopyToClipboard);
   elements.launchAtStartup.checked = Boolean(settings.launchAtStartup);
@@ -157,6 +161,7 @@ function collectSettings() {
     workflowShortcut: buildShortcutValue("workflowShortcut"),
     historyShortcut: buildShortcutValue("historyShortcut"),
     togglePinnedShortcut: buildShortcutValue("togglePinnedShortcut"),
+    pastePinnedShortcut: buildShortcutValue("pastePinnedShortcut"),
     defaultClickThrough: elements.defaultClickThrough.checked,
     autoCopyToClipboard: elements.autoCopyToClipboard.checked,
     launchAtStartup: elements.launchAtStartup.checked,
