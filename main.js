@@ -54,6 +54,16 @@ function getPinnedWindowEntries() {
   );
 }
 
+function closeAllPinnedWindows() {
+  const entries = getPinnedWindowEntries();
+  entries.forEach((entry) => {
+    if (entry.window && !entry.window.isDestroyed()) {
+      entry.window.close();
+    }
+  });
+  pinnedImageWindows.clear();
+}
+
 function isWorkflowWindowVisible() {
   return Boolean(workflowWindow && !workflowWindow.isDestroyed() && workflowWindow.isVisible());
 }
@@ -401,24 +411,88 @@ function createTrayIcon() {
 function createTrayMenu() {
   return Menu.buildFromTemplate([
     {
-      label: "区域截图",
-      click: () => startCapture(),
+      label: "截图",
+      submenu: [
+        {
+          label: "区域截图",
+          click: () => startCapture(),
+        },
+        {
+          label: "从剪贴板粘贴图片",
+          click: () => {
+            const dataUrl = clipboard.readImage().toDataURL();
+            if (dataUrl && !clipboard.readImage().isEmpty()) {
+              saveImageToHistory(dataUrl, { type: "input", newSession: true });
+              showHistoryWindow();
+            }
+          },
+        },
+      ],
     },
     {
-      label: "选择工作流窗口",
-      click: () => toggleWorkflowWindow(),
+      label: "工作流",
+      submenu: [
+        {
+          label: "管理工作流",
+          click: () => toggleWorkflowWindow(),
+        },
+        { type: "separator" },
+        {
+          label: "运行当前工作流",
+          click: () => {
+            const config = getRunningHubConfig();
+            if (config.selectedWorkflowFile) {
+              window.api.runSelectedWorkflow();
+            }
+          },
+        },
+        {
+          label: "打开工作流目录",
+          click: () => shell.openPath(runningHubWorkflowDir),
+        },
+      ],
     },
     {
-      label: pinnedWindowsHidden ? "显示置顶贴图" : "隐藏置顶贴图",
-      click: () => togglePinnedImagesVisibility(),
+      label: "置顶贴图",
+      submenu: [
+        {
+          label: pinnedWindowsHidden ? "显示全部置顶贴图" : "隐藏全部置顶贴图",
+          click: () => togglePinnedImagesVisibility(),
+        },
+        {
+          label: "关闭所有置顶贴图",
+          click: () => closeAllPinnedWindows(),
+        },
+      ],
     },
     {
-      label: "历史菜单",
-      click: () => toggleHistoryWindow(),
+      label: "历史记录",
+      submenu: [
+        {
+          label: "打开历史记录",
+          click: () => toggleHistoryWindow(),
+        },
+        {
+          label: "打开历史文件夹",
+          click: () => shell.openPath(historyRootDir),
+        },
+      ],
     },
+    { type: "separator" },
     {
       label: "设置",
       click: () => showSettingsWindow(),
+    },
+    {
+      label: "关于",
+      click: () => {
+        dialog.showMessageBox({
+          type: "info",
+          title: "关于 Running Jietu",
+          message: "Running Jietu v2.0",
+          detail: "极简托盘截图工具（区域截图 + 置顶钉图）\n\n快捷键:\nCtrl+Alt+A: 区域截图\nCtrl+Alt+H: 历史记录\nCtrl+Alt+W: 工作流",
+        });
+      },
     },
     { type: "separator" },
     {
