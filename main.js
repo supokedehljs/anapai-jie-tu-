@@ -329,6 +329,44 @@ function logDebug(message, extra = "") {
   });
 }
 
+function cleanupLogs() {
+  try {
+    const MAX_SIZE = 5 * 1024 * 1024;
+    const MAX_FILES = 5;
+    const logDir = path.dirname(logFilePath);
+    const logBase = path.basename(logFilePath, ".log");
+
+    if (fs.existsSync(logFilePath)) {
+      const stat = fs.statSync(logFilePath);
+      if (stat.size > MAX_SIZE) {
+        const ts = new Date().toISOString().replace(/[:.]/g, "-");
+        const rotated = path.join(logDir, `${logBase}-${ts}.log`);
+        fs.renameSync(logFilePath, rotated);
+      }
+    }
+
+    const rotatedPattern = new RegExp(`^${escapeRegex(logBase)}-\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}-\\d{3}Z\\.log$`);
+    const rotatedFiles = fs.readdirSync(logDir)
+      .filter((name) => rotatedPattern.test(name))
+      .map((name) => ({
+        name,
+        path: path.join(logDir, name),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    while (rotatedFiles.length > MAX_FILES) {
+      const oldest = rotatedFiles.shift();
+      fs.unlinkSync(oldest.path);
+    }
+  } catch (_) {
+    // Log cleanup failure is non-critical
+  }
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function createTrayIcon() {
   const iconCandidates = [
     path.join(__dirname, "assets", "running-jietu-icon.ico"),
@@ -672,6 +710,7 @@ function saveImageToHistory(dataUrl, options = {}) {
   session.nextImageIndex = index + 1;
   writeHistorySessionMeta(session);
   sendHistoryData();
+  pruneHistory();
   return { session, filePath, fileName };
 }
 
@@ -743,6 +782,107 @@ function sendHistoryData() {
     historyWindow.webContents.send("history-data", getHistorySessions());
   }
 }
+
+function readHistoryMeta(sessionDirPath) {
+  const metaPath = path.join(sessionDirPath, "history.json");
+  try {
+    if (fs.existsSync(metaPath)) {
+      return JSON.parse(fs.readFileSync(metaPath, "utf8"));
+    }
+  } catch (_) {}
+  return {};
+}
+
+function writeHistoryMeta(sessionDirPath, meta) {
+  fs.writeFileSync(path.join(sessionDirPath, "history.json"), JSON.stringify(meta, null, 2), "utf8");
+}
+
+function pruneHistory() {
+  ensureHistoryRootDir();
+  const MAX_SESSIONS = 50;
+  const entries = fs.readdirSync(historyRootDir)
+    .map((dirName) => {
+      const dirPath = path.join(historyRootDir, dirName);
+      if (!fs.statSync(dirPath).isDirectory()) return null;
+      const imageFiles = fs.readdirSync(dirPath)
+        .filter((name) => /\.(png|jpg|jpeg|webp|gif)$/i.test(name));
+      const hasImages = imageFiles.length > 0;
+      if (!hasImages) {
+        try {
+          fs.rmSync(dirPath, { recursive: true, force: true });
+          logDebug("prune history", `removed empty folder: ${dirName}`);
+        } catch (error) {
+          logDebug("prune history error", `${dirName}: ${error.message}`);
+        }
+        return null;
+      }
+      const meta = readHistoryMeta(dirPath);
+      const stat = fs.statSync(dirPath);
+      return {
+        dirName,
+        dirPath,
+        createdAt: meta.createdAt || stat.birthtime.toISOString(),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+
+  if (entries.length <= MAX_SESSIONS) return;
+
+  const toDelete = entries.slice(MAX_SESSIONS);
+  toDelete.forEach((entry) => {
+    try {
+      fs.rmSync(entry.dirPath, { recursive: true, force: true });
+      logDebug("prune history", `removed old folder: ${entry.dirName}`);
+    } catch (error) {
+      logDebug("prune history error", `${entry.dirName}: ${error.message}`);
+    }
+  });
+}
+
+function deleteHistorySessions(sessionIds) {
+  const ids = (Array.isArray(sessionIds) ? sessionIds : []).map(String);
+  logDebug("deleteHistorySessions", `received ${ids.length} IDs: ${ids.join(", ")}`);
+  logDebug("deleteHistorySessions", `historyRootDir: ${historyRootDir}`);
+  const deleted = [];
+  ids.forEach((dirName) => {
+    const dirPath = path.resolve(historyRootDir, dirName);
+    logDebug("deleteHistorySessions", `trying to delete: ${dirPath}, exists: ${fs.existsSync(dirPath)}`);
+    if (fs.existsSync(dirPath)) {
+      try {
+        const files = fs.readdirSync(dirPath);
+        files.forEach((file) => {
+          const filePath = path.resolve(dirPath, file);
+          if (fs.statSync(filePath).isDirectory()) {
+            fs.rmSync(filePath, { recursive: true, force: true });
+          } else {
+            fs.unlinkSync(filePath);
+          }
+        });
+        fs.rmdirSync(dirPath);
+        deleted.push(dirName);
+        logDebug("deleteHistorySessions", `successfully deleted: ${dirName}`);
+      } catch (error) {
+        logDebug("delete history error", `${dirName}: ${error.message}`);
+      }
+    }
+  });
+  return deleted;
+}
+
+ipcMain.handle("delete-history-sessions", (_event, sessionIds) => {
+  try {
+    logDebug("delete-history-sessions", `input: ${JSON.stringify(sessionIds)}`);
+    const deleted = deleteHistorySessions(sessionIds || []);
+    logDebug("delete-history-sessions", `deleted: ${JSON.stringify(deleted)}`);
+    pruneHistory();
+    sendHistoryData();
+    return { deleted };
+  } catch (error) {
+    logDebug("delete-history-sessions error", error.message);
+    return { error: error.message };
+  }
+});
 
 function getWorkflowThumbnailPath(fileName) {
   const baseName = path.basename(fileName, path.extname(fileName));
@@ -2543,6 +2683,7 @@ function togglePinnedImagesVisibility(forceVisible) {
 }
 
 function showHistoryWindow() {
+  pruneHistory();
   if (historyWindow && !historyWindow.isDestroyed()) {
     historyWindow.show();
     historyWindow.focus();
@@ -3191,8 +3332,12 @@ ipcMain.handle("open-history-image", (_event, filePath) => {
 });
 ipcMain.handle("open-history-folder", async () => {
   ensureHistoryRootDir();
+  logDebug("open-history-folder", `opening: ${historyRootDir}`);
   await shell.openPath(historyRootDir);
   return { ok: true, folderPath: historyRootDir };
+});
+ipcMain.handle("get-history-folder-path", () => {
+  return historyRootDir;
 });
 ipcMain.on("history-close", () => {
   if (historyWindow && !historyWindow.isDestroyed()) {
@@ -3680,6 +3825,7 @@ ipcMain.on("settings-close", () => {
 
 app.whenReady().then(() => {
   logDebug("app ready");
+  cleanupLogs();
   ensureRunningHubFiles();
   createTray();
   app.setLoginItemSettings({

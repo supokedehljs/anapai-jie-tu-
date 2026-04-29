@@ -192,13 +192,19 @@ contextBridge.exposeInMainWorld("api", {
   openHistoryFolder() {
     return ipcRenderer.invoke("open-history-folder");
   },
-  closeHistory() {
+closeHistory() {
     ipcRenderer.send("history-close");
   },
-  onHistoryData(callback) {
+  getHistoryFolderPath() {
+    return ipcRenderer.invoke("get-history-folder-path");
+  },
+onHistoryData(callback) {
     ipcRenderer.on("history-data", (_event, sessions) =>
       callback(Array.isArray(sessions) ? sessions : [])
     );
+  },
+  deleteHistorySessions(sessionIds) {
+    return ipcRenderer.invoke("delete-history-sessions", sessionIds);
   },
   reportError(source, message) {
     ipcRenderer.send("renderer-error", { source, message });
