@@ -4,15 +4,20 @@
   "workflowId": "2048337988328890369",
   "imageNodeId": "36",
   "imageFieldName": "image",
-  "outputNodeId": "55",
+  "outputNodeId": "69",
   "duckDecodeEnabled": false,
   "duckDecodePassword": "",
   "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
-  "favorite": true,
+  "favorite": false,
   "generationDurationsMs": [
     155876,
     135620,
     135009,
-    129185
+    129185,
+    143044,
+    141604,
+    142471,
+    166121,
+    128102
   ]
 }

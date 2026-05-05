@@ -1,0 +1,17 @@
+{
+  "fileName": "米山舞通用-提示词_api.json",
+  "displayName": "米山舞通用-提示词_api",
+  "workflowId": "2046084739047628802",
+  "imageNodeId": "69",
+  "imageFieldName": "image",
+  "outputNodeId": "70",
+  "duckDecodeEnabled": false,
+  "duckDecodePassword": "",
+  "imagePlaceholder": "{{RUNNINGHUB_IMAGE_URL}}",
+  "favorite": false,
+  "generationDurationsMs": [
+    65985,
+    53127,
+    490484
+  ]
+}
