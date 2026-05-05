@@ -472,6 +472,9 @@ function createTray() {
   tray = new Tray(createTrayIcon());
   tray.setToolTip("Running Jietu v2.0");
   tray.setContextMenu(createTrayMenu());
+  tray.on("click", () => {
+    startCapture();
+  });
 }
 
 function refreshTrayMenu() {
@@ -3237,6 +3240,39 @@ ipcMain.handle("save-image", async (_event, dataUrl) => {
 
   writeDataUrlImageToFile(dataUrl, targetPath);
   return { ok: true, filePath: targetPath };
+});
+
+ipcMain.handle("save-images", async (_event, images) => {
+  if (!Array.isArray(images) || images.length === 0) {
+    throw new Error("没有图片可保存");
+  }
+
+  const config = getRunningHubConfig();
+  const defaultDirectory = String(config.defaultSaveDirectory || app.getPath("pictures"));
+
+  const result = await dialog.showOpenDialog({
+    title: "选择保存位置",
+    defaultPath: defaultDirectory,
+    properties: ["openDirectory", "createDirectory"],
+  });
+
+  if (result.canceled || !Array.isArray(result.filePaths) || !result.filePaths[0]) {
+    return { ok: false, cancelled: true };
+  }
+
+  const targetDir = result.filePaths[0];
+  const timestamp = Date.now();
+  const savedPaths = [];
+
+  for (let i = 0; i < images.length; i++) {
+    const dataUrl = images[i];
+    const fileName = `SnapAI-${timestamp}-${i + 1}.png`;
+    const targetPath = path.join(targetDir, fileName);
+    writeDataUrlImageToFile(dataUrl, targetPath);
+    savedPaths.push(targetPath);
+  }
+
+  return { ok: true, filePaths: savedPaths };
 });
 
 ipcMain.handle("copy-image-to-clipboard", async (_event, dataUrl) => {

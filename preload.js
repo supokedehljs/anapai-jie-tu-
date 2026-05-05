@@ -24,6 +24,9 @@ contextBridge.exposeInMainWorld("api", {
   saveImage(dataUrl) {
     return ipcRenderer.invoke("save-image", dataUrl);
   },
+  saveImages(images) {
+    return ipcRenderer.invoke("save-images", images);
+  },
   copyImageToClipboard(dataUrl) {
     return ipcRenderer.invoke("copy-image-to-clipboard", dataUrl);
   },

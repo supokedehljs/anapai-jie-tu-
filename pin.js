@@ -9,7 +9,6 @@ const errorStatusTitle = document.getElementById("errorStatusTitle");
 const errorStatusMessage = document.getElementById("errorStatusMessage");
 const errorStatusClose = document.getElementById("errorStatusClose");
 const tabsBar = document.getElementById("tabsBar");
-const scaleAnchor = document.getElementById("scaleAnchor");
 
 let currentDataUrl = "";
 let currentImages = [];
@@ -23,8 +22,6 @@ let isSelected = false;
 let runningElapsedTimer = null;
 let runningElapsedPayload = null;
 let altAdjusting = false;
-let scaleAnchorPoint = { x: 0.5, y: 0.5 };
-let scaleAnchorPinned = false;
 let lastPointerPosition = null;
 let ctrlFileDragStarted = false;
 let pendingScaleFactor = 1;
@@ -69,33 +66,10 @@ function scheduleScaleOperation(scaleFactor, options = {}) {
   });
 }
 
-function updateScaleAnchorVisual() {
-  const rect = stage.getBoundingClientRect();
-  const x = scaleAnchorPoint.x * rect.width;
-  const y = scaleAnchorPoint.y * rect.height;
-  scaleAnchor.style.left = `${x}px`;
-  scaleAnchor.style.top = `${y}px`;
-}
-
 function setAltAdjusting(enabled) {
   altAdjusting = Boolean(enabled);
   document.body.classList.toggle("alt-adjusting", altAdjusting);
   applyPinOpacity();
-  if (altAdjusting) updateScaleAnchorVisual();
-}
-
-function setScaleAnchorFromEvent(event, options = {}) {
-  const rect = stage.getBoundingClientRect();
-  scaleAnchorPoint = {
-    x: Math.min(1, Math.max(0, event.clientX / Math.max(1, rect.width))),
-    y: Math.min(1, Math.max(0, event.clientY / Math.max(1, rect.height))),
-  };
-  if (options.pin) {
-    scaleAnchorPinned = true;
-    document.body.classList.add("scale-anchor-pinned", "scale-anchor-pulse");
-    setTimeout(() => document.body.classList.remove("scale-anchor-pulse"), 260);
-  }
-  updateScaleAnchorVisual();
 }
 
 function setRunningStatus(left = "", right = "") {
@@ -200,19 +174,9 @@ async function updateDisplayedImage(dataUrl) {
 
 async function resizePinByScale(scaleFactor, options = {}) {
   const rect = stage.getBoundingClientRect();
-  const shouldUseAnchor = options.useAnchor !== false;
-  if (shouldUseAnchor) {
-    await window.api.scalePinAt({
-      scaleFactor,
-      anchorRatioX: scaleAnchorPoint.x,
-      anchorRatioY: scaleAnchorPoint.y,
-    });
-  } else {
-    const nextWidth = Math.max(120, Math.round(rect.width * scaleFactor));
-    const nextHeight = Math.max(80, Math.round(rect.height * scaleFactor));
-    await window.api.setPinSize(nextWidth, nextHeight);
-  }
-  requestAnimationFrame(updateScaleAnchorVisual);
+  const nextWidth = Math.max(120, Math.round(rect.width * scaleFactor));
+  const nextHeight = Math.max(80, Math.round(rect.height * scaleFactor));
+  await window.api.setPinSize(nextWidth, nextHeight);
 }
 
 function updateTabSelection() {
@@ -326,9 +290,6 @@ function startDrag(event) {
 
 function moveDrag(event) {
   lastPointerPosition = { x: event.clientX, y: event.clientY };
-  if ((altAdjusting || event.altKey) && !dragState && !scaleAnchorPinned) {
-    setScaleAnchorFromEvent(event);
-  }
   if (!dragState || dragState.pointerId !== event.pointerId) return;
   const deltaX = event.clientX - dragState.startClientX;
   const deltaY = event.clientY - dragState.startClientY;
@@ -359,13 +320,14 @@ window.api.onSetImage((payload) => {
 
 saveBtn.addEventListener("click", async () => {
   requestSelection({});
-  if (!currentDataUrl) return;
+  if (!currentImages.length) return;
   try {
-    const result = await window.api.saveImage(currentDataUrl);
+    const result = await window.api.saveImages(currentImages);
     if (!result || result.ok !== true) {
+      if (result && result.cancelled) return;
       throw new Error((result && result.error) || "保存失败");
     }
-    setRunningStatus(`已保存到：${result.filePath || "默认位置"}`, "");
+    setRunningStatus(`已保存 ${result.filePaths.length} 张图片`, "");
     setTimeout(() => {
       setRunningStatus("", "");
     }, 3000);
@@ -403,7 +365,7 @@ frame.addEventListener(
     if (event.altKey) {
       const direction = event.deltaY < 0 ? 1 : -1;
       const scaleFactor = 1 + direction * 0.025;
-      scheduleScaleOperation(scaleFactor, { useAnchor: true });
+      scheduleScaleOperation(scaleFactor);
       return;
     }
     const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;
@@ -421,9 +383,6 @@ window.addEventListener("pointermove", (event) => {
   lastPointerPosition = { x: event.clientX, y: event.clientY };
   if (event.altKey && !altAdjusting) {
     setAltAdjusting(true);
-  }
-  if (altAdjusting || event.altKey) {
-    if (!dragState && !scaleAnchorPinned) setScaleAnchorFromEvent(event);
   }
 });
 
@@ -485,12 +444,19 @@ window.api.onPinWindowMeta((payload) => {
 });
 
 window.addEventListener("keydown", async (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key === "c" && currentDataUrl) {
+    event.preventDefault();
+    try {
+      await window.api.copyImageToClipboard(currentDataUrl);
+      setRunningStatus("已复制到剪贴板", "");
+      setTimeout(() => setRunningStatus("", ""), 2000);
+    } catch (error) {
+      window.api.reportError("pin:copy", error.message || String(error));
+    }
+    return;
+  }
   if (event.key === "Alt") {
     setAltAdjusting(true);
-    if (lastPointerPosition) {
-      const syntheticEvent = { clientX: lastPointerPosition.x, clientY: lastPointerPosition.y };
-      if (!scaleAnchorPinned) setScaleAnchorFromEvent(syntheticEvent);
-    }
   }
   if (event.key === " " || event.code === "Space") {
     event.preventDefault();
